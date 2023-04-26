@@ -1,0 +1,6 @@
+@import url('./main-layout.css');
+    [theme~="dark"] {
+      --lumo-base-color: hsl(167, 35%, 21%);
+      --lumo-body-text-color: hsla(214, 0%, 0%, 0.9);
+
+    }
