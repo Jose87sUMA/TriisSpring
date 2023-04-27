@@ -1,9 +1,9 @@
 package com.example.application.views;
 
-import com.example.application.data.entity.User;
+import com.example.application.data.entities.User;
 import com.example.application.security.AuthenticatedUser;
 import com.example.application.views.about.AboutView;
-import com.example.application.views.triis.TriisView;
+import com.example.application.views.feed.FeedView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -102,7 +102,7 @@ public class MainLayout extends AppLayout {
         if (maybeUser.isPresent()) {
             User user = maybeUser.get();
 
-            Avatar avatar = new Avatar(user.getName());
+            Avatar avatar = new Avatar(user.getUsername());
             StreamResource resource = new StreamResource("profile-pic",
                     () -> new ByteArrayInputStream(user.getProfilePicture()));
             avatar.setImageResource(resource);
@@ -115,7 +115,7 @@ public class MainLayout extends AppLayout {
             MenuItem userName = userMenu.addItem("");
             Div div = new Div();
             div.add(avatar);
-            div.add(user.getName());
+            div.add(user.getUsername());
             div.add(new Icon("lumo", "dropdown"));
             div.getElement().getStyle().set("display", "flex");
             div.getElement().getStyle().set("align-items", "center");
@@ -152,7 +152,7 @@ public class MainLayout extends AppLayout {
 
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
-                new MenuItemInfo("Triis", LineAwesomeIcon.INSTAGRAM.create(), TriisView.class), //
+                new MenuItemInfo("Triis", LineAwesomeIcon.INSTAGRAM.create(), FeedView.class), //
 
                 new MenuItemInfo("About", LineAwesomeIcon.FILE.create(), AboutView.class), //
 
