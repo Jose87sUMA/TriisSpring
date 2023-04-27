@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <!-- Project from https://start.vaadin.com/project/2102d7fa-e61a-472a-887e-c8248a8d7710 -->
     <groupId>com.example.application</groupId>
-    <artifactId>myapp</artifactId>
-    <name>myapp</name>
+    <artifactId>Triis</artifactId>
+    <name>Triis</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 

@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean;
  *
  */
 @SpringBootApplication
-@Theme(value = "myapp", variant = Lumo.DARK)
+@Theme(value = "triis", variant = Lumo.DARK)
 public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {
