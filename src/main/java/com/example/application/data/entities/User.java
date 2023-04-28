@@ -28,9 +28,6 @@ public class User implements Serializable {
     @Column(name = "EMAIL")
     private String email;
     @Basic
-    @Column(name = "PHONE_NUMBER")
-    private String phoneNumber;
-    @Basic
     @Column(name = "TYPE_1_POINTS")
     private BigInteger type1Points;
     @Basic
@@ -89,14 +86,6 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
     public BigInteger getType1Points() {
         return type1Points;
     }
@@ -148,12 +137,11 @@ public class User implements Serializable {
 
     public User(){}
 
-    public User(String newUsername, String newPassword, String newEmail, String newPhoneNumber){
+    public User(String newUsername, String newPassword, String newEmail){
 
         username = newUsername;
         password = newPassword;
         email = newEmail;
-        phoneNumber = newPhoneNumber;
         type1Points = BigInteger.valueOf(500);
         type2Points = BigInteger.valueOf(100);
         posts = new TreeMap<>();
@@ -169,12 +157,12 @@ public class User implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User that = (User) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(email, that.email) && Objects.equals(phoneNumber, that.phoneNumber) && Objects.equals(type1Points, that.type1Points) && Objects.equals(type2Points, that.type2Points) && Objects.equals(verified, that.verified) && Arrays.equals(profilePicture, that.profilePicture) && Objects.equals(treeId, that.treeId);
+        return Objects.equals(userId, that.userId) && Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(email, that.email) && Objects.equals(type1Points, that.type1Points) && Objects.equals(type2Points, that.type2Points) && Objects.equals(verified, that.verified) && Arrays.equals(profilePicture, that.profilePicture) && Objects.equals(treeId, that.treeId);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(userId, username, password, email, phoneNumber, type1Points, type2Points, verified, treeId);
+        int result = Objects.hash(userId, username, password, email, type1Points, type2Points, verified, treeId);
         result = 31 * result + Arrays.hashCode(profilePicture);
         return result;
     }
