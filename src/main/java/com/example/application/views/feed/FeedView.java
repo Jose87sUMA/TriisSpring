@@ -32,6 +32,7 @@ public class FeedView extends HorizontalLayout {
         this.postService = postService;
         this.userService = userService;
         this.authenticatedUser =  userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        
 
         feedPanel = new FeedPanel(authenticatedUser, userService, postService);
 
