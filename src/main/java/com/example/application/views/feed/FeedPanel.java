@@ -39,6 +39,7 @@ public class FeedPanel extends Scroller {
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);
 
+        this.addClassName(LumoUtility.AlignItems.CENTER);
         this.setContent(content);
 
     }
