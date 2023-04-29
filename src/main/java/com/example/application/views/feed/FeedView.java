@@ -4,6 +4,7 @@ import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.MainLayout;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -32,8 +33,9 @@ public class FeedView extends HorizontalLayout {
 
         feedPanel = new FeedPanel(authenticatedUser, userService, postService);
 
-        setMargin(true);
-        setVerticalComponentAlignment(Alignment.END, feedPanel);
+        this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        this.setMargin(true);
+        this.setVerticalComponentAlignment(Alignment.CENTER, feedPanel);
 
         add(feedPanel);
     }
