@@ -1,9 +1,10 @@
 package com.example.application.data.services;
 
+import com.example.application.data.entities.Like;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.data.repositories.LikesRepository;
 import com.example.application.data.repositories.PostsRepository;
-import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.stereotype.Service;
@@ -11,19 +12,23 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class PostService {
-
+    private final LikesRepository likeRep;
     private final PostsRepository postRep;
-    public PostService(PostsRepository postRep) {
+    public PostService(LikesRepository likeRep, PostsRepository postRep) {
+        this.likeRep = likeRep;
         this.postRep = postRep;
     }
+
+    public Post update(Post post){
+        postRep.save(post);
+        return post;
+    }
+
     public Post findById(BigInteger postId){ return postRep.findFirstByPostId(postId); }
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
 
@@ -61,4 +66,10 @@ public class PostService {
 
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
+    public int getAllLikes(Post p){
+        return getAllUsersLiking(p).size();
+    }
+    public List<Like> getAllUsersLiking(Post p) {
+        return likeRep.findAllByPostId(p.getPostId());
+    }
 }

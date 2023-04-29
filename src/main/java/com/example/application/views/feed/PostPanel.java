@@ -10,10 +10,13 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+
+import java.math.*;
 
 
 public class PostPanel extends VerticalLayout {
@@ -36,7 +39,7 @@ public class PostPanel extends VerticalLayout {
         this.setWidth(content.getWidth());
 
         PostHeader postHeader = new PostHeader(content.getWidth());
-        InteractionFooter interactionFooter = new InteractionFooter(content.getWidth());
+        InteractionFooter interactionFooter = new InteractionFooter(content.getWidth(),post);
 
         this.addClassName(LumoUtility.Border.ALL);
         this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
@@ -81,7 +84,8 @@ public class PostPanel extends VerticalLayout {
     }
 
     private class InteractionFooter extends HorizontalLayout {
-        public InteractionFooter(String width) {
+
+        public InteractionFooter(String width, Post post) {
 
             this.setWidth(width);
             this.setHeight("25px");
@@ -92,16 +96,27 @@ public class PostPanel extends VerticalLayout {
             likeButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
             likeButton.setHeight("25px");
             likeButton.setWidth(v + "px");
+            likeButton.addClickListener(click -> {
+                post.setLikes(post.getLikes().add(BigInteger.ONE));
+                postService.update(post);
+            });
+
 
             Button repostButton = new Button(new Icon(VaadinIcon.RETWEET));
             repostButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
             repostButton.setHeight("25px");
             repostButton.setWidth(v + "px");
+            repostButton.addClickListener(click -> {
+               Notification.show("Repost");
+            });
 
             Button commentButton = new Button(new Icon(VaadinIcon.COMMENT_O));
             commentButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
             commentButton.setHeight("25px");
             commentButton.setWidth(v + "px");
+            commentButton.addClickListener(click -> {
+                Notification.show("Comment");
+            });
 
             this.addClassName(LumoUtility.Border.TOP);
             this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
