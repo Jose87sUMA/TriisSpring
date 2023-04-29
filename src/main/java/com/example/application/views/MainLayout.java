@@ -154,12 +154,10 @@ public class MainLayout extends AppLayout {
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo("Triis", LineAwesomeIcon.INSTAGRAM.create(), FeedView.class), //
-                
+
                 new MenuItemInfo("Profile", LineAwesomeIcon.USER.create(), ProfileView.class), //
 
                 new MenuItemInfo("About", LineAwesomeIcon.FILE.create(), AboutView.class), //
-
-
         };
     }
 

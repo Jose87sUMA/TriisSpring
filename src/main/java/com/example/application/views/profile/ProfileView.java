@@ -10,20 +10,18 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @PageTitle("Triis - Profile")
 @Route(value = "profile", layout = MainLayout.class)
-@RouteAlias(value = "profile" ,layout = MainLayout.class)
+@RouteAlias(value = "profile", layout = MainLayout.class)
 @PermitAll
-public class ProfileView extends VerticalLayout {
+public class ProfileView extends VerticalLayout implements HasUrlParameter<String> {
 
     private ProfilePanel profilePanel;
-    private User authenticatedUser;
+    private User user;
 
     private final UserService userService;
     private final PostService postService;
@@ -38,12 +36,21 @@ public class ProfileView extends VerticalLayout {
 
     public ProfileView(UserService userService, PostService postService) {
 
-
         this.postService = postService;
         this.userService = userService;
-        this.authenticatedUser =  userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        profilePanel = new ProfilePanel(authenticatedUser, userService, postService);
+    }
+
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+
+        if(parameter == null)
+            user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        else
+            user = userService.findByUsername(parameter);
+
+
+        profilePanel = new ProfilePanel(user, userService, postService);
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
         this.setMargin(true);
@@ -53,10 +60,10 @@ public class ProfileView extends VerticalLayout {
 
         this.setHorizontalComponentAlignment(Alignment.CENTER, buttons);
 
-        
+        add(new H1(user.getUsername()), buttons, profilePanel);
 
-        add(new H1("PROFILE"), buttons, profilePanel);
     }
+
 
     /**
      * CUSTOMIZING  BUTTONS
@@ -72,6 +79,4 @@ public class ProfileView extends VerticalLayout {
         return new HorizontalLayout(follow, following, type1, type2, makepost);
 
     }
-
-
 }

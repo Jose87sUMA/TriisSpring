@@ -65,6 +65,10 @@ public class PostPanel extends VerticalLayout {
             profileName.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
             profileName.setWidth("300px");
             profileName.setHeight("30px");
+            profileName.addClickListener(e ->
+                    profileName.getUI().ifPresent(ui ->
+                            ui.navigate("profile/" + poster.getUsername()))
+            );
 
             this.addClassName(LumoUtility.Border.BOTTOM);
             this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
