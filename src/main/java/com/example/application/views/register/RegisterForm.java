@@ -129,6 +129,9 @@ public class RegisterForm extends VerticalLayout {
         if(userName.trim().isEmpty()){
             notification.setText("Enter a username");
             notification.open();
+        }else if(!userName.matches("^[a-z0-9]+$")){
+            notification.setText("Username can only contain numbers and lowercase letters");
+            notification.open();
         }else if(emailValue.trim().isEmpty()){
             notification.setText("Enter an email");
             notification.open();
