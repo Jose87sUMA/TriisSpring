@@ -31,8 +31,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         this.setSizeFull();
         this.authenticatedUser = authenticatedUser;
 
-
-        this.add(new TriisLoginForm(), new RouterLink("Register", RegisterView.class));
+        this.add(new TriisLoginForm(this), new RouterLink("Register", RegisterView.class));
 
     }
 

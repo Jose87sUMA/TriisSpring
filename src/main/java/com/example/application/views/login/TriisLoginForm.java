@@ -2,14 +2,14 @@ package com.example.application.views.login;
 
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
-import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.VaadinService;
 
 public class TriisLoginForm extends LoginForm {
 
-    public TriisLoginForm() {
+    public TriisLoginForm(LoginView loginView) {
 
+        setAction(RouteUtil.getRoutePath(VaadinService.getCurrent().getContext(), loginView.getClass()));
 
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());
@@ -18,7 +18,6 @@ public class TriisLoginForm extends LoginForm {
         i18n.setAdditionalInformation(null);
         setI18n(i18n);
         setForgotPasswordButtonVisible(true);
-
     }
 
 
