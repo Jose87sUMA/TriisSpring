@@ -6,7 +6,7 @@ import com.example.application.data.services.UserService;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -25,13 +25,6 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     private final UserService userService;
     private final PostService postService;
-
-    //buttons
-    Button following = new Button("Following");
-    Button follow = new Button("Follow");
-    Button type1 = new Button("Type 1 points");
-    Button type2 = new Button("Type 2 points");
-    Button makepost = new Button("Make a post");
 
 
     public ProfileView(UserService userService, PostService postService) {
@@ -71,12 +64,23 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     private HorizontalLayout createButtonsLayout() {
 
         //follow.addClickListener(event -> UI.getCurrent().navigate(LoginView.class));
+        //buttons
+        Button following = new Button("Following: " + userService.getFollowing(user).size());
+        Button follow = new Button("Followers: " + userService.getFollowers(user).size());
+        Button type1 = new Button("Type 1 points: " + user.getType1Points());
+        Button type2 = new Button("Type 2 points: " + user.getType2Points());
+        Button makePost = new Button("Make a Post");
+        Button editProfile = new Button("Edit Profile");
 
         //making buttons more accesible
         following.addClickShortcut(Key.ENTER);
         follow.addClickShortcut(Key.ESCAPE);
 
-        return new HorizontalLayout(follow, following, type1, type2, makepost);
+        if(!user.equals(userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()))) {
+            makePost.setVisible(false);
+            editProfile.setVisible(false);
+        }
+        return new HorizontalLayout(follow, following, type1, type2, makePost, editProfile);
 
     }
 }

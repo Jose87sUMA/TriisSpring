@@ -58,9 +58,20 @@ public class UserService {
             followingUsers.add(this.findById(followEntry.getUserIdFollowing()));
 
         }
-
         return followingUsers;
+    }
 
+    public List<User> getFollowers(User user){
+
+        List<Follow> followingEntries = followRep.findAllByUserIdFollowing(user.getUserId());
+        List<User> followers = new ArrayList<>();
+
+        for(Follow followEntry: followingEntries){
+
+            followers.add(this.findById(followEntry.getUserIdFollower()));
+
+        }
+        return followers;
     }
 
     public User save(User user){
@@ -68,5 +79,6 @@ public class UserService {
         return user;
     }
 
+    List<User> findAllByMatchingUsername(String match){return userRep.findAllByUsernameContainsIgnoreCase(match);}
 
 }
