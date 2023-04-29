@@ -1,10 +1,7 @@
 package com.example.application.data.entities;
 
-import com.example.application.data.Role;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OptimisticLockType;
-import org.hibernate.annotations.OptimisticLocking;
 
 import java.io.Serializable;
 import java.math.BigInteger;
