@@ -13,10 +13,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -113,23 +116,38 @@ public class RegisterView extends FormLayout {
         String password1 = password.getValue();
         String password2 = confirmPassword.getValue();
         String emailValue = email.getValue();
+        Notification notification = new Notification();
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+
+        notification.setDuration(2000);
 
         if(userName.trim().isEmpty()){
-            Notification.show("Enter a username");
+            notification.setText("Enter a username");
+            notification.open();
         }else if(emailValue.trim().isEmpty()){
-            Notification.show("Enter an email");
+            notification.setText("Enter an email");
+            notification.open();
         }else if(email.isInvalid()){
-            Notification.show("Email invalid format");
+            notification.setText("Email invalid format");
+            notification.open();
         }else if(password1 .trim().isEmpty()){
-            Notification.show("Enter a password");
+            notification.setText("Enter a password");
+            notification.open();
+        }else if(password1.length() < 8){
+            notification.setText("Password must contain at least 8 characters");
+            notification.open();
         }else if(password2 .trim().isEmpty()){
-            Notification.show("Confirm password");
+            notification.setText("Confirm password");
+            notification.open();
         }else if(!password1.equals(password2)){
-            Notification.show("Passwords don't match");
+            notification.setText("Passwords don't match");
+            notification.open();
         }else if(userService.findByUsername(userName) != null){
-            Notification.show("User already exists");
+            notification.setText("User already exists");
+            notification.open();
         }else if(userService.findByEmail(emailValue) != null){
-            Notification.show("Email already in use");
+            notification.setText("Email already in use");
+            notification.open();
         }else{
             //encrypting password
             PasswordEncoder pass = new BCryptPasswordEncoder();
