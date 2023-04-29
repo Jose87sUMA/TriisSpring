@@ -27,6 +27,7 @@ public class UserService {
     }
     public User findById(BigInteger userId){ return userRep.findFirstByUserId(userId); }
     public User findByUsername(String username){ return userRep.findFirstByUsername(username); }
+    public User findByEmail(String email){ return userRep.findFirstByEmail(email); }
 
     public Image getProfilePicImage(User user){
 
