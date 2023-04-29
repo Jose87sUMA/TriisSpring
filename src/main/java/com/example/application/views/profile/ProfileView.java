@@ -1,5 +1,6 @@
 package com.example.application.views.profile;
 
+import ch.qos.logback.core.Layout;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
@@ -8,6 +9,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
@@ -46,11 +48,14 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         profilePanel = new ProfilePanel(user, userService, postService);
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
+        this.setAlignItems(Alignment.CENTER);
         this.setMargin(true);
+        this.setPadding(true);
+
         this.setHorizontalComponentAlignment(Alignment.CENTER, profilePanel);
 
-        HorizontalLayout buttons = createButtonsLayout();
-
+        VerticalLayout buttons = createButtonsLayout();
+        buttons.setAlignItems(Alignment.CENTER);
         this.setHorizontalComponentAlignment(Alignment.CENTER, buttons);
 
         add(new H1(user.getUsername()), buttons, profilePanel);
@@ -61,10 +66,11 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     /**
      * CUSTOMIZING  BUTTONS
      */
-    private HorizontalLayout createButtonsLayout() {
+    private VerticalLayout createButtonsLayout() {
 
         //follow.addClickListener(event -> UI.getCurrent().navigate(LoginView.class));
         //buttons
+
         Button following = new Button("Following: " + userService.getFollowing(user).size());
         Button follow = new Button("Followers: " + userService.getFollowers(user).size());
         Button type1 = new Button("Type 1 points: " + user.getType1Points());
@@ -80,7 +86,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             makePost.setVisible(false);
             editProfile.setVisible(false);
         }
-        return new HorizontalLayout(follow, following, type1, type2, makePost, editProfile);
+        return new VerticalLayout(new HorizontalLayout(follow, following), new HorizontalLayout(type1, type2), new HorizontalLayout(makePost, editProfile));
 
     }
 }
