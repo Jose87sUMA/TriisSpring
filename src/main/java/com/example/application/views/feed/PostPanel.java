@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.messages.*;
 import com.vaadin.flow.component.notification.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -19,6 +20,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.*;
+import java.util.*;
 
 
 public class PostPanel extends VerticalLayout {
@@ -42,7 +44,7 @@ public class PostPanel extends VerticalLayout {
 
         PostHeader postHeader = new PostHeader(content.getWidth());
         InteractionFooter interactionFooter = new InteractionFooter(content.getWidth(),post);
-
+        CommentSection commentSection = new CommentSection(content.getWidth(),post);
         this.addClassName(LumoUtility.Border.ALL);
         this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
         this.addClassName(LumoUtility.BorderRadius.LARGE);
@@ -53,7 +55,7 @@ public class PostPanel extends VerticalLayout {
         this.setSpacing(false);
         this.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        this.add(postHeader, content, interactionFooter);
+        this.add(postHeader, content, interactionFooter,commentSection);
 
     }
 
@@ -130,8 +132,10 @@ public class PostPanel extends VerticalLayout {
             commentButton.setHeight("25px");
             commentButton.setWidth(v + "px");
             commentButton.addClickListener(click -> {
-                Notification.show("Comment");
+
+
             });
+
 
             this.addClassName(LumoUtility.Border.TOP);
             this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
@@ -144,8 +148,34 @@ public class PostPanel extends VerticalLayout {
 
         }
 
-
     }
+
+    private class CommentSection extends VerticalLayout{
+        public CommentSection(String width, Post post){
+            this.setWidth(width);
+            this.setHeight("125px");
+
+            MessageInput input = new MessageInput();
+            MessageList list = new MessageList();
+
+
+            List<User> usersLiking = postService.getAllUsersLiking(post);
+            for(User u: usersLiking){
+                list.setItems();
+            }
+
+            input.addSubmitListener(submitEvent -> {
+                Notification.show("Message received: " + submitEvent.getValue(),
+                        3000, Notification.Position.MIDDLE);
+            });
+
+
+
+            add(list);
+            add(input);
+        }
+    }
+
 
 
 }

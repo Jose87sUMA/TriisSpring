@@ -1,12 +1,15 @@
 package com.example.application.data.services;
 
+import com.example.application.data.entities.Comment;
 import com.example.application.data.entities.Like;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.data.repositories.CommentsRepository;
 import com.example.application.data.repositories.LikesRepository;
 import com.example.application.data.repositories.PostsRepository;
 import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.messages.*;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +24,13 @@ public class PostService {
     private final LikesRepository likeRep;
     private final PostsRepository postRep;
     private final UsersRepository userRep;
+    private final CommentsRepository commentsRep;
 
-    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep) {
+    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, CommentsRepository commentsRep) {
         this.likeRep = likeRep;
         this.postRep = postRep;
         this.userRep = userRep;
+        this.commentsRep = commentsRep;
     }
 
     public Post update(Post post){
@@ -100,5 +105,15 @@ public class PostService {
     public void dislike(User user, Post post) {
         post.setLikes(post.getLikes().subtract(BigInteger.ONE));
         likeRep.delete(likeRep.findByUserIdAndPostId(user.getUserId(), post.getPostId()));
+    }
+
+    public List<MessageListItem> commentItems(Post post){
+        List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
+        List<MessageListItem> itemList =new ArrayList<>();
+        for(Comment c : commentList){
+            MessageListItem item = new MessageListItem(c.getUserComment(),(c.getCommentDate()).toInstant(),(userRep.findFirstByUserId(c.getUserId()).getUsername()));
+            itemList.add(item);
+        }
+        return itemList;
     }
 }
