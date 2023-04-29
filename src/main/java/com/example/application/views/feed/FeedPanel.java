@@ -30,7 +30,7 @@ public class FeedPanel extends Scroller {
 
         List<Post> postsByFollowing = postService.getAllByPeopleFollowed(authenticatedUser);
 
-        for(int i = 0; i < 15; ++i){
+        for(int i = 0; i < Math.min(postsByFollowing.size(), 15); ++i){
 
             content.add(new PostPanel(postsByFollowing.get(i), userService, postService));
 
