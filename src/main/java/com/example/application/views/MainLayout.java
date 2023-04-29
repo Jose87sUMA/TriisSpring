@@ -4,6 +4,7 @@ import com.example.application.data.entities.User;
 import com.example.application.security.AuthenticatedUser;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.feed.FeedView;
+import com.example.application.views.profile.ProfileView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -153,8 +154,11 @@ public class MainLayout extends AppLayout {
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo("Triis", LineAwesomeIcon.INSTAGRAM.create(), FeedView.class), //
+                
+                new MenuItemInfo("Profile", LineAwesomeIcon.USER.create(), ProfileView.class), //
 
                 new MenuItemInfo("About", LineAwesomeIcon.FILE.create(), AboutView.class), //
+
 
         };
     }
