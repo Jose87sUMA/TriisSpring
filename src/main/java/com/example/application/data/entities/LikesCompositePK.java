@@ -1,20 +1,41 @@
 package com.example.application.data.entities;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Objects;
 
+@Embeddable
 public class LikesCompositePK implements Serializable {
 
+    @Column(name = "USER_ID", insertable=false, updatable=false)
     private BigInteger userId;
+
+    @Column(name = "POST_ID", insertable=false, updatable=false)
     private BigInteger postId;
 
+    public BigInteger getUserId() {
+        return userId;
+    }
+
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
+    }
+    public BigInteger getPostId() {
+        return postId;
+    }
+
+    public void setPostId(BigInteger postId) {
+        this.postId = postId;
+    }
     public LikesCompositePK(BigInteger userId, BigInteger postId) {
         this.userId = userId;
         this.postId = postId;
     }
 
-    private LikesCompositePK() {
+    public LikesCompositePK() {
     }
 
     @Override

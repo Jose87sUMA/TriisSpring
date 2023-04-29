@@ -1,6 +1,7 @@
 package com.example.application.data.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -10,6 +11,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
+@DynamicUpdate
 public class Post implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

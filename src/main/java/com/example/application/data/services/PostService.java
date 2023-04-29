@@ -5,6 +5,7 @@ import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.LikesRepository;
 import com.example.application.data.repositories.PostsRepository;
+import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,12 @@ import java.util.*;
 public class PostService {
     private final LikesRepository likeRep;
     private final PostsRepository postRep;
-    public PostService(LikesRepository likeRep, PostsRepository postRep) {
+    private final UsersRepository userRep;
+
+    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep) {
         this.likeRep = likeRep;
         this.postRep = postRep;
+        this.userRep = userRep;
     }
 
     public Post update(Post post){
@@ -67,9 +71,34 @@ public class PostService {
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
     public int getAllLikes(Post p){
-        return getAllUsersLiking(p).size();
+        return likeRep.findAllByPostId(p.getPostId()).size();
     }
-    public List<Like> getAllUsersLiking(Post p) {
-        return likeRep.findAllByPostId(p.getPostId());
+    public List<User> getAllUsersLiking(Post p) {
+
+        List <Like> likeEntries =  likeRep.findAllByPostId(p.getPostId());
+        List <User> usersThatLiked = new ArrayList<>();
+
+        for(Like likeEntry : likeEntries){
+            usersThatLiked.add(userRep.findFirstByUserId(likeEntry.getUserId()));
+        }
+
+        return usersThatLiked;
+    }
+    public void likeButton(Post post, User authUser) {
+        if(!this.getAllUsersLiking(post).contains(authUser)){
+            this.newLike(authUser, post);
+        }else{
+            this.dislike(authUser, post);
+        }
+        this.update(post);
+    }
+    public void newLike(User user, Post post) {
+        post.setLikes(post.getLikes().add(BigInteger.ONE));
+        likeRep.save(new Like(user.getUserId(), post.getPostId()));
+    }
+
+    public void dislike(User user, Post post) {
+        post.setLikes(post.getLikes().subtract(BigInteger.ONE));
+        likeRep.delete(likeRep.findByUserIdAndPostId(user.getUserId(), post.getPostId()));
     }
 }

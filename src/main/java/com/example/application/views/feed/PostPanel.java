@@ -1,5 +1,6 @@
 package com.example.application.views.feed;
 
+import com.example.application.data.entities.Like;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
@@ -15,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.*;
 
@@ -87,18 +89,31 @@ public class PostPanel extends VerticalLayout {
 
         public InteractionFooter(String width, Post post) {
 
+            User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+
             this.setWidth(width);
             this.setHeight("25px");
             double v = Double.parseDouble(width.substring(0, width.length() - 2))/(3.5) ;
 
+            Icon likeIcon;
+            if(!postService.getAllUsersLiking(post).contains(authUser)){
+                likeIcon = new Icon(VaadinIcon.HEART_O);
+            }else{
+                likeIcon = new Icon(VaadinIcon.HEART);
+            }
 
-            Button likeButton = new Button(new Icon(VaadinIcon.HEART_O));
+            Button likeButton = new Button(likeIcon);
             likeButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
             likeButton.setHeight("25px");
             likeButton.setWidth(v + "px");
             likeButton.addClickListener(click -> {
-                post.setLikes(post.getLikes().add(BigInteger.ONE));
-                postService.update(post);
+                postService.likeButton(post, authUser);
+
+                if(!postService.getAllUsersLiking(post).contains(authUser)){
+                    likeButton.setIcon(new Icon(VaadinIcon.HEART_O));
+                }else{
+                    likeButton.setIcon(new Icon(VaadinIcon.HEART));
+                }
             });
 
 
@@ -128,6 +143,8 @@ public class PostPanel extends VerticalLayout {
             this.add(likeButton, repostButton, commentButton);
 
         }
+
+
     }
 
 
