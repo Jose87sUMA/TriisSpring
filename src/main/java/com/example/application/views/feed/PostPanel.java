@@ -38,7 +38,7 @@ public class PostPanel extends VerticalLayout {
 
         Image content = postService.getContent(post);
 
-        float height = Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))+60;
+        float height = Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))+185;
         this.setHeight(height + "px");
         this.setWidth(content.getWidth());
 
@@ -155,14 +155,16 @@ public class PostPanel extends VerticalLayout {
             this.setWidth(width);
             this.setHeight("125px");
 
+
             MessageInput input = new MessageInput();
+            input.setMaxWidth(width);
+            input.setMaxHeight("25px");
+
             MessageList list = new MessageList();
+            list.setMaxWidth(width);
+            list.setMaxHeight("100px");
+            list.setItems(new MessageListItem("Hola buenas"));
 
-
-            List<User> usersLiking = postService.getAllUsersLiking(post);
-            for(User u: usersLiking){
-                list.setItems();
-            }
 
             input.addSubmitListener(submitEvent -> {
                 Notification.show("Message received: " + submitEvent.getValue(),
@@ -171,8 +173,16 @@ public class PostPanel extends VerticalLayout {
 
 
 
-            add(list);
-            add(input);
+            this.addClassName(LumoUtility.Border.TOP);
+            this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
+            this.setAlignItems(FlexComponent.Alignment.CENTER);
+            this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+
+
+            this.setSpacing(true);
+            this.setPadding(true);
+            this.add(list,input);
+
         }
     }
 
