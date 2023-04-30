@@ -26,7 +26,13 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.logging.log4j.message.Message;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.imageio.*;
+import javax.imageio.stream.*;
+import java.awt.image.*;
+import java.io.*;
 import java.math.*;
+import java.sql.Date;
+import java.time.*;
 import java.util.*;
 
 public class PostPanel extends VerticalLayout {
@@ -135,7 +141,21 @@ public class PostPanel extends VerticalLayout {
             repostButton.setHeight("25px");
             repostButton.setWidth(v + "px");
             repostButton.addClickListener(click -> {
-               Notification.show("Repost");
+
+                ByteArrayOutputStream imageToByte = new ByteArrayOutputStream();
+                BufferedImage image ;
+
+                try {
+                    image = ImageIO.read((ImageInputStream) content);
+
+                    ImageIO.write((RenderedImage) image, "jpg",imageToByte);
+
+                } catch (IOException e) {System.out.println("Error reading image during repost");}
+
+                postService.save(new Post(post.getPostId(),authUser.getUserId(),Date.valueOf(LocalDate.now()),imageToByte.toByteArray() ,post.getOriginalPostId()));
+
+
+               Notification.show("Post reposted");
             });
 
             Button commentButton = new Button(new Icon(VaadinIcon.COMMENT_O));
@@ -154,8 +174,6 @@ public class PostPanel extends VerticalLayout {
                     postHeader.addClassName(LumoUtility.Border.NONE);
                     commentSection.setVisible(true);
                 }
-
-
             });
 
 

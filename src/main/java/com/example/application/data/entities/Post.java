@@ -1,5 +1,6 @@
 package com.example.application.data.entities;
 
+import com.vaadin.flow.component.html.*;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -41,6 +42,21 @@ public class Post implements Serializable {
     @Basic
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
+
+    public Post(BigInteger postId, BigInteger userId, Date postDate, byte[] content, BigInteger repostId, BigInteger originalPostId) {
+
+    }
+
+    public Post() {
+
+    }
+
+    public Post(BigInteger postId, BigInteger userId, Date date, byte[] content, BigInteger originalPostId) {
+        this.postId = null;
+        this.userId = userId;
+        this.content = content;
+        this.originalPostId = originalPostId;
+    }
 
     public BigInteger getPostId() {
         return postId;

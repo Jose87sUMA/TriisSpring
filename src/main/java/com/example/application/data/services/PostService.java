@@ -36,7 +36,7 @@ public class PostService {
         this.commentsRep = commentsRep;
     }
 
-    public Post update(Post post){
+    public Post save(Post post){
         postRep.save(post);
         return post;
     }
@@ -98,7 +98,7 @@ public class PostService {
         }else{
             this.dislike(authUser, post);
         }
-        this.update(post);
+        this.save(post);
     }
     public void newLike(User user, Post post) {
         post.setLikes(post.getLikes().add(BigInteger.ONE));
@@ -122,6 +122,9 @@ public class PostService {
         }
         return itemList;
     }
+
+
+
 
     public void newComment(Post post, User user, String text){
         Comment comment = new Comment();
