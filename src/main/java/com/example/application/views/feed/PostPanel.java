@@ -1,4 +1,8 @@
 package com.example.application.views.feed;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.flow.shared.ui.Transport;
 
 import com.example.application.data.entities.Like;
 import com.example.application.data.entities.Post;
@@ -19,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.apache.logging.log4j.message.Message;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.*;
@@ -182,11 +187,17 @@ public class PostPanel extends VerticalLayout {
 
             this.input.addSubmitListener(submitEvent -> {
                 User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-                postService.newComment(post,authUser,submitEvent.getValue());
-                Notification.show("Commented " + submitEvent.getValue(),
-                        10000, Notification.Position.BOTTOM_STRETCH);
-                list = new MessageList(postService.commentItems(post));
+                postService.newComment(post, authUser, submitEvent.getValue());
+                Notification.show("Commented " + submitEvent.getValue(), 10000, Notification.Position.BOTTOM_STRETCH);
+                List<MessageListItem> commentItems = postService.commentItems(post);
+
+                UI ui = UI.getCurrent();
+                ui.access(() -> {
+                    list.setItems(commentItems);
+                    ui.push();
+                });
             });
+
 
 
             this.addClassName(LumoUtility.Border.TOP);
