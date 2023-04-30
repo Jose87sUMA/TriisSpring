@@ -167,7 +167,6 @@ public class PostPanel extends VerticalLayout {
             this.setSpacing(true);
             this.setPadding(true);
             this.add(likeButton, repostButton, commentButton);
-
         }
 
     }
