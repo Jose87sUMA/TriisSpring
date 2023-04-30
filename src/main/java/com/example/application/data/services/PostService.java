@@ -17,6 +17,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
+import java.sql.Date;
+import java.time.*;
 import java.util.*;
 
 @Service
@@ -106,14 +108,38 @@ public class PostService {
         post.setLikes(post.getLikes().subtract(BigInteger.ONE));
         likeRep.delete(likeRep.findByUserIdAndPostId(user.getUserId(), post.getPostId()));
     }
-
     public List<MessageListItem> commentItems(Post post){
         List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
         List<MessageListItem> itemList =new ArrayList<>();
         for(Comment c : commentList){
-            MessageListItem item = new MessageListItem(c.getUserComment(),(c.getCommentDate()).toInstant(),(userRep.findFirstByUserId(c.getUserId()).getUsername()));
+            Instant i = null;
+            try{
+                i = c.getCommentDate().toInstant();
+            }catch (java.lang.UnsupportedOperationException e){}
+            MessageListItem item = new MessageListItem(c.getUserComment(), i,(userRep.findFirstByUserId(c.getUserId()).getUsername()));
             itemList.add(item);
         }
         return itemList;
+    }
+
+    public void newComment(Post post, User user, String text){
+        Comment comment = new Comment();
+
+        comment.setPostId(post.getPostId());
+        comment.setCommentDate(Date.valueOf(LocalDate.now()));
+        comment.setUserId(user.getUserId());
+        comment.setUserComment(text);
+
+        List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
+        BigInteger random_id = BigInteger.valueOf((new Random()).nextInt(30,1000));
+        boolean found = false;
+        for(Comment c : commentList)
+            if (c.getCommentId().equals(random_id)) {
+                found = true;
+                break;
+            }
+        if(!found) comment.setCommentId(random_id);
+        commentsRep.save(comment);
+
     }
 }

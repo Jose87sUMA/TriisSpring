@@ -29,6 +29,10 @@ public class PostPanel extends VerticalLayout {
     User poster;
     private final UserService userService;
     private final PostService postService;
+    PostHeader postHeader;
+    Image content;
+    InteractionFooter interactionFooter;
+    CommentSection commentSection;
     public PostPanel(Post post, UserService userService, PostService postService){
 
         this.post = post;
@@ -36,15 +40,16 @@ public class PostPanel extends VerticalLayout {
         this.userService = userService;
         this.postService = postService;
 
-        Image content = postService.getContent(post);
+        this.content = postService.getContent(post);
 
-        float height = Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))+185;
+        Float height = Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))+60;
         this.setHeight(height + "px");
         this.setWidth(content.getWidth());
 
-        PostHeader postHeader = new PostHeader(content.getWidth());
-        InteractionFooter interactionFooter = new InteractionFooter(content.getWidth(),post);
-        CommentSection commentSection = new CommentSection(content.getWidth(),post);
+        this.postHeader = new PostHeader(content.getWidth());
+        this.interactionFooter = new InteractionFooter(content.getWidth(),post);
+        this.commentSection = new CommentSection(content.getWidth(),post);
+
         this.addClassName(LumoUtility.Border.ALL);
         this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
         this.addClassName(LumoUtility.BorderRadius.LARGE);
@@ -59,7 +64,7 @@ public class PostPanel extends VerticalLayout {
 
     }
 
-    private class PostHeader extends HorizontalLayout {
+    protected class PostHeader extends HorizontalLayout {
         public PostHeader(String width) {
 
             this.setWidth(width);
@@ -87,7 +92,7 @@ public class PostPanel extends VerticalLayout {
         }
     }
 
-    private class InteractionFooter extends HorizontalLayout {
+    protected class InteractionFooter extends HorizontalLayout {
 
         public InteractionFooter(String width, Post post) {
 
@@ -132,6 +137,17 @@ public class PostPanel extends VerticalLayout {
             commentButton.setHeight("25px");
             commentButton.setWidth(v + "px");
             commentButton.addClickListener(click -> {
+                if(commentSection.isVisible()){
+                    content.setVisible(true);
+                    postHeader.setVisible(true);
+                    postHeader.addClassName(LumoUtility.Border.BOTTOM);
+                    commentSection.setVisible(false);
+                }else{
+                    content.setVisible(false);
+                    postHeader.setVisible(false);
+                    postHeader.addClassName(LumoUtility.Border.NONE);
+                    commentSection.setVisible(true);
+                }
 
 
             });
@@ -150,42 +166,41 @@ public class PostPanel extends VerticalLayout {
 
     }
 
-    private class CommentSection extends VerticalLayout{
+    protected class CommentSection extends VerticalLayout{
+        MessageInput input;
+        MessageList list;
         public CommentSection(String width, Post post){
             this.setWidth(width);
-            this.setHeight("125px");
+            this.setHeight("190");
 
 
-            MessageInput input = new MessageInput();
-            input.setMaxWidth(width);
-            input.setMaxHeight("25px");
+            this.input = new MessageInput();
 
-            MessageList list = new MessageList();
-            list.setMaxWidth(width);
-            list.setMaxHeight("100px");
-            list.setItems(new MessageListItem("Hola buenas"));
+            this.list = new MessageList(postService.commentItems(post));
 
 
-            input.addSubmitListener(submitEvent -> {
-                Notification.show("Message received: " + submitEvent.getValue(),
-                        3000, Notification.Position.MIDDLE);
+            this.input.addSubmitListener(submitEvent -> {
+                User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+                postService.newComment(post,authUser,submitEvent.getValue());
+                Notification.show("Commented " + submitEvent.getValue(),
+                        3000, Notification.Position.BOTTOM_STRETCH);
+                list = new MessageList(postService.commentItems(post));
             });
-
 
 
             this.addClassName(LumoUtility.Border.TOP);
             this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
             this.setAlignItems(FlexComponent.Alignment.CENTER);
             this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-
-
+            setVisible(false);
             this.setSpacing(true);
             this.setPadding(true);
             this.add(list,input);
 
         }
-    }
 
+
+    }
 
 
 }
