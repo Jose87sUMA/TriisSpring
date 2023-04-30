@@ -6,11 +6,10 @@ import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,4 +80,27 @@ public class UserService {
 
     List<User> findAllByMatchingUsername(String match){return userRep.findAllByUsernameContainsIgnoreCase(match);}
 
+    public boolean editUsername(User user, String username) {
+        if(!username.isEmpty() && username.matches("^[a-z0-9]+$") && findByUsername(username) == null) {
+            user.setUsername(username);
+            userRep.save(user);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public boolean editEmail(User user, String email) {
+        if(!email.isEmpty() && findByEmail(email) == null) {
+            user.setEmail(email);
+            userRep.save(user);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public void editPassword(User user, String password) {
+        user.setPassword((new BCryptPasswordEncoder()).encode(password));
+    }
 }

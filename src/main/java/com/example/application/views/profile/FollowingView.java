@@ -22,7 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 @PermitAll
-@Route("profile/*following")
+@Route("profile/?following")
 public class FollowingView extends Div  implements HasUrlParameter<String> {
     private final UserService userService;
     private User user;

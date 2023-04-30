@@ -40,9 +40,10 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
         if(parameter == null)
             user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        else
-            user = userService.findByUsername(parameter);
-
+        else if((user = userService.findByUsername(parameter)) == null){
+            event.forwardTo("feed");
+            return;
+        }
 
         profilePanel = new ProfilePanel(user, userService, postService);
 
@@ -53,6 +54,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         HorizontalLayout buttons = createButtonsLayout();
 
         this.setHorizontalComponentAlignment(Alignment.CENTER, buttons);
+        this.setAlignItems(Alignment.CENTER);
 
         add(new H1(user.getUsername()), buttons, profilePanel);
 
@@ -63,17 +65,17 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
      * CUSTOMIZING  BUTTONS
      */
     private HorizontalLayout createButtonsLayout() {
-
-
         //buttons
         Button following = new Button("Following: " + userService.getFollowing(user).size());
+        following.addClickListener(event -> UI.getCurrent().navigate("profile/?following/" + user.getUsername()));
+
         Button follow = new Button("Followers: " + userService.getFollowers(user).size());
         Button type1 = new Button("Type 1 points: " + user.getType1Points());
         Button type2 = new Button("Type 2 points: " + user.getType2Points());
         Button makePost = new Button("Make a Post");
-        Button editProfile = new Button("Edit Profile");
 
-        following.addClickListener(event -> UI.getCurrent().navigate("profile/*following/" + user.getUsername()));
+        Button editProfile = new Button("Edit Profile");
+        editProfile.addClickListener(event -> UI.getCurrent().navigate("profile/?edit/" + user.getUsername()));
 
         if(!user.equals(userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()))) {
             makePost.setVisible(false);

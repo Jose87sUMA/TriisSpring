@@ -117,7 +117,7 @@ public class RegisterForm extends VerticalLayout {
      * VERIFY FIELDS AND SAVE USER
      */
     private void register(){
-        String userName = username.getValue();
+        String username = this.username.getValue();
         String password1 = password.getValue();
         String password2 = confirmPassword.getValue();
         String emailValue = email.getValue();
@@ -126,10 +126,10 @@ public class RegisterForm extends VerticalLayout {
 
         notification.setDuration(2000);
 
-        if(userName.trim().isEmpty()){
+        if(username.trim().isEmpty()){
             notification.setText("Enter a username");
             notification.open();
-        }else if(!userName.matches("^[a-z0-9]+$")){
+        }else if(!username.matches("^[a-z0-9]+$")){
             notification.setText("Username can only contain numbers and lowercase letters");
             notification.open();
         }else if(emailValue.trim().isEmpty()){
@@ -150,7 +150,7 @@ public class RegisterForm extends VerticalLayout {
         }else if(!password1.equals(password2)){
             notification.setText("Passwords don't match");
             notification.open();
-        }else if(userService.findByUsername(userName) != null){
+        }else if(userService.findByUsername(username) != null){
             notification.setText("User already exists");
             notification.open();
         }else if(userService.findByEmail(emailValue) != null){
@@ -161,7 +161,7 @@ public class RegisterForm extends VerticalLayout {
             PasswordEncoder pass = new BCryptPasswordEncoder();
             CharSequence passwordToEncrypt = password1;
 
-            userService.save(new User(userName, pass.encode(passwordToEncrypt), emailValue));
+            userService.save(new User(username, pass.encode(passwordToEncrypt), emailValue));
             notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);    
             notification.setText("User saved");

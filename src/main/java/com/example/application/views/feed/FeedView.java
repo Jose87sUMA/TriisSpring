@@ -13,25 +13,17 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @PageTitle("Triis - Feed")
-@Route(value = "Feed", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
+@Route(value = "feed", layout = MainLayout.class)
+@RouteAlias(value = "feed", layout = MainLayout.class)
 @PermitAll
 public class FeedView extends HorizontalLayout {
 
-    private FeedPanel feedPanel;
-    private User authenticatedUser;
-
-    private final UserService userService;
-    private final PostService postService;
-
     public FeedView(UserService userService, PostService postService) {
 
-        this.postService = postService;
-        this.userService = userService;
-        this.authenticatedUser =  userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        
+        User authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        feedPanel = new FeedPanel(authenticatedUser, userService, postService);
+
+        FeedPanel feedPanel = new FeedPanel(authenticatedUser, userService, postService);
 
         this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         this.setMargin(true);
