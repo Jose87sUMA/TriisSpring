@@ -5,6 +5,7 @@ import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -16,12 +17,12 @@ import com.vaadin.flow.component.notification.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.*;
 import java.util.*;
-
 
 public class PostPanel extends VerticalLayout {
 
@@ -183,7 +184,7 @@ public class PostPanel extends VerticalLayout {
                 User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
                 postService.newComment(post,authUser,submitEvent.getValue());
                 Notification.show("Commented " + submitEvent.getValue(),
-                        3000, Notification.Position.BOTTOM_STRETCH);
+                        10000, Notification.Position.BOTTOM_STRETCH);
                 list = new MessageList(postService.commentItems(post));
             });
 

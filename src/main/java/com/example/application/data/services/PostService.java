@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
+import java.sql.*;
 import java.sql.Date;
 import java.time.*;
 import java.util.*;
@@ -112,10 +113,10 @@ public class PostService {
         List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
         List<MessageListItem> itemList =new ArrayList<>();
         for(Comment c : commentList){
-            Instant i = null;
-            try{
-                i = c.getCommentDate().toInstant();
-            }catch (java.lang.UnsupportedOperationException e){}
+
+            Timestamp timestamp = new Timestamp((c.getCommentDate()).getTime());
+            Instant i = timestamp.toInstant();
+
             MessageListItem item = new MessageListItem(c.getUserComment(), i,(userRep.findFirstByUserId(c.getUserId()).getUsername()));
             itemList.add(item);
         }
@@ -140,6 +141,5 @@ public class PostService {
             }
         if(!found) comment.setCommentId(random_id);
         commentsRep.save(comment);
-
     }
 }
