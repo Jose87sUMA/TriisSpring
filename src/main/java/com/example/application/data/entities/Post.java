@@ -7,8 +7,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Date;
-import java.util.Arrays;
-import java.util.Objects;
+import java.time.*;
+import java.util.*;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
@@ -43,20 +43,25 @@ public class Post implements Serializable {
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
 
-    public Post(BigInteger postId, BigInteger userId, Date postDate, byte[] content, BigInteger repostId, BigInteger originalPostId) {
-
-    }
 
     public Post() {
-
     }
 
-    public Post(BigInteger postId, BigInteger userId, Date date, byte[] content, BigInteger originalPostId) {
+
+    public Post(Post post, BigInteger userID) {
+        if(originalPostId == null) this.originalPostId = post.getPostId();
+        else this.originalPostId = post.getOriginalPostId();
+
         this.postId = null;
-        this.userId = userId;
-        this.content = content;
-        this.originalPostId = originalPostId;
+        this.repostId = post.getPostId();
+        this.postDate = Date.valueOf(LocalDate.now());
+        this.userId = userID;
+        this.content = post.getContent();
+        this.points = BigInteger.ZERO;
+        this.pointed = "Y";
+        this.likes = null;
     }
+
 
     public BigInteger getPostId() {
         return postId;

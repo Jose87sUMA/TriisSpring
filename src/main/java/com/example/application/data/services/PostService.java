@@ -29,6 +29,13 @@ public class PostService {
     private final UsersRepository userRep;
     private final CommentsRepository commentsRep;
 
+    public boolean isReposted(Post post, User user){
+
+        for(Post p : postRep.findAllByUserId(user.getUserId())){
+            if(p.getRepostId() != null && p.getRepostId().compareTo(post.getPostId()) == 0) return true;
+        }
+        return false;
+    }
     public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, CommentsRepository commentsRep) {
         this.likeRep = likeRep;
         this.postRep = postRep;

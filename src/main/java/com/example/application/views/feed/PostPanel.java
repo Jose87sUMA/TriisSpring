@@ -141,21 +141,11 @@ public class PostPanel extends VerticalLayout {
             repostButton.setHeight("25px");
             repostButton.setWidth(v + "px");
             repostButton.addClickListener(click -> {
-
-                ByteArrayOutputStream imageToByte = new ByteArrayOutputStream();
-                BufferedImage image ;
-
-                try {
-                    image = ImageIO.read((ImageInputStream) content);
-
-                    ImageIO.write((RenderedImage) image, "jpg",imageToByte);
-
-                } catch (IOException e) {System.out.println("Error reading image during repost");}
-
-                postService.save(new Post(post.getPostId(),authUser.getUserId(),Date.valueOf(LocalDate.now()),imageToByte.toByteArray() ,post.getOriginalPostId()));
+                if(!postService.isReposted(post,authUser)) postService.save(new Post(post,authUser.getUserId()));
 
 
-               Notification.show("Post reposted");
+
+               Notification.show("Reposted correctly");
             });
 
             Button commentButton = new Button(new Icon(VaadinIcon.COMMENT_O));
@@ -198,7 +188,6 @@ public class PostPanel extends VerticalLayout {
 
 
             this.input = new MessageInput();
-
             this.list = new MessageList(postService.commentItems(post));
 
 
