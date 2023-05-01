@@ -49,17 +49,17 @@ public class Post implements Serializable {
 
 
     public Post(Post post, BigInteger userID) {
-        if(originalPostId == null) this.originalPostId = post.getPostId();
+        if(post.originalPostId == null) this.originalPostId = post.getPostId();
         else this.originalPostId = post.getOriginalPostId();
 
         this.postId = null;
         this.repostId = post.getPostId();
         this.postDate = Date.valueOf(LocalDate.now());
         this.userId = userID;
-        this.content = post.getContent();
+        this.content = null;
         this.points = BigInteger.ZERO;
         this.pointed = "Y";
-        this.likes = null;
+        this.likes = BigInteger.ZERO;
     }
 
 

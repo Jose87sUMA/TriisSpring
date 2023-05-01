@@ -10,6 +10,7 @@ import java.util.Objects;
 @Table(name = "COMMENTS", schema = "UBD3336", catalog = "")
 public class Comment {
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "COMMENT_ID")
     private BigInteger commentId;

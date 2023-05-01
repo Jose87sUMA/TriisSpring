@@ -137,19 +137,12 @@ public class PostService {
         Comment comment = new Comment();
 
         comment.setPostId(post.getPostId());
-        comment.setCommentDate(Date.valueOf(LocalDate.now()));
+        comment.setCommentDate(new java.sql.Date(Instant.now().toEpochMilli()));
         comment.setUserId(user.getUserId());
         comment.setUserComment(text);
 
         List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
-        BigInteger random_id = BigInteger.valueOf((new Random()).nextInt(30,1000));
-        boolean found = false;
-        for(Comment c : commentList)
-            if (c.getCommentId().equals(random_id)) {
-                found = true;
-                break;
-            }
-        if(!found) comment.setCommentId(random_id);
+
         commentsRep.save(comment);
     }
 }

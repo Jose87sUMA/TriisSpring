@@ -141,7 +141,7 @@ public class PostPanel extends VerticalLayout {
             repostButton.setHeight("25px");
             repostButton.setWidth(v + "px");
             repostButton.addClickListener(click -> {
-                if(!postService.isReposted(post,authUser)) postService.save(new Post(post,authUser.getUserId()));
+                if(!postService.isReposted(post,authUser)) postService.save(new Post(post, authUser.getUserId()));
 
 
 
@@ -184,11 +184,12 @@ public class PostPanel extends VerticalLayout {
         MessageList list;
         public CommentSection(String width, Post post){
             this.setWidth(width);
-            this.setHeight("190");
-
+            //this.setHeight("190px");
 
             this.input = new MessageInput();
             this.list = new MessageList(postService.commentItems(post));
+            list.setMaxHeight("350px");
+            list.setMaxHeight("350px");
 
 
             this.input.addSubmitListener(submitEvent -> {
@@ -203,7 +204,7 @@ public class PostPanel extends VerticalLayout {
                     ui.push();
                 });
             });
-
+            input.setMaxHeight("70px");
 
 
             this.addClassName(LumoUtility.Border.TOP);
