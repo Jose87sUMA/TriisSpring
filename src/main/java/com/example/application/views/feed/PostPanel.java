@@ -137,8 +137,7 @@ public class PostPanel extends VerticalLayout {
             });
 
             Button repostButton = new Button();
-            boolean reposted = postService.isReposted(post,authUser);
-            if(reposted){
+            if(postService.isReposted(post,authUser)){
                 Icon icon = new Icon(VaadinIcon.RETWEET);
                 icon.setColor("springgreen");
                 repostButton.setIcon(icon);
@@ -149,9 +148,11 @@ public class PostPanel extends VerticalLayout {
             repostButton.setHeight("25px");
             repostButton.setWidth(v + "px");
             repostButton.addClickListener(click -> {
+                boolean reposted = postService.isReposted(post,authUser);
+
                 if(reposted) {
-                    repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
                     postService.deleteRepost(authUser,post);
+                    repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
                     Notification.show("UnReposted");
                 }
                 else {
@@ -160,7 +161,6 @@ public class PostPanel extends VerticalLayout {
                     repostButton.setIcon(icon);
                     postService.save(new Post(post, authUser));
                     Notification.show("Reposted correctly");
-
                 }
 
             });
@@ -170,8 +170,7 @@ public class PostPanel extends VerticalLayout {
             commentButton.setHeight("25px");
             commentButton.setWidth(v + "px");
             commentButton.addClickListener(click -> {
-                UI ui = UI.getCurrent();
-                ui.access(() -> {
+
                     if(commentSection.isVisible()){
                         content.setVisible(true);
                         postHeader.setVisible(true);
@@ -185,8 +184,6 @@ public class PostPanel extends VerticalLayout {
                         commentSection.setVisible(true);
                         commentButton.setIcon(new Icon(VaadinIcon.COMMENT));
                     }
-                    ui.push();
-                });
 
             });
 
