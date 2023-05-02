@@ -31,14 +31,9 @@ public class FeedPanel extends Scroller {
 
         List<Post> postsByFollowing = postService.getAllByPeopleFollowed(authenticatedUser);
 
-
-        try {
-            for (int i = 0; i < 15; ++i) {
-
-                content.add(new PostPanel(postsByFollowing.get(i), userService, postService));
-
-            }
-        }catch(IndexOutOfBoundsException e){System.out.println("Error creating feed panel, check FOR condition: "+e.getMessage()+" | "+e.getCause());}
+        for(int i = 0; i < Math.min(postsByFollowing.size(), 15); ++i){
+            content.add(new PostPanel(postsByFollowing.get(i), userService, postService));
+        }
 
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);

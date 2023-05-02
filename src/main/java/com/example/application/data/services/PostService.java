@@ -29,13 +29,6 @@ public class PostService {
     private final UsersRepository userRep;
     private final CommentsRepository commentsRep;
 
-    public boolean isReposted(Post post, User user){
-
-        for(Post p : postRep.findAllByUserId(user.getUserId())){
-            if(p.getRepostId() != null && p.getRepostId().compareTo(post.getPostId()) == 0) return true;
-        }
-        return false;
-    }
     public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, CommentsRepository commentsRep) {
         this.likeRep = likeRep;
         this.postRep = postRep;
@@ -49,9 +42,7 @@ public class PostService {
     }
 
     public void deletePost(Post post){postRep.delete(post);}
-    public void deleteRepost(User reposter, Post post){
-        deletePost(postRep.findByRepostIdAndUserId(post.getPostId(),reposter.getUserId()));
-    }
+
 
     public Post findById(BigInteger postId){ return postRep.findFirstByPostId(postId); }
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
@@ -121,6 +112,19 @@ public class PostService {
         post.setLikes(post.getLikes().subtract(BigInteger.ONE));
         likeRep.delete(likeRep.findByUserIdAndPostId(user.getUserId(), post.getPostId()));
     }
+
+    public boolean isReposted(Post post, User user){
+                //User reposting a repost and has already reposted any post refering to the same original post as the repost he is reposting
+       return (post.getOriginalPostId() != null && !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getOriginalPostId()).isEmpty())
+                //User reposting the original post and has already reposted any repost of the original post
+               || !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getPostId()).isEmpty(); //
+    }
+
+    public void deleteRepost(User reposter, Post post){
+        deletePost(postRep.findByRepostIdAndUserId(post.getPostId(),reposter.getUserId()));
+    }
+
+
     public List<MessageListItem> commentItems(Post post){
         List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
         List<MessageListItem> itemList =new ArrayList<>();
@@ -145,8 +149,6 @@ public class PostService {
         comment.setCommentDate(new java.sql.Date(Instant.now().toEpochMilli()));
         comment.setUserId(user.getUserId());
         comment.setUserComment(text);
-
-        List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
 
         commentsRep.save(comment);
     }

@@ -1,6 +1,5 @@
 package com.example.application.data.entities;
 
-import com.vaadin.flow.component.html.*;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -48,7 +47,7 @@ public class Post implements Serializable {
     }
 
 
-    public Post(Post post, User user) {
+    public Post(Post post, User user, boolean pointed) {
         if(post.originalPostId == null) this.originalPostId = post.getPostId();
         else this.originalPostId = post.getOriginalPostId();
 
@@ -58,7 +57,7 @@ public class Post implements Serializable {
         this.userId = user.getUserId();
         this.content = null;
         this.points = BigInteger.ZERO;
-        this.pointed = "Y";
+        this.pointed = pointed ? "Y":"N";
         this.likes = BigInteger.ZERO;
     }
 

@@ -1,15 +1,13 @@
 package com.example.application.views.feed;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.shared.communication.PushMode;
-import com.vaadin.flow.shared.ui.Transport;
 
-import com.example.application.data.entities.Like;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
-import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -17,24 +15,16 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.*;
-import com.vaadin.flow.component.notification.*;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.apache.logging.log4j.message.Message;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
 
-import javax.imageio.*;
-import javax.imageio.stream.*;
-import java.awt.image.*;
-import java.io.*;
-import java.math.*;
-import java.sql.Date;
-import java.time.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PostPanel extends VerticalLayout {
 
@@ -86,7 +76,7 @@ public class PostPanel extends VerticalLayout {
             Avatar profileAvatar = new Avatar(poster.getUsername());
             profileAvatar.setImageResource(userService.getProfilePicImageResource(poster));
 
-            Button profileName = new Button(poster.getUsername());
+            Button profileName = new Button(poster.getUsername() + " - " + post.getPoints());
             profileName.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
             profileName.setWidth("300px");
             profileName.setHeight("30px");
@@ -137,32 +127,83 @@ public class PostPanel extends VerticalLayout {
             });
 
             Button repostButton = new Button();
-            if(postService.isReposted(post,authUser)){
+
+
+            if(postService.isReposted(post, authUser)){
                 Icon icon = new Icon(VaadinIcon.RETWEET);
                 icon.setColor("springgreen");
                 repostButton.setIcon(icon);
             }else{
                 repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
             }
+
             repostButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
             repostButton.setHeight("25px");
             repostButton.setWidth(v + "px");
+
             repostButton.addClickListener(click -> {
-                boolean reposted = postService.isReposted(post,authUser);
+                boolean reposted = postService.isReposted(post, authUser);
 
-                if(reposted) {
-                    postService.deleteRepost(authUser,post);
-                    repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
-                    Notification.show("UnReposted");
-                }
-                else {
-                    Icon icon = new Icon(VaadinIcon.RETWEET);
-                    icon.setColor("springgreen");
-                    repostButton.setIcon(icon);
-                    postService.save(new Post(post, authUser));
-                    Notification.show("Reposted correctly");
-                }
+                if(!reposted) {
 
+                    if(post.getPointed().equals("Y")){
+                        Notification repostSuccess = new Notification("Reposted correctly.");
+                        repostSuccess.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                        repostSuccess.setDuration(5000);
+
+                        Notification usePoints = new Notification();
+                        usePoints.setDuration(-1);
+                        usePoints.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+                        Div statusText = new Div(new Text("Use points?"));
+
+                        Button yes = new Button("Yes");
+                        yes.addClickListener(event -> {
+                            usePoints.close();
+                            postService.save(new Post(post, authUser, true));
+                            repostSuccess.open();
+                        });
+                        Button no = new Button("No");
+                        no.addClickListener(event -> {
+                            usePoints.close();
+                            postService.save(new Post(post, authUser, false));
+                            repostSuccess.open();
+                        });
+
+                        HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
+                        buttons.setAlignItems(Alignment.CENTER);
+                        usePoints.add(buttons);
+
+                        usePoints.open();
+
+                        Icon icon = new Icon(VaadinIcon.RETWEET);
+                        icon.setColor("springgreen");
+                        repostButton.setIcon(icon);
+
+                    }
+
+                }else{
+
+                    Notification deletePostCheck = new Notification();
+                    deletePostCheck.setDuration(-1);
+                    deletePostCheck.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+                    Div statusText = new Div(new Text("Are you sure you want to unrepost? You won't get any used points back :("));
+
+                    Button yes = new Button("Yes");
+                    yes.addClickListener(event -> {
+                        deletePostCheck.close();
+                        postService.deleteRepost(authUser, post);
+                        repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
+                        Notification.show("Unreposted");
+                    });
+                    Button no = new Button("No");
+                    no.addClickListener(event -> {
+                        deletePostCheck.close();
+                    });
+                    HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
+                    buttons.setAlignItems(Alignment.CENTER);
+                    deletePostCheck.add(buttons);
+                    deletePostCheck.open();
+                }
             });
 
             Button commentButton = new Button(new Icon(VaadinIcon.COMMENT_O));
@@ -209,9 +250,7 @@ public class PostPanel extends VerticalLayout {
 
             this.input = new MessageInput();
             this.list = new MessageList(postService.commentItems(post));
-            list.setMaxHeight("350px");
-            list.setMaxHeight("350px");
-
+            list.setMaxHeight(Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))-50 + "px");
 
             this.input.addSubmitListener(submitEvent -> {
                 User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -227,7 +266,6 @@ public class PostPanel extends VerticalLayout {
             });
             input.setMaxHeight("70px");
 
-
             this.addClassName(LumoUtility.Border.TOP);
             this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
             this.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -239,8 +277,6 @@ public class PostPanel extends VerticalLayout {
 
         }
 
-
     }
-
 
 }
