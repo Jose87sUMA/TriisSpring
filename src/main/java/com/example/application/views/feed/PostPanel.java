@@ -25,6 +25,7 @@ import com.vaadin.flow.component.page.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.logging.log4j.message.Message;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 
 import javax.imageio.*;
 import javax.imageio.stream.*;
@@ -135,17 +136,33 @@ public class PostPanel extends VerticalLayout {
                 }
             });
 
-
-            Button repostButton = new Button(new Icon(VaadinIcon.RETWEET));
+            Button repostButton = new Button();
+            boolean reposted = postService.isReposted(post,authUser);
+            if(reposted){
+                Icon icon = new Icon(VaadinIcon.RETWEET);
+                icon.setColor("lime");
+                repostButton.setIcon(icon);
+            }else{
+                repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
+            }
             repostButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
             repostButton.setHeight("25px");
             repostButton.setWidth(v + "px");
             repostButton.addClickListener(click -> {
-                if(!postService.isReposted(post,authUser)) postService.save(new Post(post, authUser.getUserId()));
+                if(reposted) {
+                    repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
+                    postService.deletePost(post);
+                    Notification.show("Reposted deleted");
+                }
+                else {
+                    Icon icon = new Icon();
+                    icon.setColor("lime");
+                    repostButton.setIcon(icon);
+                    postService.save(new Post(post, authUser));
+                    Notification.show("Reposted correctly");
 
+                }
 
-
-               Notification.show("Reposted correctly");
             });
 
             Button commentButton = new Button(new Icon(VaadinIcon.COMMENT_O));

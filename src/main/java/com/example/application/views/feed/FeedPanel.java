@@ -9,6 +9,7 @@ import com.example.application.data.services.UserService;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import jakarta.persistence.Index;
 
 import java.util.List;
 
@@ -30,11 +31,14 @@ public class FeedPanel extends Scroller {
 
         List<Post> postsByFollowing = postService.getAllByPeopleFollowed(authenticatedUser);
 
-        for(int i = 0; i < 15; ++i){
 
-            content.add(new PostPanel(postsByFollowing.get(i), userService, postService));
+        try {
+            for (int i = 0; i < 15; ++i) {
 
-        }
+                content.add(new PostPanel(postsByFollowing.get(i), userService, postService));
+
+            }
+        }catch(IndexOutOfBoundsException e){System.out.println("Error creating feed panel, check FOR condition: "+e.getMessage()+" | "+e.getCause());}
 
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);

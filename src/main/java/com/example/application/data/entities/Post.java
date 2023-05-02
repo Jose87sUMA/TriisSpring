@@ -48,14 +48,14 @@ public class Post implements Serializable {
     }
 
 
-    public Post(Post post, BigInteger userID) {
+    public Post(Post post, User user) {
         if(post.originalPostId == null) this.originalPostId = post.getPostId();
         else this.originalPostId = post.getOriginalPostId();
 
         this.postId = null;
         this.repostId = post.getPostId();
         this.postDate = Date.valueOf(LocalDate.now());
-        this.userId = userID;
+        this.userId = user.getUserId();
         this.content = null;
         this.points = BigInteger.ZERO;
         this.pointed = "Y";
