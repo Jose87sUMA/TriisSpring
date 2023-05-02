@@ -140,7 +140,7 @@ public class PostPanel extends VerticalLayout {
             boolean reposted = postService.isReposted(post,authUser);
             if(reposted){
                 Icon icon = new Icon(VaadinIcon.RETWEET);
-                icon.setColor("lime");
+                icon.setColor("springgreen");
                 repostButton.setIcon(icon);
             }else{
                 repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
@@ -151,12 +151,12 @@ public class PostPanel extends VerticalLayout {
             repostButton.addClickListener(click -> {
                 if(reposted) {
                     repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
-                    postService.deletePost(post);
-                    Notification.show("Reposted deleted");
+                    postService.deleteRepost(authUser,post);
+                    Notification.show("UnReposted");
                 }
                 else {
-                    Icon icon = new Icon();
-                    icon.setColor("lime");
+                    Icon icon = new Icon(VaadinIcon.RETWEET);
+                    icon.setColor("springgreen");
                     repostButton.setIcon(icon);
                     postService.save(new Post(post, authUser));
                     Notification.show("Reposted correctly");
@@ -170,17 +170,24 @@ public class PostPanel extends VerticalLayout {
             commentButton.setHeight("25px");
             commentButton.setWidth(v + "px");
             commentButton.addClickListener(click -> {
-                if(commentSection.isVisible()){
-                    content.setVisible(true);
-                    postHeader.setVisible(true);
-                    postHeader.addClassName(LumoUtility.Border.BOTTOM);
-                    commentSection.setVisible(false);
-                }else{
-                    content.setVisible(false);
-                    postHeader.setVisible(false);
-                    postHeader.addClassName(LumoUtility.Border.NONE);
-                    commentSection.setVisible(true);
-                }
+                UI ui = UI.getCurrent();
+                ui.access(() -> {
+                    if(commentSection.isVisible()){
+                        content.setVisible(true);
+                        postHeader.setVisible(true);
+                        postHeader.addClassName(LumoUtility.Border.BOTTOM);
+                        commentSection.setVisible(false);
+                        commentButton.setIcon(new Icon(VaadinIcon.COMMENT_O));
+                    }else{
+                        content.setVisible(false);
+                        postHeader.setVisible(false);
+                        postHeader.addClassName(LumoUtility.Border.NONE);
+                        commentSection.setVisible(true);
+                        commentButton.setIcon(new Icon(VaadinIcon.COMMENT));
+                    }
+                    ui.push();
+                });
+
             });
 
 

@@ -49,7 +49,9 @@ public class PostService {
     }
 
     public void deletePost(Post post){postRep.delete(post);}
-
+    public void deleteRepost(User reposter, Post post){
+        deletePost(postRep.findByRepostIdAndUserId(post.getPostId(),reposter.getUserId()));
+    }
 
     public Post findById(BigInteger postId){ return postRep.findFirstByPostId(postId); }
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
