@@ -255,7 +255,7 @@ public class PostPanel extends VerticalLayout {
             this.input.addSubmitListener(submitEvent -> {
                 User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
                 postService.newComment(post, authUser, submitEvent.getValue());
-                Notification.show("Commented " + submitEvent.getValue(), 3000, Notification.Position.BOTTOM_STRETCH);
+                Notification.show("Commented " + submitEvent.getValue(), 2000, Notification.Position.BOTTOM_STRETCH);
                 List<MessageListItem> commentItems = postService.commentItems(post);
 
                 UI ui = UI.getCurrent();
