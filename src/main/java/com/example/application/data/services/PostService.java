@@ -8,6 +8,7 @@ import com.example.application.data.repositories.CommentsRepository;
 import com.example.application.data.repositories.LikesRepository;
 import com.example.application.data.repositories.PostsRepository;
 import com.example.application.data.repositories.UsersRepository;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.messages.*;
 import com.vaadin.flow.server.StreamResource;
@@ -95,21 +96,16 @@ public class PostService {
 
         return usersThatLiked;
     }
-    public void likeButton(Post post, User authUser) {
-        if(!this.getAllUsersLiking(post).contains(authUser)){
-            this.newLike(authUser, post);
-        }else{
-            this.dislike(authUser, post);
-        }
-        this.save(post);
-    }
+
     public void newLike(User user, Post post) {
         post.setLikes(post.getLikes().add(BigInteger.ONE));
+        save(post);
         likeRep.save(new Like(user.getUserId(), post.getPostId()));
     }
 
     public void dislike(User user, Post post) {
         post.setLikes(post.getLikes().subtract(BigInteger.ONE));
+        save(post);
         likeRep.delete(likeRep.findByUserIdAndPostId(user.getUserId(), post.getPostId()));
     }
 
@@ -119,6 +115,40 @@ public class PostService {
                 //User reposting the original post and has already reposted any repost of the original post
                || !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getPostId()).isEmpty(); //
     }
+
+    public void pointDistribution(Post post) {
+
+        List<Post> branch = postRep.findPostBranch(post.getPostId());
+
+        Post original = branch.get(0);
+        Post direct = branch.get(branch.size()-1);
+        User originalPoster = userRep.findFirstByUserId(original.getUserId());
+
+        original.setPoints(BigInteger.valueOf(original.getPoints().intValue() + 10));
+        originalPoster.setType1Points(BigInteger.valueOf(originalPoster.getType1Points().intValue() + 10));
+        userRep.save(originalPoster);
+
+        if(!original.equals(direct)){
+            User directUser = userRep.findFirstByUserId(direct.getUserId());
+            direct.setPoints(BigInteger.valueOf(direct.getPoints().intValue() + 5));
+            directUser.setType1Points(BigInteger.valueOf(directUser.getType1Points().intValue() + 5));
+            userRep.save(directUser);
+        }
+
+        for(Post p : branch){
+            User poster = userRep.findFirstByUserId(p.getUserId());
+            p.setPoints(BigInteger.valueOf(p.getPoints().intValue() + 5));
+            poster.setType1Points(BigInteger.valueOf(poster.getType1Points().intValue() + 5));
+            save(p);
+            userRep.save(poster);
+        }
+
+        UI ui = UI.getCurrent();
+        ui.access(() -> {
+            ui.push();
+        });
+    }
+
 
     public void deleteRepost(User reposter, Post post){
         deletePost(postRep.findByRepostIdAndUserId(post.getPostId(),reposter.getUserId()));
@@ -140,8 +170,6 @@ public class PostService {
     }
 
 
-
-
     public void newComment(Post post, User user, String text){
         Comment comment = new Comment();
 
@@ -152,4 +180,6 @@ public class PostService {
 
         commentsRep.save(comment);
     }
+
+
 }

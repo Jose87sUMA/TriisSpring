@@ -47,6 +47,7 @@ public class Post implements Serializable {
     }
 
 
+    //FOR REPOST
     public Post(Post post, User user, boolean pointed) {
         if(post.originalPostId == null) this.originalPostId = post.getPostId();
         else this.originalPostId = post.getOriginalPostId();

@@ -30,7 +30,13 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
 
     /*DELETE QUERIES*/
     void deleteAllByUserIdAndPostId(BigInteger userId, BigInteger postId);
+
+
+    //CUSTOM QUERIES
     @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId ORDER BY POST_DATE DESC", nativeQuery = true)
     List<Post> findAllByUsersFollowedByUserIdOrderByPostDateDesc(@Param("userId") BigInteger userId);
+
+    @Query(value = "SELECT * FROM POSTS WHERE POST_ID IN (WITH PARENT_POST (P) AS (SELECT REPOST_ID AS P FROM POSTS WHERE POST_ID = :postId UNION ALL SELECT REPOST_ID FROM PARENT_POST, POSTS WHERE PARENT_POST.P = POSTS.POST_ID) SELECT * FROM PARENT_POST)", nativeQuery = true)
+    List<Post> findPostBranch(@Param("postId") BigInteger postId);
 
 }
