@@ -1,15 +1,17 @@
 package com.example.application.data.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Date;
-import java.util.Arrays;
-import java.util.Objects;
+import java.time.*;
+import java.util.*;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
+@DynamicUpdate
 public class Post implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -39,6 +41,27 @@ public class Post implements Serializable {
     @Basic
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
+
+
+    public Post() {
+    }
+
+
+    //FOR REPOST
+    public Post(Post post, User user, boolean pointed) {
+        if(post.originalPostId == null) this.originalPostId = post.getPostId();
+        else this.originalPostId = post.getOriginalPostId();
+
+        this.postId = null;
+        this.repostId = post.getPostId();
+        this.postDate = Date.valueOf(LocalDate.now());
+        this.userId = user.getUserId();
+        this.content = null;
+        this.points = BigInteger.ZERO;
+        this.pointed = pointed ? "Y":"N";
+        this.likes = BigInteger.ZERO;
+    }
+
 
     public BigInteger getPostId() {
         return postId;

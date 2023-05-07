@@ -54,13 +54,9 @@ public class UserService {
         List<User> followingUsers = new ArrayList<>();
 
         for(Follow followEntry: followingEntries){
-
             followingUsers.add(this.findById(followEntry.getUserIdFollowing()));
-
         }
-
         return followingUsers;
-
     }
 
     public User save(User user){

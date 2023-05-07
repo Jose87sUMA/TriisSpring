@@ -10,6 +10,7 @@ import java.util.Objects;
 @Table(name = "COMMENTS", schema = "UBD3336", catalog = "")
 public class Comment {
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "COMMENT_ID")
     private BigInteger commentId;
@@ -66,6 +67,9 @@ public class Comment {
     public void setCommentDate(Date commentDate) {
         this.commentDate = commentDate;
     }
+
+
+
 
     @Override
     public boolean equals(Object o) {

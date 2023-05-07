@@ -11,6 +11,6 @@ import java.util.List;
 public interface LikesRepository extends CrudRepository<Like, BigInteger> {
 
     List<Like> findAllByPostId(BigInteger postId);
-    List<Like> findAllByUserIdAndPostId(BigInteger userId, BigInteger postId);
+    Like findByUserIdAndPostId(BigInteger userId, BigInteger postId);
     void deleteAllByUserIdAndPostId(BigInteger userId, BigInteger postId);
 }
