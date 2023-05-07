@@ -20,12 +20,14 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import jakarta.annotation.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class PostPanel extends VerticalLayout {
 
@@ -37,6 +39,10 @@ public class PostPanel extends VerticalLayout {
     Image content;
     InteractionFooter interactionFooter;
     CommentSection commentSection;
+
+    @Resource
+    Executor executor;
+
     public PostPanel(Post post, UserService userService, PostService postService){
 
         this.post = post;
@@ -104,13 +110,14 @@ public class PostPanel extends VerticalLayout {
 
             this.setWidth(width);
             this.setHeight("25px");
-            double v = Double.parseDouble(width.substring(0, width.length() - 2))/(3.5) ;
+            double v = Double.parseDouble(width.substring(0, width.length() - 2)) / (3.5);
 
             Icon likeIcon;
-            if(!postService.getAllUsersLiking(post).contains(authUser)){
+            if (!postService.getAllUsersLiking(post).contains(authUser)) {
                 likeIcon = new Icon(VaadinIcon.HEART_O);
-            }else{
+            } else {
                 likeIcon = new Icon(VaadinIcon.HEART);
+                likeIcon.setColor("red");
             }
 
             Button likeButton = new Button(likeIcon);
@@ -119,22 +126,19 @@ public class PostPanel extends VerticalLayout {
             likeButton.setWidth(v + "px");
             likeButton.addClickListener(click -> {
 
-                likeClick(post, authUser);
+                likeButton.setEnabled(false);
+                likeClick(post, authUser, likeButton);
+                likeButton.setEnabled(true);
 
-                if(!postService.getAllUsersLiking(post).contains(authUser)){
-                    likeButton.setIcon(new Icon(VaadinIcon.HEART_O));
-                }else{
-                    likeButton.setIcon(new Icon(VaadinIcon.HEART));
-                }
             });
 
             Button repostButton = new Button();
 
             Icon retweeted = new Icon(VaadinIcon.RETWEET);
             retweeted.setColor("springgreen");
-            if(postService.isReposted(post, authUser)){
+            if (postService.isReposted(post, authUser)) {
                 repostButton.setIcon(retweeted);
-            }else{
+            } else {
                 repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
             }
 
@@ -152,19 +156,19 @@ public class PostPanel extends VerticalLayout {
             commentButton.setWidth(v + "px");
             commentButton.addClickListener(click -> {
 
-                    if(commentSection.isVisible()){
-                        content.setVisible(true);
-                        postHeader.setVisible(true);
-                        postHeader.addClassName(LumoUtility.Border.BOTTOM);
-                        commentSection.setVisible(false);
-                        commentButton.setIcon(new Icon(VaadinIcon.COMMENT_O));
-                    }else{
-                        content.setVisible(false);
-                        postHeader.setVisible(false);
-                        postHeader.addClassName(LumoUtility.Border.NONE);
-                        commentSection.setVisible(true);
-                        commentButton.setIcon(new Icon(VaadinIcon.COMMENT));
-                    }
+                if (commentSection.isVisible()) {
+                    content.setVisible(true);
+                    postHeader.setVisible(true);
+                    postHeader.addClassName(LumoUtility.Border.BOTTOM);
+                    commentSection.setVisible(false);
+                    commentButton.setIcon(new Icon(VaadinIcon.COMMENT_O));
+                } else {
+                    content.setVisible(false);
+                    postHeader.setVisible(false);
+                    postHeader.addClassName(LumoUtility.Border.NONE);
+                    commentSection.setVisible(true);
+                    commentButton.setIcon(new Icon(VaadinIcon.COMMENT));
+                }
 
             });
 
@@ -179,11 +183,15 @@ public class PostPanel extends VerticalLayout {
             this.add(likeButton, repostButton, commentButton);
         }
 
-        public void likeClick(Post post, User authUser) {
-            if(!postService.getAllUsersLiking(post).contains(authUser)){
+        public void likeClick(Post post, User authUser, Button likeButton) {
+            if (!postService.getAllUsersLiking(post).contains(authUser)) {
                 postService.newLike(authUser, post);
-            }else{
+                Icon redHeart = new Icon(VaadinIcon.HEART);
+                redHeart.setColor("red");
+                likeButton.setIcon(redHeart);
+            } else {
                 postService.dislike(authUser, post);
+                likeButton.setIcon(new Icon(VaadinIcon.HEART_O));
             }
             postService.save(post);
         }
@@ -192,97 +200,14 @@ public class PostPanel extends VerticalLayout {
             boolean reposted = postService.isReposted(post, authUser);
             repostButton.setEnabled(false);
             //Already reposted?
-            if(!reposted) {
-                repost(post, authUser, repostButton);
-            }else{
-                unrepost(post, authUser, repostButton);
+            if (!reposted) {
+                postService.repost(post, authUser, repostButton);
+            } else {
+                postService.unrepost(post, authUser, repostButton);
             }
+            System.out.println("main");
+
         }
-        private void repost(Post post, User authUser, Button repostButton) {
-            var ref = new Object() {
-                boolean repostSuccess = true;
-            };
-            Notification repostSuccessNoti = new Notification("Reposted correctly.");
-            repostSuccessNoti.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            repostSuccessNoti.setDuration(5000);
-
-            //Post allows point investment?
-            if(post.getPointed().equals("Y")){
-
-                Notification usePoints = new Notification();
-                usePoints.setDuration(-1);
-                usePoints.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
-                Div statusText = new Div(new Text("Use points?"));
-
-                Button yes = new Button("Yes");
-                yes.addClickListener(event -> {
-                    usePoints.close();
-
-                    //Enough Points?
-                    if(authUser.getType2Points().compareTo(BigInteger.valueOf(5)) >= 0){
-                        Post newRepost = postService.save(new Post(post, authUser, true));
-                        postService.pointDistribution(newRepost);
-                        authUser.setType2Points(BigInteger.valueOf(authUser.getType2Points().intValue() - 5));
-                        userService.save(authUser);
-                        repostSuccessNoti.open();
-                    }else{
-                        Notification notEnough = new Notification("Not enough points for repost! Wait for next refill :)");
-                        notEnough.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                        notEnough.open();
-                        ref.repostSuccess = false;
-                    }
-                    repostButton.setEnabled(true);
-                });
-                Button no = new Button("No");
-                no.addClickListener(event -> {
-                    usePoints.close();
-                    postService.save(new Post(post, authUser, false));
-                    repostSuccessNoti.open();
-                    repostButton.setEnabled(true);
-                });
-
-                HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
-                buttons.setAlignItems(Alignment.CENTER);
-                usePoints.add(buttons);
-                usePoints.open();
-
-            }else{
-                postService.save(new Post(post, authUser, false));
-                repostButton.setEnabled(true);
-            }
-
-            if(ref.repostSuccess){
-                Icon icon = new Icon(VaadinIcon.RETWEET);
-                icon.setColor("springgreen");
-                repostButton.setIcon(icon);
-            }
-        }
-
-        private void unrepost(Post post, User authUser, Button repostButton) {
-            Notification deletePostCheck = new Notification();
-            deletePostCheck.setDuration(-1);
-            deletePostCheck.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
-            Div statusText = new Div(new Text("Are you sure you want to unrepost? You won't get any used points back :("));
-
-            Button yes = new Button("Yes");
-            yes.addClickListener(event -> {
-                deletePostCheck.close();
-                postService.deleteRepost(authUser, post);
-                repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
-                Notification.show("Unreposted");
-                repostButton.setEnabled(true);
-            });
-            Button no = new Button("No");
-            no.addClickListener(event -> {
-                deletePostCheck.close();
-                repostButton.setEnabled(true);
-            });
-            HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
-            buttons.setAlignItems(Alignment.CENTER);
-            deletePostCheck.add(buttons);
-            deletePostCheck.open();
-        }
-
     }
 
     protected class CommentSection extends VerticalLayout{

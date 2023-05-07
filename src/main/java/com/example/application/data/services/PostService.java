@@ -8,10 +8,20 @@ import com.example.application.data.repositories.CommentsRepository;
 import com.example.application.data.repositories.LikesRepository;
 import com.example.application.data.repositories.PostsRepository;
 import com.example.application.data.repositories.UsersRepository;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.*;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.StreamResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -19,7 +29,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.sql.*;
-import java.sql.Date;
 import java.time.*;
 import java.util.*;
 
@@ -97,24 +106,149 @@ public class PostService {
         return usersThatLiked;
     }
 
+    //LIKE BUTTON
+    @Async
     public void newLike(User user, Post post) {
         post.setLikes(post.getLikes().add(BigInteger.ONE));
-        save(post);
+        postRep.save(post);
         likeRep.save(new Like(user.getUserId(), post.getPostId()));
     }
 
+    @Async
     public void dislike(User user, Post post) {
         post.setLikes(post.getLikes().subtract(BigInteger.ONE));
-        save(post);
+        postRep.save(post);
         likeRep.delete(likeRep.findByUserIdAndPostId(user.getUserId(), post.getPostId()));
     }
 
+    //REPOST BUTTON
     public boolean isReposted(Post post, User user){
                 //User reposting a repost and has already reposted any post refering to the same original post as the repost he is reposting
        return (post.getOriginalPostId() != null && !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getOriginalPostId()).isEmpty())
                 //User reposting the original post and has already reposted any repost of the original post
                || !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getPostId()).isEmpty(); //
     }
+
+    @Async
+    public void repost(Post post, User authUser, Button repostButton) {
+
+        UI.setCurrent(repostButton.getUI().get());
+
+        var ref = new Object() {
+            boolean repostSuccess = true;
+        };
+        Notification repostSuccessNoti = new Notification("Reposted correctly.");
+        repostSuccessNoti.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        repostSuccessNoti.setDuration(5000);
+
+        //Post allows point investment?
+        if(post.getPointed().equals("Y")){
+
+            Notification usePoints = new Notification();
+            usePoints.setDuration(-1);
+            usePoints.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+            Div statusText = new Div(new Text("Use points?"));
+
+            Button yes = new Button("Yes");
+            yes.addClickListener(event -> {
+
+                UI.getCurrent().access(() -> {
+                    usePoints.close();
+                });
+
+                //Enough Points?
+                if(authUser.getType2Points().compareTo(BigInteger.valueOf(5)) >= 0){
+                    Post newRepost = this.save(new Post(post, authUser, true));
+                    this.pointDistribution(newRepost);
+                    authUser.setType2Points(BigInteger.valueOf(authUser.getType2Points().intValue() - 5));
+                    userRep.save(authUser);
+                    UI.getCurrent().access(() -> {
+                        repostSuccessNoti.open();
+                    });
+                }else{
+                    Notification notEnough = new Notification("Not enough points for repost! Wait for next refill :)");
+                    notEnough.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notEnough.open();
+
+                    UI.getCurrent().access(() -> {
+                        ref.repostSuccess = false;
+                    });
+                }
+                UI.getCurrent().access(() -> {
+                    repostButton.setEnabled(true);
+                });
+            });
+            Button no = new Button("No");
+            no.addClickListener(event -> {
+                usePoints.close();
+                this.save(new Post(post, authUser, false));
+
+                UI.getCurrent().access(() -> {
+                    repostButton.setEnabled(true);
+                    repostSuccessNoti.open();
+                });
+            });
+
+            HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
+            buttons.setAlignItems(FlexComponent.Alignment.CENTER);
+            usePoints.add(buttons);
+
+            UI.getCurrent().access(() -> {
+                usePoints.open();
+            });
+
+        }else{
+            this.save(new Post(post, authUser, false));
+            repostButton.setEnabled(true);
+        }
+
+        if(ref.repostSuccess){
+            Icon icon = new Icon(VaadinIcon.RETWEET);
+            icon.setColor("springgreen");
+            UI.getCurrent().access(() -> {
+                repostButton.setIcon(icon);
+            });
+        }
+
+        System.out.println("thread");
+
+    }
+
+    @Async
+    public void unrepost(Post post, User authUser, Button repostButton){
+
+        UI.setCurrent(repostButton.getUI().get());
+
+        Notification deletePostCheck = new Notification();
+        deletePostCheck.setDuration(-1);
+        deletePostCheck.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+        Div statusText = new Div(new Text("Are you sure you want to unrepost? You won't get any used points back :("));
+
+        Button yes = new Button("Yes");
+        yes.addClickListener(event -> {
+            deletePostCheck.close();
+            this.deleteRepost(authUser, post);
+            repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
+            Notification.show("Unreposted");
+            repostButton.setEnabled(true);
+        });
+        Button no = new Button("No");
+        no.addClickListener(event -> {
+            deletePostCheck.close();
+            repostButton.setEnabled(true);
+        });
+        HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
+        buttons.setAlignItems(FlexComponent.Alignment.CENTER);
+        deletePostCheck.add(buttons);
+
+        UI.getCurrent().access(() -> {
+           deletePostCheck.open();
+        });
+        System.out.println("thread");
+
+    }
+
+
 
     public void pointDistribution(Post post) {
 
@@ -155,6 +289,7 @@ public class PostService {
     }
 
 
+    //COMMENT RELATED
     public List<MessageListItem> commentItems(Post post){
         List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
         List<MessageListItem> itemList =new ArrayList<>();
