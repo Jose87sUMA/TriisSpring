@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
@@ -42,6 +43,7 @@ public class MakePostBox extends Dialog {
 
     private Dialog createUploadPictureLayout(){
         Dialog makePostWindow = new Dialog();
+        makePostWindow.setDraggable(true);
 
         //add an empty line
         Div emptyLine = new Div();
@@ -50,6 +52,7 @@ public class MakePostBox extends Dialog {
         Notification notification = new Notification();
         notification.setDuration(2000);
         Button postButton = new Button("Post");
+        postButton.getStyle().set("background-color","#0C6CE9");
 
         postButton.addClickListener(e -> {
             boolean enoughPoints = false;
@@ -91,17 +94,16 @@ public class MakePostBox extends Dialog {
         Button pointed = new Button("Pointed");
         Button notPointed = new Button("Not Pointed");
         pointed.setWidth("50%");
-        pointed.getStyle().set("background-color", "#00001a");
-        pointed.getStyle().set("color", "#e6e6ff");
         notPointed.setWidth("50%");
         notPointed.getStyle().set("background-color","#0C6CE9");
-        notPointed.getStyle().set("color", "#00001a" );
+
 
         HorizontalLayout pointedButtons = new HorizontalLayout(pointed, notPointed);
+        pointedButtons.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
         pointed.addClickListener(event -> {
             pointed.getStyle().set("background-color","#0C6CE9");
-            notPointed.getStyle().set("background-color","#e6e6ff");
+            notPointed.getStyle().set("background-color","#2D3D52");
             pointedPost = true;
             notPointedPost = false;
 
@@ -109,7 +111,7 @@ public class MakePostBox extends Dialog {
 
         notPointed.addClickListener(event -> {
             notPointed.getStyle().set("background-color","#0C6CE9");
-            pointed.getStyle().set("background-color","#00001a");
+            pointed.getStyle().set("background-color","#2D3D52");
             pointedPost = false;
             notPointedPost = true;
 
