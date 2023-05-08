@@ -3,12 +3,12 @@ package com.example.application.data.repositories;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Pageable;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -16,6 +16,8 @@ import java.util.List;
 public interface PostsRepository extends CrudRepository<Post, BigInteger> {
 
     /*SELECT QUERIES*/
+    //List<Post> findAll();
+
     //by one parameter
     List<Post> findAllByUserId(BigInteger userId);
     Post findFirstByPostId(BigInteger postId);
@@ -33,4 +35,9 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findAllByUsersFollowedByUserIdOrderByPostDateDesc(@Param("userId") BigInteger userId);
 
 
+    @Query(value = "select * from POSTS ORDER BY POST_DATE DESC", nativeQuery = true)
+    List<Post> findAll(Pageable pageable);
+
+    @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId ORDER BY POST_DATE DESC", nativeQuery = true)
+    List<Post> findAllByUsersFollowedByUserId(Pageable pageable, @Param("userId") BigInteger userId);
 }
