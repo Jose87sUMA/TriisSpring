@@ -61,4 +61,8 @@ public class PostService {
 
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
+    public Post save(Post post){
+        postRep.save(post);
+        return post;
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.application.views.profile;
 
+import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
@@ -7,13 +8,22 @@ import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.io.InputStream;
 
 @PageTitle("Triis - Profile")
 @Route(value = "profile", layout = MainLayout.class)
@@ -80,8 +90,15 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         if(!user.equals(userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()))) {
             makePost.setVisible(false);
             editProfile.setVisible(false);
+        }else{
+            makePost.addClickListener(e -> new MakePostBox(postService)) ;
         }
         return new HorizontalLayout(follow, following, type1, type2, makePost, editProfile);
 
     }
+
+
+
+
+
 }
