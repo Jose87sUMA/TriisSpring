@@ -1,11 +1,15 @@
 package com.example.application.data.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigInteger;
 
+@Entity
+@Table(name = "REPORT", schema = "UBD3336", catalog = "")
+@DynamicUpdate
 public class Report {
-/*
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "REPORT_ID")
@@ -15,11 +19,21 @@ public class Report {
     private User reporter;
 
     @ManyToOne
-    private Post reported_Post;
+    @JoinColumn(name = "REPORTED_POST")
+    private Post reportedPost;
 
     @Basic
     @Column(name = "REPORT_MESSAGE")
     private String reportMessage;
+
+    public Report(User authenticatedUser, Post post, String reason) {
+        reporter = authenticatedUser;
+        reportedPost = post;
+        reportMessage = reason;
+    }
+
+    public Report() {
+    }
 
     public void setreportId(BigInteger id) {
         this.reportId = id;
@@ -37,11 +51,11 @@ public class Report {
     }
 
     public Post getReported_post() {
-        return reported_Post;
+        return reportedPost;
     }
 
     public void setReportedPost(Post reportedPost) {
-        this.reported_Post = reportedPost;
+        this.reportedPost = reportedPost;
     }
 
     public String getReportMessage() {
@@ -50,5 +64,5 @@ public class Report {
 
     public void setReportMessage(String reportMessage) {
         this.reportMessage = reportMessage;
-    }*/
+    }
 }

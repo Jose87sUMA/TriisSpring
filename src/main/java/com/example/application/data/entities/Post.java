@@ -40,9 +40,8 @@ public class Post implements Serializable {
     @Basic
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
-
-    /*@OneToMany(mappedBy = "REPORTED_POST")
-    private List<Report> reports;*/
+    @OneToMany(mappedBy = "reportedPost")
+    private List<Report> reports;
 
     public Post() {
     }

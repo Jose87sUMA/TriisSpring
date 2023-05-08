@@ -146,21 +146,29 @@ public class PostPanel extends VerticalLayout {
 
     private ConfirmDialog createReportLayout(){
         ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setWidth("475px");
         dialog.setHeader("Report?");
 
         RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroup.setLabel("Reason for reporting");
-        radioGroup.setItems("Violence", "Sexual content", "Discriminatory content");
+        radioGroup.setItems("Violence", "Sexual content", "Discriminatory content", "Other (write your reason)");
         TextField other = new TextField("Other");
-        dialog.add(radioGroup,other );
+        dialog.add(radioGroup, other);
 
         dialog.setCancelable(true);
         dialog.setConfirmText("Report");
         dialog.setConfirmButtonTheme("error primary");
+
         dialog.addConfirmListener(e -> {
-            //postService.deletePost(post);
-            this.removeFromParent();
+            String reason;
+            if(radioGroup.getValue().equals("Other (write your reason)")){
+                reason = other.getValue();
+            }else{
+                reason = radioGroup.getValue();
+            }
+            postService.newReport(authenticatedUser, post, reason);
+            Notification.show("Report successful");
         });
         return dialog;
 

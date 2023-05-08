@@ -1,13 +1,7 @@
 package com.example.application.data.services;
 
-import com.example.application.data.entities.Comment;
-import com.example.application.data.entities.Like;
-import com.example.application.data.entities.Post;
-import com.example.application.data.entities.User;
-import com.example.application.data.repositories.CommentsRepository;
-import com.example.application.data.repositories.LikesRepository;
-import com.example.application.data.repositories.PostsRepository;
-import com.example.application.data.repositories.UsersRepository;
+import com.example.application.data.entities.*;
+import com.example.application.data.repositories.*;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -37,12 +31,14 @@ public class PostService {
     private final LikesRepository likeRep;
     private final PostsRepository postRep;
     private final UsersRepository userRep;
+    private final ReportRepository reportRep;
     private final CommentsRepository commentsRep;
 
-    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, CommentsRepository commentsRep) {
+    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, ReportRepository reportRep, CommentsRepository commentsRep) {
         this.likeRep = likeRep;
         this.postRep = postRep;
         this.userRep = userRep;
+        this.reportRep = reportRep;
         this.commentsRep = commentsRep;
     }
 
@@ -200,6 +196,7 @@ public class PostService {
         }else{
             this.save(new Post(post, authUser, false));
             repostButton.setEnabled(true);
+            
         }
 
         if(ref.repostSuccess){
@@ -317,4 +314,7 @@ public class PostService {
     }
 
 
+    public void newReport(User authenticatedUser, Post post, String reason) {
+        reportRep.save(new Report(authenticatedUser, post, reason));
+    }
 }

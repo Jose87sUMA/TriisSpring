@@ -42,16 +42,8 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Role> roles;
-
-   /* @OneToMany(mappedBy = "REPORTER")
-    private List<Report> reports;*/
-
-    @Transient
-    private Map<BigInteger, User> followers;
-    @Transient
-    private Map<BigInteger, User> following;
-    @Transient
-    private Map<BigInteger, Post> posts;
+    @OneToMany(mappedBy = "reporter")
+    private List<Report> reports;
 
 
     public BigInteger getUserId() {
@@ -151,10 +143,7 @@ public class User implements Serializable {
         email = newEmail;
         type1Points = BigInteger.valueOf(500);
         type2Points = BigInteger.valueOf(100);
-        posts = new TreeMap<>();
         verified = "N";
-        following = new TreeMap<>();
-        followers = new TreeMap<>();
         profilePicture = null;
         //tree = new Tree();
 
