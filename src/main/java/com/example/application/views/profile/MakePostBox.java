@@ -139,7 +139,10 @@ public class MakePostBox extends Dialog {
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         });
 
-        upload.addSucceededListener(event -> {
+        /**
+         * AQUI HACES PARA COGER EL POST QUE SUBIRAS A LA BASE DE DATOS, SI TODO VA BIEN EN EL POST
+         */
+        /*upload.addSucceededListener(event -> {
             // Get information about the uploaded file
             InputStream fileData = buffer.getInputStream();
             String fileName = event.getFileName();
@@ -149,7 +152,7 @@ public class MakePostBox extends Dialog {
             // processFile(fileData, fileName, contentLength, mimeType);
 
             postService.save(new Post());
-        });
+        });*/
 
 
 

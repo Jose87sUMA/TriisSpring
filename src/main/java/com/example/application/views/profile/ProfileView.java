@@ -97,7 +97,13 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     }
 
+    /*private Image createProfilePicture(){
+        Image content = userService.getProfilePicture(user);
 
+        float height = Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))+60;
+        this.setHeight(height + "px");
+        this.setWidth(content.getWidth());
+    }*/
 
 
 
