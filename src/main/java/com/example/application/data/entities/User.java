@@ -43,6 +43,9 @@ public class User implements Serializable {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
+   /* @OneToMany(mappedBy = "REPORTER")
+    private List<Report> reports;*/
+
     @Transient
     private Map<BigInteger, User> followers;
     @Transient
@@ -131,6 +134,13 @@ public class User implements Serializable {
         this.roles = roles;
     }
 
+   /* public List<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }*/
 
     public User(){}
 

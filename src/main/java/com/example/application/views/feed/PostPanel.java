@@ -1,7 +1,16 @@
 package com.example.application.views.feed;
+import com.example.application.data.entities.Role;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.notification.Notification;
 
 import com.example.application.data.entities.Post;
@@ -19,18 +28,24 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.awt.*;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class PostPanel extends VerticalLayout {
 
+    private final User authenticatedUser;
     Post post;
     User poster;
     private final UserService userService;
@@ -49,6 +64,7 @@ public class PostPanel extends VerticalLayout {
         this.poster = userService.findById(post.getUserId());
         this.userService = userService;
         this.postService = postService;
+        this.authenticatedUser =  userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
         this.content = postService.getContent(post);
 
@@ -72,6 +88,7 @@ public class PostPanel extends VerticalLayout {
 
         this.add(postHeader, content, interactionFooter,commentSection);
 
+
     }
 
     protected class PostHeader extends HorizontalLayout {
@@ -85,7 +102,7 @@ public class PostPanel extends VerticalLayout {
 
             Button profileName = new Button(poster.getUsername() + " - " + post.getPoints());
             profileName.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-            profileName.setWidth("300px");
+            profileName.setWidth("270px");
             profileName.setHeight("30px");
 
             this.addClassName(LumoUtility.Border.BOTTOM);
@@ -97,23 +114,84 @@ public class PostPanel extends VerticalLayout {
             this.setSpacing(true);
             this.setPadding(true);
 
-            this.add(profileAvatar, profileName);
+            this.add(profileAvatar, profileName, createMenuLayout());
 
         }
     }
 
+
+    private MenuBar createMenuLayout(){
+        MenuBar menuBar = new MenuBar();
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
+        MenuItem options = menuBar.addItem(new H3("..."));
+        SubMenu subItems = options.getSubMenu();
+        if(poster.equals(authenticatedUser) || authenticatedUser.getRoles().contains(Role.ADMIN)){
+            MenuItem delete = subItems.addItem("Delete");
+            MenuItem statistics = subItems.addItem("View statistics");
+
+            delete.addClickListener(e -> {
+                    createConfirmDelete().open();
+            });
+        }else{
+            MenuItem report = subItems.addItem("Report");
+            report.addClickListener(e -> {
+                createReportLayout().open();
+            });
+
+
+        }
+
+        return menuBar;
+    }
+
+    private ConfirmDialog createReportLayout(){
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setHeader("Report?");
+
+        RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
+        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        radioGroup.setLabel("Reason for reporting");
+        radioGroup.setItems("Violence", "Sexual content", "Discriminatory content");
+        TextField other = new TextField("Other");
+        dialog.add(radioGroup,other );
+
+        dialog.setCancelable(true);
+        dialog.setConfirmText("Report");
+        dialog.setConfirmButtonTheme("error primary");
+        dialog.addConfirmListener(e -> {
+            //postService.deletePost(post);
+            this.removeFromParent();
+        });
+        return dialog;
+
+    }
+
+    private ConfirmDialog createConfirmDelete(){
+
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setHeader("Delete?");
+        dialog.setText(
+                "Are you sure you want to permanently delete this item?");
+
+        dialog.setCancelable(true);
+        dialog.setConfirmText("Delete");
+        dialog.setConfirmButtonTheme("error primary");
+        dialog.addConfirmListener(e -> {
+            //postService.deletePost(post);
+            this.removeFromParent();
+        });
+        return dialog;
+    }
     protected class InteractionFooter extends HorizontalLayout {
 
         public InteractionFooter(String width, Post post) {
-
-            User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
             this.setWidth(width);
             this.setHeight("25px");
             double v = Double.parseDouble(width.substring(0, width.length() - 2)) / (3.5);
 
             Icon likeIcon;
-            if (!postService.getAllUsersLiking(post).contains(authUser)) {
+            if (!postService.getAllUsersLiking(post).contains(authenticatedUser)) {
                 likeIcon = new Icon(VaadinIcon.HEART_O);
             } else {
                 likeIcon = new Icon(VaadinIcon.HEART);
@@ -127,7 +205,7 @@ public class PostPanel extends VerticalLayout {
             likeButton.addClickListener(click -> {
 
                 likeButton.setEnabled(false);
-                likeClick(post, authUser, likeButton);
+                likeClick(post, authenticatedUser, likeButton);
                 likeButton.setEnabled(true);
 
             });
@@ -136,7 +214,7 @@ public class PostPanel extends VerticalLayout {
 
             Icon retweeted = new Icon(VaadinIcon.RETWEET);
             retweeted.setColor("springgreen");
-            if (postService.isReposted(post, authUser)) {
+            if (postService.isReposted(post, authenticatedUser)) {
                 repostButton.setIcon(retweeted);
             } else {
                 repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
@@ -147,7 +225,7 @@ public class PostPanel extends VerticalLayout {
             repostButton.setWidth(v + "px");
 
             repostButton.addClickListener(click -> {
-                repostClick(post, authUser, repostButton);
+                repostClick(post, authenticatedUser, repostButton);
             });
 
             Button commentButton = new Button(new Icon(VaadinIcon.COMMENT_O));
@@ -183,27 +261,27 @@ public class PostPanel extends VerticalLayout {
             this.add(likeButton, repostButton, commentButton);
         }
 
-        public void likeClick(Post post, User authUser, Button likeButton) {
-            if (!postService.getAllUsersLiking(post).contains(authUser)) {
-                postService.newLike(authUser, post);
+        public void likeClick(Post post, User authenticatedUser, Button likeButton) {
+            if (!postService.getAllUsersLiking(post).contains(authenticatedUser)) {
+                postService.newLike(authenticatedUser, post);
                 Icon redHeart = new Icon(VaadinIcon.HEART);
                 redHeart.setColor("red");
                 likeButton.setIcon(redHeart);
             } else {
-                postService.dislike(authUser, post);
+                postService.dislike(authenticatedUser, post);
                 likeButton.setIcon(new Icon(VaadinIcon.HEART_O));
             }
             postService.save(post);
         }
 
-        private void repostClick(Post post, User authUser, Button repostButton) {
-            boolean reposted = postService.isReposted(post, authUser);
+        private void repostClick(Post post, User authenticatedUser, Button repostButton) {
+            boolean reposted = postService.isReposted(post, authenticatedUser);
             repostButton.setEnabled(false);
             //Already reposted?
             if (!reposted) {
-                postService.repost(post, authUser, repostButton);
+                postService.repost(post, authenticatedUser, repostButton);
             } else {
-                postService.unrepost(post, authUser, repostButton);
+                postService.unrepost(post, authenticatedUser, repostButton);
             }
             System.out.println("main");
 
@@ -222,8 +300,8 @@ public class PostPanel extends VerticalLayout {
             list.setMaxHeight(Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))-50 + "px");
 
             this.input.addSubmitListener(submitEvent -> {
-                User authUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-                postService.newComment(post, authUser, submitEvent.getValue());
+                User authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+                postService.newComment(post, authenticatedUser, submitEvent.getValue());
                 Notification.show("Commented " + submitEvent.getValue(), 2000, Notification.Position.BOTTOM_STRETCH);
                 List<MessageListItem> commentItems = postService.commentItems(post);
 

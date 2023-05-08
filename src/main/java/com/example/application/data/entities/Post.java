@@ -5,7 +5,6 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.sql.Date;
 import java.time.*;
 import java.util.*;
 
@@ -42,6 +41,8 @@ public class Post implements Serializable {
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
 
+    /*@OneToMany(mappedBy = "REPORTED_POST")
+    private List<Report> reports;*/
 
     public Post() {
     }
@@ -54,7 +55,7 @@ public class Post implements Serializable {
 
         this.postId = null;
         this.repostId = post.getPostId();
-        this.postDate = Date.valueOf(LocalDate.now());
+        this.postDate = Date.from(Instant.now());
         this.userId = user.getUserId();
         this.content = null;
         this.points = BigInteger.ZERO;
@@ -134,6 +135,14 @@ public class Post implements Serializable {
     public void setOriginalPostId(BigInteger originalPostId) {
         this.originalPostId = originalPostId;
     }
+
+    /*public List<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }*/
 
     @Override
     public boolean equals(Object o) {
