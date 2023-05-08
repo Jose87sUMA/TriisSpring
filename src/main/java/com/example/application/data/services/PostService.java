@@ -9,9 +9,9 @@ import com.vaadin.flow.server.StreamResource;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.SQLException;
@@ -59,10 +59,42 @@ public class PostService {
         }
     }
 
+
+    public static byte[] getBlobFromFile(File file){
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = bi.createGraphics();
+        g2d.drawImage(img, 0, 0, null);
+        g2d.dispose();
+        ByteArrayOutputStream baos = null;
+
+        try {
+            baos = new ByteArrayOutputStream();
+            ImageIO.write(bi, "png", baos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                baos.close();
+            } catch (Exception e) {
+            }
+        }
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        return bais.readAllBytes();
+
+    }
+
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
     public Post save(Post post){
         postRep.save(post);
         return post;
     }
+
 }

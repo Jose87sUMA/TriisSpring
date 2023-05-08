@@ -30,14 +30,17 @@ public class MakePostBox extends Dialog {
 
     private final PostService postService;
     private final User authenticatedUser;
+    private InputStream fileData;
     boolean pointedPost;
     boolean notPointedPost;
+
 
     public MakePostBox(PostService postService, UserService userService) {
         this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         this.postService = postService;
         this.pointedPost = false;
         this.notPointedPost = true;
+        this.fileData = null;
         createUploadPictureLayout().open();
     }
 
@@ -56,19 +59,24 @@ public class MakePostBox extends Dialog {
 
         postButton.addClickListener(e -> {
             boolean enoughPoints = false;
+
             if(notPointedPost){
+                postService.save(new Post(authenticatedUser,false, fileData));
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
                 notification.setText("Not-pointed post saved correctly");
                 notification.open();
                 makePostWindow.close();
+                fileData = null;
                 //añades non pointed post
             }else if(enoughPoints){
+                postService.save(new Post(authenticatedUser,true, fileData));
                 notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Pointed post saved correctly");
                 notification.open();
                 makePostWindow.close();
+                fileData = null;
 
                 //resta los points y eso
             }else{ //nothing is done
@@ -126,8 +134,9 @@ public class MakePostBox extends Dialog {
     private Upload createUploadComponent(){
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
-        upload.setAcceptedFileTypes("image/png, image/jpeg");
+        upload.setAcceptedFileTypes("image/png, image/jpeg, image/jpg");
         upload.setDropLabel(new Label("Drop picture here"));
+
 
 
         upload.addFileRejectedListener(event -> {
@@ -144,7 +153,7 @@ public class MakePostBox extends Dialog {
         /**
          * AQUI HACES PARA COGER EL POST QUE SUBIRAS A LA BASE DE DATOS, SI TODO VA BIEN EN EL POST
          */
-        /*upload.addSucceededListener(event -> {
+        upload.addSucceededListener(event -> {
             // Get information about the uploaded file
             InputStream fileData = buffer.getInputStream();
             String fileName = event.getFileName();
@@ -152,9 +161,10 @@ public class MakePostBox extends Dialog {
             String mimeType = event.getMIMEType();
             // Do something with the file data
             // processFile(fileData, fileName, contentLength, mimeType);
+            this.fileData = fileData;
 
-            postService.save(new Post());
-        });*/
+
+        });
 
 
 

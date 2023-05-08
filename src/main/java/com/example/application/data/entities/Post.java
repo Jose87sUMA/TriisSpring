@@ -1,12 +1,17 @@
 package com.example.application.data.entities;
 
+import com.vaadin.flow.component.html.Image;
 import jakarta.persistence.*;
 
-import java.io.Serializable;
+import java.io.*;
 import java.math.BigInteger;
-import java.sql.Date;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.time.*;
+import java.util.*;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
@@ -39,6 +44,30 @@ public class Post implements Serializable {
     @Basic
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
+
+
+    public Post() {
+    }
+
+    //FOR POST
+    public Post(User user, boolean pointed, InputStream inputStream) {
+
+
+        this.postId = null;
+        this.originalPostId = null;
+        this.repostId = null;
+        this.postDate = Date.from(Instant.now());
+        this.userId = user.getUserId();
+        this.content = getBlobFromInputStream(inputStream);
+        this.points = BigInteger.ZERO;
+        this.pointed = pointed ? "Y":"N";
+        this.likes = BigInteger.ZERO;
+    }
+
+
+
+
+
 
     public BigInteger getPostId() {
         return postId;
@@ -125,6 +154,22 @@ public class Post implements Serializable {
         int result = Objects.hash(postId, userId, postDate, points, likes, pointed, repostId, originalPostId);
         result = 31 * result + Arrays.hashCode(content);
         return result;
+    }
+
+    public static byte[] getBlobFromInputStream(InputStream inputStream){
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        while (true) {
+            try {
+                if (!((bytesRead = inputStream.read(buffer)) != -1)) break;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        byte[] bytes = outputStream.toByteArray();
+        return bytes;
     }
 
 
