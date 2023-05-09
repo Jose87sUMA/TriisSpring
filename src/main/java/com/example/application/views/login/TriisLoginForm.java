@@ -18,6 +18,7 @@ public class TriisLoginForm extends LoginForm {
         i18n.setAdditionalInformation(null);
         setI18n(i18n);
         setForgotPasswordButtonVisible(true);
+        
     }
 
 

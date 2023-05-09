@@ -1,6 +1,7 @@
 package com.example.application.views.login;
 
 import com.example.application.security.AuthenticatedUser;
+import com.example.application.views.feed.FeedView;
 import com.example.application.views.register.RegisterView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.internal.BeforeLeaveHandler;
 import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -24,7 +26,6 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final AuthenticatedUser authenticatedUser;
 
     public LoginView(AuthenticatedUser authenticatedUser) {
-
         this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         this.addClassName(LumoUtility.AlignItems.CENTER);
         this.setSpacing(false);
@@ -35,11 +36,12 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     }
 
+
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (authenticatedUser.get().isPresent()) {
             // Already logged in
-            event.forwardTo("");
+            event.forwardTo(FeedView.class);
         }
     }
 }
