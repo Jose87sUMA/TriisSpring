@@ -26,6 +26,7 @@ public class PostService {
     }
     public Post findById(BigInteger postId){ return postRep.findFirstByPostId(postId); }
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
+    public List<Post> findAllByUserAndDate(User user){ return postRep.findAllByUserIdOrderByPostDateDesc(user.getUserId()); }
 
     public Image getContent(Post post){
 

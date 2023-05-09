@@ -33,4 +33,5 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findAllByUsersFollowedByUserIdOrderByPostDateDesc(@Param("userId") BigInteger userId);
 
 
+    List<Post> findAllByUserIdOrderByPostDateDesc(BigInteger userId);
 }

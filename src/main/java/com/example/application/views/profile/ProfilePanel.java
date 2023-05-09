@@ -29,12 +29,10 @@ public class ProfilePanel extends Scroller {
 
         this.addClassName("profile-panel");
 
-        List<Post> myPosts = postService.findAllByUser(authenticatedUser);
+        List<Post> myPosts = postService.findAllByUserAndDate(authenticatedUser);
 
         for(int i = 0; i < min(15,myPosts.size()); ++i){
-
             content.add(new PostPanel(myPosts.get(i), userService, postService));
-
         }
 
         content.setSpacing(true);
