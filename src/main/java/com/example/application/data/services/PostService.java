@@ -3,10 +3,6 @@ package com.example.application.data.services;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.PostsRepository;
-import com.example.application.data.repositories.UsersRepository;
-import com.example.application.data.services.feed.DiscoveryService;
-import com.example.application.data.services.feed.FeedService;
-import com.example.application.data.services.feed.FollowingService;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.stereotype.Service;
@@ -14,10 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.List;
 
 @Service
@@ -64,17 +57,8 @@ public class PostService {
     }
 
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
-    //public List<Post> getAll(){return postRep.findAll();}
 
-    public FeedService getFeedService(FeedService.FeedType ft){
-        switch (ft){
-            case DISCOVERY -> {
-                return new DiscoveryService(postRep);
-            }
-            case FOLLOWING -> {
-                return new FollowingService(postRep);
-            }
-        }
-        return null;
+    public FeedService getFeedService(FeedService.FeedType ft, BigInteger uid){
+        return new FeedService(postRep, ft, uid);
     }
 }

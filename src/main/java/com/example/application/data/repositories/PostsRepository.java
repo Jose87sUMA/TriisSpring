@@ -23,7 +23,8 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     Post findFirstByPostId(BigInteger postId);
 
     //ordered
-    List<Post> findAllByPostIdAndUserIdOrderByPostDateDesc(BigInteger postId, BigInteger userId);
+    @Query(value = "select * from POSTS P WHERE P.USER_ID = :userId AND P.POST_ID = :postId ORDER BY POST_DATE DESC", nativeQuery = true)
+    List<Post> findAllByPostIdAndUserId(@Param("postId") BigInteger postId,@Param("userId") BigInteger userId);
 
     //by two parameters
     List<Post> findAllByUserIdAndOriginalPostId(BigInteger userId, BigInteger postId);
@@ -35,9 +36,9 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findAllByUsersFollowedByUserIdOrderByPostDateDesc(@Param("userId") BigInteger userId);
 
 
-    @Query(value = "select * from POSTS ORDER BY POST_DATE DESC", nativeQuery = true)
+    @Query(value = "select * from POSTS", nativeQuery = true)
     List<Post> findAll(Pageable pageable);
 
-    @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId ORDER BY POST_DATE DESC", nativeQuery = true)
+    @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId", nativeQuery = true)
     List<Post> findAllByUsersFollowedByUserId(Pageable pageable, @Param("userId") BigInteger userId);
 }

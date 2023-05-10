@@ -1,6 +1,7 @@
 package com.example.application.views.feed;
 
 import com.example.application.data.entities.Post;
+import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.vaadin.flow.component.ClickEvent;
@@ -9,63 +10,53 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-import com.example.application.data.services.feed.FeedService.SortType;
-import com.example.application.data.services.feed.FeedService;
+import com.example.application.data.services.FeedService.*;
+import com.example.application.data.services.FeedService;
 
 
 import java.util.*;
 
-public class FeedScroller extends Scroller {
-    //public static final int ELEMENTS = 5;
-    //enum SortType {RECENT, POPULAR}
+public class FeedScroller extends VerticalLayout {
     SortType current = null;
 
-    MenuBar menu;
     Button loadMore;
 
-    HashMap<SortType, Comparator<Post>> sorter = new HashMap<>();
+    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.naturalOrder()),
+                                                          SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
 
-    List<Post> allPosts = new ArrayList<>();
     PriorityQueue<Post> buffer;
 
     private final UserService userService;
     private final PostService postService;
     private final FeedService feedService;
 
-    private VerticalLayout over = new VerticalLayout();
     private VerticalLayout content = new VerticalLayout();
 
-    FeedScroller(FeedService feedService, UserService userService, PostService postService) {
+    FeedScroller(FeedType feedType, User authenticatedUser, UserService userService, PostService postService) {
         this.userService = userService;
         this.postService = postService;
-        this.feedService = feedService;
+        this.feedService = this.postService.getFeedService(feedType, authenticatedUser.getUserId());
 
         this.feedService.initializeFeed();
 
-        sorter.put(SortType.RECENT, Comparator.comparing(Post::getPostDate, Comparator.naturalOrder()));
-        sorter.put(SortType.POPULAR, Comparator.comparing(Post::getLikes, Comparator.reverseOrder()));
-
-        //this.setHeightFull();
-
-/*
-        getElement().executeJs("""
-                    window.onscroll = function(ev) {
-                                if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
-                                    alert("you're at the bottom of the page");
-                                }
-                            };
-                """);*/
+//        getElement().executeJs("""
+//            window.onscroll = function(ev) {
+//                if (document.body.offsetHeight - (window.innerHeight + window.scrollY) <= 400) {
+//                    alert("you're at the bottom of the page");
+//                    $0.$server.loadMore();
+//                }
+//            };
+//        """, getElement());
 
         ComponentEventListener<ClickEvent<Button>> but = e -> {
             loadMore();
         };
         loadMore = new Button("Load More Posts", but);
 
-        menu = new MenuBar();
+        MenuBar menu = new MenuBar();
         MenuItem sortChooser = menu.addItem("Sorting By Recent");
         ComponentEventListener<ClickEvent<MenuItem>> listener = e -> {
             if (e.getSource().getText().equals("Change to Recent")){
@@ -81,27 +72,27 @@ public class FeedScroller extends Scroller {
         subMenuSort.addItem("Change to Popular", listener);
         menu.setOpenOnHover(true);
 
-        over.add(menu);
+        this.add(menu);
 
-        over.setSpacing(true);
-        over.addClassName(LumoUtility.AlignItems.CENTER);
+        this.setSpacing(true);
+
+        this.addClassName(LumoUtility.AlignItems.CENTER);
 
         changeSorting(SortType.RECENT);
 
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);
 
-        over.add(content);
-        over.add(loadMore);
-
-        this.setContent(over);
+        this.add(content);
+        this.add(loadMore);
     }
 
     @ClientCallable
     void loadMore(){
-        System.out.println("Loading More..."); //TODO: REMOVE PRINT
-        addPosts();
-        loadPosts();
+        if (loadMore.isEnabled()) {
+            addPosts();
+            loadPosts();
+        }
     }
 
     void addPosts(){
@@ -130,14 +121,18 @@ public class FeedScroller extends Scroller {
 
     void changeSorting(SortType st){
         if (current != st) {
-            buffer = new PriorityQueue<>(sorter.get(st));
-            feedService.setSort(st);
-            reset();
-            PriorityQueue<Post> aux = new PriorityQueue<>(sorter.get(st));
-            aux.addAll(buffer);
-            buffer = aux;
-            addPosts();
             current = st;
+            feedService.setSort(st);
+            refresh();
         }
+    }
+
+    void refresh(){
+        buffer = new PriorityQueue<>(sorter.get(current));
+        reset();
+        PriorityQueue<Post> aux = new PriorityQueue<>(sorter.get(current));
+        aux.addAll(buffer);
+        buffer = aux;
+        addPosts();
     }
 }
