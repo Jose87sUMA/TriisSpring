@@ -111,22 +111,38 @@ public class MakePostBox extends Dialog {
 
             //now we manage the posting
             if(validFile && notPointedPost){
-                Post post = new Post(authenticatedUser,false, fileData);
-                postService.save(post);
-                profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.setText("Not-pointed post saved correctly");
-                notification.open();
-                makePostWindow.close();
+                try{
+                    Post post = new Post(authenticatedUser,false, fileData);
+                    postService.save(post);
+                    profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
+                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    notification.setText("Not-pointed post saved correctly");
+                    notification.open();
+                    makePostWindow.close();
+                }catch(Exception exception){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notification.setText("Server error: not available at the moment :(");
+                    notification.open();
+                    makePostWindow.close();
+                }
+
 
             }else if(validFile && enoughPoints){
-                Post post = new Post(authenticatedUser,true, fileData);
-                postService.save(post);
-                profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.setText("Pointed post saved correctly");
-                notification.open();
-                makePostWindow.close();
+                try{
+                    Post post = new Post(authenticatedUser,true, fileData);
+                    postService.save(post);
+                    profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
+                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    notification.setText("Pointed post saved correctly");
+                    notification.open();
+                    makePostWindow.close();
+                }catch (Exception exception){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notification.setText("Server error: not available at the moment");
+                    notification.open();
+                }
+
+
 
                 //resta los points y eso
             }
