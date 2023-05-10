@@ -199,7 +199,9 @@ public class PostService {
 
         }else{
             this.save(new Post(post, authUser, false));
-            repostButton.setEnabled(true);
+            UI.getCurrent().access(() -> {
+                repostButton.setEnabled(true);
+            });
         }
 
         if(ref.repostSuccess){
