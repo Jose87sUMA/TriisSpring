@@ -21,6 +21,10 @@ public class ProfilePanel extends Scroller {
     private VerticalLayout content = new VerticalLayout();
 
 
+    public VerticalLayout getContent() {
+        return content;
+    }
+
     public ProfilePanel(User authenticatedUser, UserService userService, PostService postService){
 
         this.authenticatedUser = authenticatedUser;

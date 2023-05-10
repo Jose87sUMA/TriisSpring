@@ -4,6 +4,7 @@ import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -20,6 +21,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 
@@ -30,14 +32,19 @@ public class MakePostBox extends Dialog {
 
     private final PostService postService;
     private final User authenticatedUser;
+    private final UserService userService;
+    private final ProfilePanel profilePanel;
     private InputStream fileData;
     boolean pointedPost;
     boolean notPointedPost;
+    private boolean validFile = false;
 
 
-    public MakePostBox(PostService postService, UserService userService) {
+    public MakePostBox(PostService postService, UserService userService, ProfilePanel profilePanel) {
         this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         this.postService = postService;
+        this.userService = userService;
+        this.profilePanel = profilePanel;
         this.pointedPost = false;
         this.notPointedPost = true;
         this.fileData = null;
@@ -52,47 +59,82 @@ public class MakePostBox extends Dialog {
         Div emptyLine = new Div();
         emptyLine.setHeight("1em");
 
-        Notification notification = new Notification();
-        notification.setDuration(2000);
+        makePostWindow.add(new H1("Create Post"),createUploadComponent(), emptyLine, new H4(" How do you want your post?"), createPointedButtons());
+        Button cancelButton = new Button("Cancel", (e) -> makePostWindow.close());
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
         Button postButton = new Button("Post");
+        makePostWindow.getFooter().add(cancelButton, postButton);
         postButton.getStyle().set("background-color","#0C6CE9");
 
+
+
         postButton.addClickListener(e -> {
+            Notification notification = new Notification();
+            notification.setDuration(2000);
             boolean enoughPoints = false;
 
-            if(notPointedPost){
-                postService.save(new Post(authenticatedUser,false, fileData));
+            //first we check the validity of the file
+            if(notPointedPost || enoughPoints){
+
+                if(!validFile){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notification.setText("No file appended");
+                    notification.open();
+
+                }else{
+                    try {
+                        if(fileData.available() == 0){
+                            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                            notification.setText("File is empty");
+                            notification.open();
+                            validFile = false;
+                            this.close();
+                            this.open();
+                        }else{
+                            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                            notification.setText("Nice picture:D");
+                            notification.open();
+
+                        }
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+
+
+            }else{ //nothing is done
+                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                notification.setText("Sorry, not enough points");
+                notification.open();
+            }
+
+            //now we manage the posting
+            if(validFile && notPointedPost){
+                Post post = new Post(authenticatedUser,false, fileData);
+                postService.save(post);
+                profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
                 notification.setText("Not-pointed post saved correctly");
                 notification.open();
                 makePostWindow.close();
-                fileData = null;
-                //añades non pointed post
-            }else if(enoughPoints){
-                postService.save(new Post(authenticatedUser,true, fileData));
-                notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
+
+            }else if(validFile && enoughPoints){
+                Post post = new Post(authenticatedUser,true, fileData);
+                postService.save(post);
+                profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Pointed post saved correctly");
                 notification.open();
                 makePostWindow.close();
-                fileData = null;
 
                 //resta los points y eso
-            }else{ //nothing is done
-                notification.removeThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.setText("Sorry, not enough points");
-                notification.open();
-
             }
         });
 
-        makePostWindow.add(new H1("Create Post"),createUploadComponent(), emptyLine, new H4(" How do you want your post?"), createPointedButtons());
 
-        Button cancelButton = new Button("Cancel", (e) -> makePostWindow.close());
-        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        makePostWindow.getFooter().add(cancelButton, postButton);
+
+
 
 
         return makePostWindow;
@@ -132,11 +174,10 @@ public class MakePostBox extends Dialog {
 
     //auxiliar function to manage only the uploading of images
     private Upload createUploadComponent(){
-        MemoryBuffer buffer = new MemoryBuffer();
-        Upload upload = new Upload(buffer);
+         MemoryBuffer uploadBuffer= new MemoryBuffer();
+        Upload upload = new Upload(uploadBuffer);
         upload.setAcceptedFileTypes("image/png, image/jpeg, image/jpg");
         upload.setDropLabel(new Label("Drop picture here"));
-
 
 
         upload.addFileRejectedListener(event -> {
@@ -147,6 +188,7 @@ public class MakePostBox extends Dialog {
                     5000,
                     Notification.Position.MIDDLE
             );
+            validFile = false;
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         });
 
@@ -154,19 +196,19 @@ public class MakePostBox extends Dialog {
          * AQUI HACES PARA COGER EL POST QUE SUBIRAS A LA BASE DE DATOS, SI TODO VA BIEN EN EL POST
          */
         upload.addSucceededListener(event -> {
-            // Get information about the uploaded file
-            InputStream fileData = buffer.getInputStream();
-            String fileName = event.getFileName();
-            long contentLength = event.getContentLength();
-            String mimeType = event.getMIMEType();
-            // Do something with the file data
-            // processFile(fileData, fileName, contentLength, mimeType);
-            this.fileData = fileData;
+            validFile = true;
+            this.fileData = uploadBuffer.getInputStream();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 
-
+            upload.clearFileList();
+            upload.setDropLabel(new Label("Picture uploaded correctly"));
+            upload.getDropLabelIcon().removeFromParent();
+            upload.getUploadButton().removeFromParent();
         });
-
-
 
         return upload;
     }

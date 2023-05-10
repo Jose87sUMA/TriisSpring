@@ -33,7 +33,6 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     private ProfilePanel profilePanel;
     private User user;
-
     private final UserService userService;
     private final PostService postService;
 
@@ -91,7 +90,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             makePost.setVisible(false);
             editProfile.setVisible(false);
         }else{
-            makePost.addClickListener(e -> new MakePostBox(postService, userService)) ;
+            makePost.addClickListener(e -> new MakePostBox(postService, userService, profilePanel)) ;
         }
         return new HorizontalLayout(follow, following, type1, type2, makePost, editProfile);
 
