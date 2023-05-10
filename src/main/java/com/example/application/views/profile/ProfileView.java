@@ -79,6 +79,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         following.addClickListener(event -> UI.getCurrent().navigate("profile/?following/" + user.getUsername()));
 
         Button follow = new Button("Followers: " + userService.getFollowers(user).size());
+        follow.addClickListener(event -> UI.getCurrent().navigate("profile/?follower/" + user.getUsername()));
         Button type1 = new Button("Type 1 points: " + user.getType1Points());
         Button type2 = new Button("Type 2 points: " + user.getType2Points());
         Button makePost = new Button("Make a Post");

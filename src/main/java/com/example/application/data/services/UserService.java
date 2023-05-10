@@ -103,4 +103,22 @@ public class UserService {
     public void editPassword(User user, String password) {
         user.setPassword((new BCryptPasswordEncoder()).encode(password));
     }
+
+
+    public List<User> findAllFollowing(String stringFilter, User user) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return getFollowing(user);
+        } else {
+
+            return userRep.searchFollowing(stringFilter);
+        }
+    }
+   public List<User> findAllFollower(String stringFilter, User user) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return getFollowers(user);
+        } else {
+
+            return userRep.searchFollowers(stringFilter);
+        }
+    }
 }

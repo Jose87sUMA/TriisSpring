@@ -1,5 +1,4 @@
 package com.example.application.views.profile;
-
 import com.example.application.data.entities.User;
 import com.example.application.data.services.UserService;
 import com.vaadin.flow.component.Component;
@@ -24,17 +23,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 @PermitAll
-@Route("profile/?following")
-public class FollowingView extends Div  implements HasUrlParameter<String> {
+@Route("profile/?follower")
+public class FollowerView extends Div  implements HasUrlParameter<String> {
+
     private final UserService userService;
     private User user;
     TextField filterText = new TextField();
     //to filter
     Grid<User> grid = new Grid<>(User.class, false);
 
-    //to filter
-
-    public FollowingView(UserService userService ) {
+    public FollowerView(UserService userService) {
         this.userService = userService;
 
 
@@ -42,13 +40,13 @@ public class FollowingView extends Div  implements HasUrlParameter<String> {
 
     @Override
     public void setParameter(BeforeEvent event, String parameter) {
-        if(parameter == null)
+        if (parameter == null)
             this.user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         else
             user = userService.findByUsername(parameter);
 
         // tag::snippet1[]
-
+        //  Grid<User> grid = new Grid<>(User.class, false);
         grid.addColumn(User::getUsername).setHeader("Username");
         grid.addComponentColumn(user -> createStatusIcon(user.getVerified()))
                 .setTooltipGenerator(User -> User.getVerified())
@@ -56,25 +54,21 @@ public class FollowingView extends Div  implements HasUrlParameter<String> {
 
 
         //on right click, actions appear
-        UserContextMenu contextMenu = new UserContextMenu(grid);
+        FollowerView.UserContextMenu contextMenu = new FollowerView.UserContextMenu(grid);
         // end::snippet1[]
-
-        Button back = new Button("Go back");
-        back.addClickListener(e -> UI.getCurrent().navigate("profile/" +user.getUsername()));
 
 
         add(getSearchBar(), grid);
 
         updateList();
 
+
     }
-
-
 
     private void updateList() {
         //List<User> users = userService.getFollowing(user);
         //grid.setItems(users);
-        grid.setItems(userService.findAllFollowing(filterText.getValue(),user));
+        grid.setItems(userService.findAllFollower(filterText.getValue(), user));
     }
 
     private Component getSearchBar() {
@@ -85,7 +79,7 @@ public class FollowingView extends Div  implements HasUrlParameter<String> {
         filterText.addValueChangeListener(e -> updateList());
 
         Button back = new Button("Go back");
-        back.addClickListener(e -> UI.getCurrent().navigate("profile/" +user.getUsername()));
+        back.addClickListener(e -> UI.getCurrent().navigate("profile/" + user.getUsername()));
         HorizontalLayout toolBar = new HorizontalLayout(back, filterText);
         toolBar.addClassName("toolBar");
         return toolBar;
@@ -115,7 +109,6 @@ public class FollowingView extends Div  implements HasUrlParameter<String> {
     }
 
     /**
-     *
      * @param status
      * @return Icon   green if verified, red if not
      */
