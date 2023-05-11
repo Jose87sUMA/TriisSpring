@@ -61,4 +61,8 @@ public class PostService {
     public FeedService getFeedService(FeedService.FeedType ft, BigInteger uid){
         return new FeedService(postRep, ft, uid);
     }
+
+    public LeaderboardService getLeaderboardService(LeaderboardService.LeaderboardType ft, BigInteger uid){
+        return new LeaderboardService(postRep, ft, uid);
+    }
 }

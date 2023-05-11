@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.util.List;
 
 @Repository("postsRepository")
@@ -36,9 +37,23 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findAllByUsersFollowedByUserIdOrderByPostDateDesc(@Param("userId") BigInteger userId);
 
 
+    //queries used for feed
     @Query(value = "select * from POSTS", nativeQuery = true)
     List<Post> findAll(Pageable pageable);
 
     @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId", nativeQuery = true)
     List<Post> findAllByUsersFollowedByUserId(Pageable pageable, @Param("userId") BigInteger userId);
+
+
+    /**
+     * Used for leaderboard
+     * @return
+     */
+    @Query(value = "select * from POSTS " +
+            "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL AND " +
+            "POST_DATE BETWEEN TO_DATE(:chosenDate ,'dd/mm/yy') AND TO_DATE(SYSDATE,'dd/mm/yy')" +
+            "ORDER BY POINTS DESC", nativeQuery = true)
+    List<Post> findByPointedAndOriginalPostIdNullCreatedAtAfterOrderByPointsDesc(@Param("chosenDate") Date post_date);
+
+
 }

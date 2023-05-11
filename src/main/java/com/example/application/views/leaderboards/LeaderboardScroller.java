@@ -1,79 +1,70 @@
-package com.example.application.views.feed;
+package com.example.application.views.leaderboards;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.data.services.LeaderboardService.SortType;
+import com.example.application.data.services.LeaderboardService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.time.*;
-import java.util.*;
 
-import com.example.application.data.services.FeedService.*;
-import com.example.application.data.services.FeedService;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.PriorityQueue;
 
-
-import java.util.*;
-
-public class FeedScroller extends VerticalLayout {
+public class LeaderboardScroller extends VerticalLayout {
     SortType current = null;
 
     Button loadMore;
 
-    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.naturalOrder()),
-                                                          SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
+    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.SORT_BY_POST, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
 
     PriorityQueue<Post> buffer;
 
     private final UserService userService;
     private final PostService postService;
-    private final FeedService feedService;
+    private final LeaderboardService leaderboardService;
 
     private VerticalLayout content = new VerticalLayout();
 
-    FeedScroller(FeedType feedType, User authenticatedUser, UserService userService, PostService postService) {
+    LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, User authenticatedUser, UserService userService, PostService postService) {
         this.userService = userService;
         this.postService = postService;
-        this.feedService = this.postService.getFeedService(feedType, authenticatedUser.getUserId());
+        this.leaderboardService = this.postService.getLeaderboardService(leaderboardType, authenticatedUser.getUserId());
 
-        this.feedService.initializeFeed();
+        this.leaderboardService.initializeLeaderboard();
 
-//        getElement().executeJs("""
-//            window.onscroll = function(ev) {
-//                if (document.body.offsetHeight - (window.innerHeight + window.scrollY) <= 400) {
-//                    alert("you're at the bottom of the page");
-//                    $0.$server.loadMore();
-//                }
-//            };
-//        """, getElement());
+
 
         ComponentEventListener<ClickEvent<Button>> but = e -> {
             loadMore();
         };
-        loadMore = new Button("Load More Posts", but);
+        loadMore = new Button("Load More", but);
 
         MenuBar menu = new MenuBar();
-        MenuItem sortChooser = menu.addItem("Sorting By Recent");
+        MenuItem sortChooser = menu.addItem("Sorting By Users"); //Sorting By Popular
         ComponentEventListener<ClickEvent<MenuItem>> listener = e -> {
-            if (e.getSource().getText().equals("Change to Recent")){
-                this.changeSorting(SortType.RECENT);
-                sortChooser.setText("Sorting By Recent");
-            }else if (e.getSource().getText().equals("Change to Popular")){
-                this.changeSorting(SortType.POPULAR);
-                sortChooser.setText("Sorting By Popular");
+            if (e.getSource().getText().equals("Change to Users")){
+
+                sortChooser.setText("Sorting By Users"); // Sorting By Recent
+            }else if (e.getSource().getText().equals("Change to Posts")){
+                this.changeSorting(SortType.SORT_BY_POST);
+                sortChooser.setText("Sorting By Posts"); //Sorting By Popular
             }
         };
         SubMenu subMenuSort = sortChooser.getSubMenu();
-        subMenuSort.addItem("Change to Recent", listener);
-        subMenuSort.addItem("Change to Popular", listener);
+        subMenuSort.addItem("Change to Users", listener); //recent
+        subMenuSort.addItem("Change to Posts", listener); //popular
         menu.setOpenOnHover(true);
 
         this.add(menu);
@@ -82,7 +73,7 @@ public class FeedScroller extends VerticalLayout {
 
         this.addClassName(LumoUtility.AlignItems.CENTER);
 
-        changeSorting(SortType.RECENT);
+        changeSorting(SortType.SORT_BY_POST); //por probar
 
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);
@@ -100,7 +91,7 @@ public class FeedScroller extends VerticalLayout {
     }
 
     void addPosts(){
-        for(int i = 0; i < FeedService.ELEMENTS; i++){
+        for(int i = 0; i < LeaderboardService.ELEMENTS; i++){
             if (buffer.isEmpty()) {
                 content.add(new Text("No more posts available."));
                 loadMore.setEnabled(false);
@@ -111,13 +102,13 @@ public class FeedScroller extends VerticalLayout {
     }
 
     void loadPosts(){
-        buffer.addAll(feedService.findNextNPosts());
+        buffer.addAll(leaderboardService.findNextNPosts());
         System.out.println(buffer.toString());
     }
 
     void reset(){
         loadMore.setEnabled(true);
-        feedService.reset();
+        leaderboardService.reset();
         content.removeAll();
         loadPosts();
         loadPosts();
@@ -126,7 +117,7 @@ public class FeedScroller extends VerticalLayout {
     void changeSorting(SortType st){
         if (current != st) {
             current = st;
-            feedService.setSort(st);
+            leaderboardService.setSort(st);
             refresh();
         }
     }
