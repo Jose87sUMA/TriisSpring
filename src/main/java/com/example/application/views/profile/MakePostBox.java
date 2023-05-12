@@ -22,10 +22,12 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.swing.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import static java.lang.Math.min;
 
@@ -43,6 +45,7 @@ public class MakePostBox extends Dialog {
     boolean notPointedPost;
     private InputStream fileData;
     private boolean validFile = false;
+    private boolean uploadByLink = false;
     /**
      *  components that appear and disappear from the window
      */
@@ -50,6 +53,7 @@ public class MakePostBox extends Dialog {
     private TextField linkField  = new TextField("Link");
     private Button fileButton = new Button("File");
     private Button linkButton = new Button("Link");
+
 
 
     public MakePostBox(PostService postService, UserService userService, ProfilePanel profilePanel) {
@@ -110,6 +114,7 @@ public class MakePostBox extends Dialog {
         linkField.setVisible(true);
         linkButton.setVisible(false);
         fileButton.setVisible(true);
+        uploadByLink = true;
     }
 
     /**
@@ -122,52 +127,83 @@ public class MakePostBox extends Dialog {
         linkField.setVisible(false);
         linkButton.setVisible(true);
         fileButton.setVisible(false);
+        uploadByLink = false;
     }
 
 
     /**
-     * returns whether there is a valid file/link loaded at the moment of posting
-     * @return boolean
+     * sets validFile and shows notifications appropriately
+     * depending on whether there is a valid file loaded at the moment of posting
+     * checks if file is empty
      */
-    private boolean validatePostContent(){
-        return true;
+    private void validatePostContent(){
+        Notification notification = new Notification();
+        notification.setDuration(2000);
+        if(!validFile) {
+            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            notification.setText("No right format file to work with, try a smaller file jpg, jpeg or png");
+            notification.open();
+        }else{
+            try {
+                if(fileData.available() == 0){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notification.setText("File is empty");
+                    notification.open();
+                    validFile = false;
+                    this.close();
+                    this.open();
+                }else{
+                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    notification.setText("Nice picture:D");
+                    notification.open();
+
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
     }
     private void post(){
-
         Notification notification = new Notification();
         notification.setDuration(2000);
         boolean enoughPoints = false;
 
-        //first we check the validity of the file
+        //if we can make the post we check the validity of the file
         if(notPointedPost || enoughPoints){
-
-            if(!validFile){
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.setText("No file appended");
-                notification.open();
-
-            }else{
+            if(uploadByLink){
+                URL imageUrl = null;
                 try {
-                    if(fileData.available() == 0){
+                    imageUrl = new URL(linkField.getValue());
+                    String urlString = imageUrl.toString();
+                    if (urlString.endsWith(".jpg") || urlString.endsWith(".jpeg") || urlString.endsWith(".png")) {
+                        fileData = imageUrl.openStream();
+                        if(fileData == null){
+                            notification.setText("URL does not work");
+                            notification.open();
+                        }
+                        validFile = true;
+                    } else {
                         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                        notification.setText("File is empty");
-                        notification.open();
+                        notification.setText("Could not upload a picture with provided link");
                         validFile = false;
-                        this.close();
-                        this.open();
-                    }else{
-                        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                        notification.setText("Nice picture:D");
                         notification.open();
-
                     }
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
+
+
+
+
+                } catch (IOException e) {
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notification.setText("Could not upload a picture with provided link");
+                    validFile = false;
+                    notification.open();
                 }
+
             }
+            validatePostContent();
 
-
-        }else{ //nothing is done
+        }else{ //if not enough points and pointed post nothing is done
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
             notification.setText("Sorry, not enough points");
             notification.open();
