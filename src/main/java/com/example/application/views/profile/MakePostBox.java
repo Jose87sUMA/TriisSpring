@@ -17,10 +17,12 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -41,7 +43,13 @@ public class MakePostBox extends Dialog {
     boolean notPointedPost;
     private InputStream fileData;
     private boolean validFile = false;
-    Dialog makePostWindow;
+    /**
+     *  components that appear and disappear from the window
+     */
+    private Upload uploadComponent;
+    private TextField linkField  = new TextField("Link");
+    private Button fileButton = new Button("File");
+    private Button linkButton = new Button("Link");
 
 
     public MakePostBox(PostService postService, UserService userService, ProfilePanel profilePanel) {
@@ -52,36 +60,79 @@ public class MakePostBox extends Dialog {
         this.pointedPost = false;
         this.notPointedPost = true;
         this.fileData = null;
-        this.makePostWindow = new Dialog();
         createUploadPictureLayout();
-        makePostWindow.open();
 
     }
 
-    private Dialog createUploadPictureLayout(){
-        makePostWindow.setDraggable(true);
+    /**ADDS AND STYLES THE COMPONENT OF MAKE POST WINDOW,
+     * ADDS CLOSING FUNCTIONALITY
+     * CALLS AUXILIAR FUNCTIONS TO CREATE COMPONENTS AND MODEL BEHAVIOUR
+     * */
+    private void createUploadPictureLayout(){
+        this.setDraggable(true);
 
         H4 pointsQuestionText = new H4(" How do you want your post?");
         pointsQuestionText.getStyle().set("marginTop", "20px");
         pointsQuestionText.getStyle().set("marginBottom", "10px");
 
-        makePostWindow.add(new H1("Create Post"),createUploadComponent(), pointsQuestionText, createPointedButtons());
+        createUploadComponent();
 
-        Button cancelButton = new Button("Cancel", (e) -> makePostWindow.close());
+        linkField.setWidth("100%");
+        linkField.setVisible(false);
+        this.add(new H1("Create Post"),uploadComponent, linkField, pointsQuestionText, createPointedButtons());
+
+        Button cancelButton = new Button("Cancel", (e) -> this.close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         Button postButton = new Button("Post", (e) -> post());
         postButton.getStyle().set("background-color","#0C6CE9");
-        Button linkButton = new Button("Link");
+
+        fileButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        fileButton.getStyle().set("marginRight", "200px");
+        fileButton.setVisible(false);
+        fileButton.addClickListener((e)-> fileButtonEvent());
+
         linkButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         linkButton.getStyle().set("marginRight", "200px");
-        makePostWindow.getFooter().add(linkButton, cancelButton, postButton);
+        linkButton.addClickListener((e)-> linkButtonEvent());
 
-
-        return makePostWindow;
+        this.getFooter().add(fileButton, linkButton, cancelButton, postButton);
+        
     }
 
-    void post(){
+    /**
+     * auxiliar function
+     * models behaviour of link button
+     * user can see a link field on the screen now
+     */
+    private void linkButtonEvent(){
+        uploadComponent.setVisible(false);
+        linkField.setVisible(true);
+        linkButton.setVisible(false);
+        fileButton.setVisible(true);
+    }
+
+    /**
+     * auxiliar function
+     * models behaviour of filebutton
+     * user can see an upload picture componentn ow
+     */
+    private void fileButtonEvent(){
+        uploadComponent.setVisible(true);
+        linkField.setVisible(false);
+        linkButton.setVisible(true);
+        fileButton.setVisible(false);
+    }
+
+
+    /**
+     * returns whether there is a valid file/link loaded at the moment of posting
+     * @return boolean
+     */
+    private boolean validatePostContent(){
+        return true;
+    }
+    private void post(){
 
         Notification notification = new Notification();
         notification.setDuration(2000);
@@ -131,12 +182,12 @@ public class MakePostBox extends Dialog {
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Not-pointed post saved correctly");
                 notification.open();
-                makePostWindow.close();
+                this.close();
             }catch(Exception exception){
                 notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
                 notification.setText("Server error: not available at the moment :(");
                 notification.open();
-                makePostWindow.close();
+                this.close();
             }
 
 
@@ -148,7 +199,7 @@ public class MakePostBox extends Dialog {
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Pointed post saved correctly");
                 notification.open();
-                makePostWindow.close();
+                this.close();
             }catch (Exception exception){
                 notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
                 notification.setText("Server error: not available at the moment");
@@ -197,13 +248,13 @@ public class MakePostBox extends Dialog {
      * upload component which notifies in case of an error or saves image as an attribute of the class (fileData)
      * @return upload component for images
      */
-    private Upload createUploadComponent(){
+    private void createUploadComponent(){
         MemoryBuffer uploadBuffer= new MemoryBuffer();
-        Upload upload = new Upload(uploadBuffer);
-        upload.setAcceptedFileTypes("image/png, image/jpeg, image/jpg");
-        upload.setDropLabel(new Label("Drop picture here"));
+        this.uploadComponent = new Upload(uploadBuffer);
+        uploadComponent.setAcceptedFileTypes("image/png, image/jpeg, image/jpg");
+        uploadComponent.setDropLabel(new Label("Drop picture here"));
 
-        upload.addFileRejectedListener(event -> {
+        uploadComponent.addFileRejectedListener(event -> {
             String errorMessage = event.getErrorMessage();
 
             Notification notification = Notification.show(
@@ -215,7 +266,7 @@ public class MakePostBox extends Dialog {
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         });
 
-        upload.addSucceededListener(event -> {
+        uploadComponent.addSucceededListener(event -> {
             validFile = true;
             this.fileData = uploadBuffer.getInputStream();
             try {
@@ -224,12 +275,11 @@ public class MakePostBox extends Dialog {
                 throw new RuntimeException(e);
             }
 
-            upload.clearFileList();
-            upload.setDropLabel(new Label("Picture uploaded correctly"));
-            upload.getDropLabelIcon().removeFromParent();
-            upload.getUploadButton().removeFromParent();
+            uploadComponent.clearFileList();
+            uploadComponent.setDropLabel(new Label("Picture uploaded correctly"));
+            uploadComponent.getDropLabelIcon().removeFromParent();
+            uploadComponent.getUploadButton().removeFromParent();
         });
 
-        return upload;
     }
 }
