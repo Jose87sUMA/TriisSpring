@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import static java.lang.Math.min;
 
@@ -130,40 +131,17 @@ public class MakePostBox extends Dialog {
         uploadByLink = false;
     }
 
-
     /**
-     * sets validFile and shows notifications appropriately
-     * depending on whether there is a valid file loaded at the moment of posting
-     * checks if file is empty
+     * USES POST CONSTRUCTOR TO SAVE PICTURE UPLOADED BY USER IN DATABASE
+     * if user can make a post: a non-pointed post or enough points for a pointed one: check the validity of the file first
+     * pictures can be uploaded by means of files or a link to a picture
+     * the input stream is taken in both cases
+     * there is a function to take the input stream from an url
+     * when files are uploaded, upload component is used
+     * error checking is done with notifications for the user
+     * validFile means we can try to put it in the database
      */
-    private void validatePostContent(){
-        Notification notification = new Notification();
-        notification.setDuration(2000);
-        if(!validFile) {
-            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            notification.setText("No right format file to work with, try a smaller file jpg, jpeg or png");
-            notification.open();
-        }else{
-            try {
-                if(fileData.available() == 0){
-                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    notification.setText("File is empty");
-                    notification.open();
-                    validFile = false;
-                    this.close();
-                    this.open();
-                }else{
-                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    notification.setText("Nice picture:D");
-                    notification.open();
 
-                }
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-
-    }
     private void post(){
         Notification notification = new Notification();
         notification.setDuration(2000);
@@ -172,36 +150,11 @@ public class MakePostBox extends Dialog {
         //if we can make the post we check the validity of the file
         if(notPointedPost || enoughPoints){
             if(uploadByLink){
-                URL imageUrl = null;
-                try {
-                    imageUrl = new URL(linkField.getValue());
-                    String urlString = imageUrl.toString();
-                    if (urlString.endsWith(".jpg") || urlString.endsWith(".jpeg") || urlString.endsWith(".png")) {
-                        fileData = imageUrl.openStream();
-                        if(fileData == null){
-                            notification.setText("URL does not work");
-                            notification.open();
-                        }
-                        validFile = true;
-                    } else {
-                        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                        notification.setText("Could not upload a picture with provided link");
-                        validFile = false;
-                        notification.open();
-                    }
-
-
-
-
-                } catch (IOException e) {
-                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    notification.setText("Could not upload a picture with provided link");
-                    validFile = false;
-                    notification.open();
-                }
-
+                manageImageURL();
+            }else{
+                validatePostContentFromFile();
             }
-            validatePostContent();
+
 
         }else{ //if not enough points and pointed post nothing is done
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -248,6 +201,102 @@ public class MakePostBox extends Dialog {
         }
 
     }
+
+
+    /**
+     * sets validFile and shows notifications appropriately
+     * depending on whether there is a valid file loaded at the moment of posting
+     * checks if file is empty
+     */
+    private void validatePostContentFromFile(){
+        Notification notification = new Notification();
+        notification.setDuration(4000);
+        if(!validFile) {
+            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            notification.setText("No file");
+            notification.open();
+        }else{
+            try {
+                if(fileData == null || fileData.available() == 0){
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notification.setText("File is empty or not valid");
+                    notification.open();
+                    validFile = false;
+                    this.close();
+                    this.open();
+                }else{
+                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    notification.setText("Nice picture:D");
+                    validFile = true;
+                    notification.open();
+
+                }
+            } catch (IOException ex) {
+                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                notification.setText("Error while dealing with file");
+                validFile = false;
+                notification.open();
+            }
+        }
+
+    }
+
+
+    /**
+     * sets validFile and shows notifications appropriately
+     * depending on whether the right format of image can be extracted from the url at the moment of posting
+     * checks if file is empty
+     */
+    private void validatePostContentFromLink(){
+        Notification notification = new Notification();
+        notification.setDuration(4000);
+
+        try {
+            if(fileData == null || fileData.available() == 0){
+                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                notification.setText("Not the right format, try jpeg, jpg or pdf");
+                validFile = false;
+                notification.open();
+            }else{
+                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                notification.setText("Nice picture:D");
+                validFile = true;
+                notification.open();
+            }
+        } catch (IOException e) {
+            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            notification.setText("Error while dealing with file");
+            validFile = false;
+            notification.open();
+        }
+
+    }
+
+    /**
+     * Creates an input stream from image link
+     */
+    private void manageImageURL(){
+        URL imageUrl = null;
+        Notification notification = new Notification();
+        notification.setDuration(4000);
+        try {
+            imageUrl = new URL(linkField.getValue());
+            URLConnection connection = imageUrl.openConnection();
+            String contentType = connection.getHeaderField("Content-Type");
+            if (contentType.equals("image/jpeg") || contentType.equals("image/jpg") || contentType.equals("image/png")) {
+                fileData = connection.getInputStream();
+
+            }
+            validatePostContentFromLink();
+
+        } catch (IOException e) {
+            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            notification.setText("Could not upload a picture with provided link");
+            validFile = false;
+            notification.open();
+        }
+    }
+
 
     /**
      * CREATE BUTTONS TO MANAGE WHETHER A POST IS POINTED OR NOT
@@ -308,9 +357,9 @@ public class MakePostBox extends Dialog {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
 
+            }
+            linkButton.setEnabled(false);
             uploadComponent.clearFileList();
             uploadComponent.setDropLabel(new Label("Picture uploaded correctly"));
             uploadComponent.getDropLabelIcon().removeFromParent();
