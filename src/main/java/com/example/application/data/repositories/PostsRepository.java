@@ -51,4 +51,12 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
      */
     @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId", nativeQuery = true)
     List<Post> findAllByUsersFollowedByUserId(Pageable pageable, @Param("userId") BigInteger userId);
+
+    /**
+     * Get all posts by a certain user.
+     * @param pageable Page request.
+     * @param userId User ID.
+     * @return List of posts determined by page.
+     */
+    List<Post> findAllByUserId(Pageable pageable, BigInteger userId);
 }

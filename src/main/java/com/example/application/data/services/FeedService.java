@@ -13,7 +13,7 @@ import java.util.*;
  * Service to handle Feed requests. It works by sending data page by page.
  */
 public class FeedService {
-    public enum FeedType {DISCOVERY, FOLLOWING}
+    public enum FeedType {DISCOVERY, FOLLOWING, PROFILE}
     public enum SortType {RECENT, POPULAR}
 
     public static final int ELEMENTS = 10;
@@ -75,6 +75,7 @@ public class FeedService {
         switch (feedType){
             case FOLLOWING -> posts = postRep.findAllByUsersFollowedByUserId(page, userId);
             case DISCOVERY -> posts = postRep.findAll(page);
+            case PROFILE -> posts = postRep.findAllByUserId(page, userId);
         }
         nextPage();
         return posts;
