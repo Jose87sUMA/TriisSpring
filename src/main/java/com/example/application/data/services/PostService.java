@@ -59,12 +59,10 @@ public class PostService {
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
     /**
-     * Creates a FeedService class.
-     * @param ft Feed type.
-     * @param uid User ID of the authenticated User.
-     * @return FeedService with the specified parameters.
+     * Returns Post Repository.
+     * @return
      */
-    public FeedService getFeedService(FeedService.FeedType ft, BigInteger uid){
-        return new FeedService(postRep, ft, uid);
+    public PostsRepository getPostRepository(){
+        return postRep;
     }
 }
