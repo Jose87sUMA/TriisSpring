@@ -43,7 +43,7 @@ public class LeaderboardView extends HorizontalLayout {
         leaderboardPanel.add("This month", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_MONTH, authenticatedUser, userService, postService));
         leaderboardPanel.add("This year", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_YEAR, authenticatedUser, userService, postService));
         leaderboardPanel.add("All time", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME, authenticatedUser, userService, postService));
-        leaderboardPanel.add("Users", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME, authenticatedUser, userService, postService));
+        leaderboardPanel.add("Users", new LeaderboardScroller(LeaderboardService.LeaderboardType.USERS, authenticatedUser, userService, postService));
         leaderboardPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
 
 
@@ -52,10 +52,6 @@ public class LeaderboardView extends HorizontalLayout {
         this.setVerticalComponentAlignment(Alignment.CENTER, leaderboardPanel);
 
         add(leaderboardPanel);
-    }
-
-    public void loadMore(){
-        System.out.println("Loading more");
     }
 
 }

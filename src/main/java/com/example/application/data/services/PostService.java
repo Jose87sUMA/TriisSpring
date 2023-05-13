@@ -83,8 +83,4 @@ public class PostService {
     public List<Post> findAllByPointedOriginalPostIdOrderByPointsDesc(){
         return postRep.findAllByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
     }
-
-    public LeaderboardService getLeaderboardService(LeaderboardService.LeaderboardType ft, BigInteger uid){
-        return new LeaderboardService(postRep, ft, uid);
-    }
 }

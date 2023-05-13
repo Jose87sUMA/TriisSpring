@@ -15,15 +15,15 @@ public class LeaderboardScroller extends VerticalLayout {
 
     private final UserService userService;
     private final PostService postService;
-    private final LeaderboardService leaderboardService;
+    private final LeaderboardService.LeaderboardType leaderboardType;
 
+    private List<Post> posts;
     private VerticalLayout content = new VerticalLayout();
 
     LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, User authenticatedUser, UserService userService, PostService postService) {
         this.userService = userService;
         this.postService = postService;
-        this.leaderboardService = this.postService.getLeaderboardService(leaderboardType, authenticatedUser.getUserId());
-
+        this.leaderboardType = leaderboardType;
         //this.leaderboardService.initializeLeaderboard();
 
         this.addClassName(LumoUtility.AlignItems.CENTER);
@@ -35,7 +35,15 @@ public class LeaderboardScroller extends VerticalLayout {
     }
 
     private void addResult(){
-        List<Post> posts = postService.findAllByPointedOriginalPostIdOrderByPointsDesc();
+        switch (leaderboardType){
+            case TODAY -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedToday();
+            case THIS_WEEK -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek();
+            case THIS_MONTH -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth();
+            case THIS_YEAR -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisYear();
+            case ALL_TIME -> posts = postService.findAllByPointedOriginalPostIdOrderByPointsDesc();
+            //case USERS -> users = postService.findAllByPointedOriginalPostIdOrderByPointsDesc();
+        }
+
         for(int i = 0; i < Math.min(10, posts.size()); i++){
             content.add(new H4(posts.get(i).getPoints().toString()));
         }
