@@ -52,23 +52,7 @@ public class FeedScroller extends VerticalLayout {
 
         loadMore = new Button("Load More Posts", e -> loadMore());
 
-        MenuBar menu = new MenuBar();
-        MenuItem sortChooser = menu.addItem("Sorting By Recent");
-        ComponentEventListener<ClickEvent<MenuItem>> listener = e -> {
-            if (e.getSource().getText().equals("Change to Recent")){
-                this.changeSorting(SortType.RECENT);
-                sortChooser.setText("Sorting By Recent");
-            }else if (e.getSource().getText().equals("Change to Popular")){
-                this.changeSorting(SortType.POPULAR);
-                sortChooser.setText("Sorting By Popular");
-            }
-        };
-        SubMenu subMenuSort = sortChooser.getSubMenu();
-        subMenuSort.addItem("Change to Recent", listener);
-        subMenuSort.addItem("Change to Popular", listener);
-        menu.setOpenOnHover(true);
-
-        this.add(menu);
+        this.add(sortChooser());
 
         this.setSpacing(true);
 
@@ -95,6 +79,29 @@ public class FeedScroller extends VerticalLayout {
     }
 
     /**
+     * Menu Item to choose which type of sorting for the feed.
+     * @return Component in charge of this action.
+     */
+    MenuBar sortChooser(){
+        MenuBar menu = new MenuBar();
+        MenuItem sortChooser = menu.addItem("Sorting By Recent");
+        ComponentEventListener<ClickEvent<MenuItem>> listener = e -> {
+            if (e.getSource().getText().equals("Change to Recent")){
+                this.changeSorting(SortType.RECENT);
+                sortChooser.setText("Sorting By Recent");
+            }else if (e.getSource().getText().equals("Change to Popular")){
+                this.changeSorting(SortType.POPULAR);
+                sortChooser.setText("Sorting By Popular");
+            }
+        };
+        SubMenu subMenuSort = sortChooser.getSubMenu();
+        subMenuSort.addItem("Change to Recent", listener);
+        subMenuSort.addItem("Change to Popular", listener);
+        menu.setOpenOnHover(true);
+        return menu;
+    }
+
+    /**
      * Adds posts into the feed.
      */
     private void addPosts(){
@@ -117,17 +124,6 @@ public class FeedScroller extends VerticalLayout {
     }
 
     /**
-     * Resets feed by clearing content and loading again.
-     */
-    private void reset(){
-        loadMore.setEnabled(true);
-        feedService.reset();
-        content.removeAll();
-        loadPosts();
-        loadPosts();
-    }
-
-    /**
      * Changes sorting of the feed. Also clears it.
      * @param st Sorting mode.
      */
@@ -144,10 +140,11 @@ public class FeedScroller extends VerticalLayout {
      */
     public void refresh(){
         buffer = new PriorityQueue<>(sorter.get(current));
-        reset();
-        PriorityQueue<Post> aux = new PriorityQueue<>(sorter.get(current));
-        aux.addAll(buffer);
-        buffer = aux;
+        loadMore.setEnabled(true);
+        feedService.reset();
+        content.removeAll();
+        loadPosts();
+        loadPosts();
         addPosts();
     }
 }
