@@ -16,7 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 @PageTitle("Triis - Feed")
 @Route(value = "feed", layout = MainLayout.class)
-@RouteAlias(value = "feed", layout = MainLayout.class)
+@RouteAlias(value = "", layout = MainLayout.class)
 @PermitAll
 public class FeedView extends HorizontalLayout {
 

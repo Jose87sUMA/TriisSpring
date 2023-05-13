@@ -15,10 +15,10 @@ public class Report {
     @Column(name = "REPORT_ID")
     private BigInteger reportId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private User reporter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "REPORTED_POST")
     private Post reportedPost;
 

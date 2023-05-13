@@ -10,6 +10,7 @@ import java.util.Objects;
 @jakarta.persistence.Table(name = "LIKES", schema = "UBD3336", catalog = "")
 @IdClass(LikesCompositePK.class)
 public class Like implements Serializable {
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @jakarta.persistence.Column(name = "USER_ID")

@@ -2,6 +2,7 @@ package com.example.application.data.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -10,6 +11,7 @@ import java.util.*;
 @Entity
 @Table(name = "USERS", schema = "UBD3336", catalog = "")
 @DynamicUpdate
+@Transactional
 public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -153,13 +155,11 @@ public class User implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User that = (User) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(email, that.email) && Objects.equals(type1Points, that.type1Points) && Objects.equals(type2Points, that.type2Points) && Objects.equals(verified, that.verified) && Arrays.equals(profilePicture, that.profilePicture) && Objects.equals(treeId, that.treeId);
+        return Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(userId, username, password, email, type1Points, type2Points, verified, treeId);
-        result = 31 * result + Arrays.hashCode(profilePicture);
-        return result;
+        return Objects.hash(userId);
     }
 }

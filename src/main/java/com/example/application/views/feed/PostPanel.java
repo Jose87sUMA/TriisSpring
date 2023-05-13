@@ -1,14 +1,15 @@
 package com.example.application.views.feed;
+import com.example.application.data.entities.PostsPointLog;
 import com.example.application.data.entities.Role;
+import com.example.application.data.repositories.PostPointLogRepository;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
+import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.notification.Notification;
@@ -20,11 +21,9 @@ import com.example.application.data.services.UserService;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.*;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -33,14 +32,17 @@ import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.Resource;
-import org.springframework.scheduling.annotation.Async;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceContext;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.awt.*;
 import java.math.BigInteger;
-import java.util.*;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class PostPanel extends VerticalLayout {
@@ -54,9 +56,6 @@ public class PostPanel extends VerticalLayout {
     Image content;
     InteractionFooter interactionFooter;
     CommentSection commentSection;
-
-    @Resource
-    Executor executor;
 
     public PostPanel(Post post, UserService userService, PostService postService){
 
@@ -114,13 +113,13 @@ public class PostPanel extends VerticalLayout {
             this.setSpacing(true);
             this.setPadding(true);
 
-            this.add(profileAvatar, profileName, createMenuLayout());
+            this.add(profileAvatar, profileName, createPostMenuLayout());
 
         }
     }
 
 
-    private MenuBar createMenuLayout(){
+    private MenuBar createPostMenuLayout(){
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
         MenuItem options = menuBar.addItem(new H3("..."));
@@ -132,6 +131,11 @@ public class PostPanel extends VerticalLayout {
             delete.addClickListener(e -> {
                     createConfirmDelete().open();
             });
+
+            statistics.addClickListener(e -> {
+                createStatisticsLayout().open();
+            });
+
         }else{
             MenuItem report = subItems.addItem("Report");
             report.addClickListener(e -> {
@@ -190,6 +194,43 @@ public class PostPanel extends VerticalLayout {
         });
         return dialog;
     }
+
+    private ConfirmDialog createStatisticsLayout(){
+
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setWidth("475px");
+        dialog.setHeader("Point Statistics");
+        dialog.setCancelable(true);
+        dialog.setConfirmText("Ok");
+
+        VerticalLayout directRepostersLayout = new VerticalLayout();
+
+        int directPoints = 0;
+        int indirectPoints = 0;
+
+        List<PostsPointLog> postLogs = postService.findAllLogsByPost(post);
+
+        for(PostsPointLog postLog : postLogs){
+
+            if(postLog.isDirect()){
+
+                String username = userService.findById(postLog.getUserId()).getUsername();
+                H6 profileName = new H6(username + " - " + 15);
+                directPoints += postLog.getPoints().intValue();
+                directRepostersLayout.add(profileName);
+
+            }else{
+                indirectPoints += postLog.getPoints().intValue();
+            }
+
+        }
+
+        dialog.add(new Details("Direct Points: " + directPoints, directRepostersLayout), new H6("Indirect Points: " + indirectPoints));
+        return dialog;
+
+    }
+
+
     protected class InteractionFooter extends HorizontalLayout {
 
         public InteractionFooter(String width, Post post) {

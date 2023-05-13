@@ -21,7 +21,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
 
     Post findByPostIdAndUserId(BigInteger postId, BigInteger userId);
 
-    Post findByRepostIdAndUserId(BigInteger repostId, BigInteger userId);
+    Post findByOriginalPostIdAndUserId(BigInteger originalPostId, BigInteger userId);
     //ordered
     List<Post> findAllByPostIdAndUserIdOrderByPostDateDesc(BigInteger postId, BigInteger userId);
 
