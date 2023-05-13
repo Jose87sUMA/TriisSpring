@@ -41,11 +41,12 @@ public class LeaderboardScroller extends VerticalLayout {
             case THIS_MONTH -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth();
             case THIS_YEAR -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisYear();
             case ALL_TIME -> posts = postService.findAllByPointedOriginalPostIdOrderByPointsDesc();
-            //case USERS -> users = postService.findAllByPointedOriginalPostIdOrderByPointsDesc();
+            case USERS -> posts = postService.findAllByPointedOriginalPostIdOrderByPointsDesc(); //arregla eso
         }
 
         for(int i = 0; i < Math.min(10, posts.size()); i++){
             content.add(new H4(posts.get(i).getPoints().toString()));
+            //añade lo de null y comment
         }
     }
 
