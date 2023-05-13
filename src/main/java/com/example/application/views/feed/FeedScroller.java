@@ -19,6 +19,9 @@ import com.example.application.data.services.FeedService;
 
 import java.util.*;
 
+/**
+ * Class that manages a feed.
+ */
 public class FeedScroller extends VerticalLayout {
     SortType current = null;
 
@@ -35,26 +38,19 @@ public class FeedScroller extends VerticalLayout {
 
     private VerticalLayout content = new VerticalLayout();
 
+    /**
+     * Constructs the feed.
+     * @param feedType Type of feed.
+     * @param authenticatedUser
+     * @param userService
+     * @param postService
+     */
     FeedScroller(FeedType feedType, User authenticatedUser, UserService userService, PostService postService) {
         this.userService = userService;
         this.postService = postService;
         this.feedService = this.postService.getFeedService(feedType, authenticatedUser.getUserId());
 
-        this.feedService.initializeFeed();
-
-//        getElement().executeJs("""
-//            window.onscroll = function(ev) {
-//                if (document.body.offsetHeight - (window.innerHeight + window.scrollY) <= 400) {
-//                    alert("you're at the bottom of the page");
-//                    $0.$server.loadMore();
-//                }
-//            };
-//        """, getElement());
-
-        ComponentEventListener<ClickEvent<Button>> but = e -> {
-            loadMore();
-        };
-        loadMore = new Button("Load More Posts", but);
+        loadMore = new Button("Load More Posts", e -> loadMore());
 
         MenuBar menu = new MenuBar();
         MenuItem sortChooser = menu.addItem("Sorting By Recent");
@@ -87,6 +83,9 @@ public class FeedScroller extends VerticalLayout {
         this.add(loadMore);
     }
 
+    /**
+     * Adds posts into the feed and loads more posts from database.
+     */
     @ClientCallable
     void loadMore(){
         if (loadMore.isEnabled()) {
@@ -95,6 +94,9 @@ public class FeedScroller extends VerticalLayout {
         }
     }
 
+    /**
+     * Adds posts into the feed.
+     */
     void addPosts(){
         for(int i = 0; i < FeedService.ELEMENTS; i++){
             if (buffer.isEmpty()) {
@@ -106,11 +108,17 @@ public class FeedScroller extends VerticalLayout {
         }
     }
 
+    /**
+     * Loads posts from database.
+     */
     void loadPosts(){
         buffer.addAll(feedService.findNextNPosts());
         System.out.println(buffer.toString());
     }
 
+    /**
+     * Resets feed by clearing content and loading again.
+     */
     void reset(){
         loadMore.setEnabled(true);
         feedService.reset();
@@ -119,6 +127,10 @@ public class FeedScroller extends VerticalLayout {
         loadPosts();
     }
 
+    /**
+     * Changes sorting of the feed. Also clears it.
+     * @param st Sorting mode.
+     */
     void changeSorting(SortType st){
         if (current != st) {
             current = st;
@@ -127,6 +139,9 @@ public class FeedScroller extends VerticalLayout {
         }
     }
 
+    /**
+     * Refreshes the feed. Clears buffer, resets and adds posts.
+     */
     void refresh(){
         buffer = new PriorityQueue<>(sorter.get(current));
         reset();

@@ -18,6 +18,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+
+/**
+ * View manager for the feed.
+ */
 @PageTitle("Triis - Feed")
 @Route(value = "Feed", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
@@ -46,14 +50,13 @@ public class FeedView extends HorizontalLayout {
         feedPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
 
 //        getElement().executeJs("""
-//            var obj = $0.parentNode;
-//            obj.onscroll = function(e){
-//                if (obj.scrollTop == (obj.scrollHeight - obj.offsetHeight)){
-//                    alert("End");
-//                    $0.$server.loadMore();
+//            var el = this;
+//            el.addEventListener("scroll", function(e) {
+//                if(el.scrollTop + el.clientHeight == el.scrollHeight) {
+//                    this.$server.loadMore();
 //                }
-//            };
-//        """, getElement());
+//            });
+//        """);
 
         this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         this.setMargin(true);
@@ -62,8 +65,8 @@ public class FeedView extends HorizontalLayout {
         add(feedPanel);
     }
 
-    public void loadMore(){
-        System.out.println("Loading more");
-    }
+//    public void loadMore(){
+//        System.out.println("Loading more");
+//    }
 
 }

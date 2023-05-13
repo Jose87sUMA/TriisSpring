@@ -35,10 +35,20 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId ORDER BY POST_DATE DESC", nativeQuery = true)
     List<Post> findAllByUsersFollowedByUserIdOrderByPostDateDesc(@Param("userId") BigInteger userId);
 
-
+    /**
+     * Get all posts.
+     * @param pageable Page request.
+     * @return List of posts determined by page.
+     */
     @Query(value = "select * from POSTS", nativeQuery = true)
     List<Post> findAll(Pageable pageable);
 
+    /**
+     * Get posts of users that a certain user follows.
+     * @param pageable Page request.
+     * @param userId User ID.
+     * @return List of posts determined by page.
+     */
     @Query(value = "select * from POSTS P JOIN FOLLOW F ON (P.USER_ID = F.USER_ID_FOLLOWING) WHERE F.USER_ID_FOLLOWER = :userId", nativeQuery = true)
     List<Post> findAllByUsersFollowedByUserId(Pageable pageable, @Param("userId") BigInteger userId);
 }
