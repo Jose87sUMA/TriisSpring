@@ -21,7 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @PermitAll
 public class LeaderboardView extends HorizontalLayout {
 
-    private TabSheet feedPanel;
+    private TabSheet leaderboardPanel;
     private User authenticatedUser;
 
     private final UserService userService;
@@ -33,25 +33,25 @@ public class LeaderboardView extends HorizontalLayout {
         this.userService = userService;
         this.authenticatedUser =  userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        feedPanel = new TabSheet();
+        leaderboardPanel = new TabSheet();
 
-        feedPanel.addClassName("leaderboard-panel");
-        feedPanel.addClassName(LumoUtility.AlignItems.CENTER);
+        leaderboardPanel.addClassName("leaderboard-panel");
+        leaderboardPanel.addClassName(LumoUtility.AlignItems.CENTER);
 
-        feedPanel.add("Today", new LeaderboardScroller(LeaderboardService.LeaderboardType.TODAY, authenticatedUser, userService, postService));
-        feedPanel.add("This week", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_WEEK, authenticatedUser, userService, postService));
-        feedPanel.add("This month", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_MONTH, authenticatedUser, userService, postService));
-        feedPanel.add("This year", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_YEAR, authenticatedUser, userService, postService));
-        feedPanel.add("All time", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME, authenticatedUser, userService, postService));
-        feedPanel.add("Users", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME, authenticatedUser, userService, postService));
-        feedPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
+        leaderboardPanel.add("Today", new LeaderboardScroller(LeaderboardService.LeaderboardType.TODAY, authenticatedUser, userService, postService));
+        leaderboardPanel.add("This week", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_WEEK, authenticatedUser, userService, postService));
+        leaderboardPanel.add("This month", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_MONTH, authenticatedUser, userService, postService));
+        leaderboardPanel.add("This year", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_YEAR, authenticatedUser, userService, postService));
+        leaderboardPanel.add("All time", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME, authenticatedUser, userService, postService));
+        leaderboardPanel.add("Users", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME, authenticatedUser, userService, postService));
+        leaderboardPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
 
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
         this.setMargin(true);
-        this.setVerticalComponentAlignment(Alignment.CENTER, feedPanel);
+        this.setVerticalComponentAlignment(Alignment.CENTER, leaderboardPanel);
 
-        add(feedPanel);
+        add(leaderboardPanel);
     }
 
     public void loadMore(){

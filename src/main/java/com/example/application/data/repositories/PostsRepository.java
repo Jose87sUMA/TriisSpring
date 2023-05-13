@@ -1,8 +1,6 @@
 package com.example.application.data.repositories;
 
 import com.example.application.data.entities.Post;
-import com.example.application.data.entities.User;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -52,8 +50,16 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     @Query(value = "select * from POSTS " +
             "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL AND " +
             "POST_DATE BETWEEN TO_DATE(:chosenDate ,'dd/mm/yy') AND TO_DATE(SYSDATE,'dd/mm/yy')" +
-            "ORDER BY POINTS DESC", nativeQuery = true)
-    List<Post> findByPointedAndOriginalPostIdNullCreatedAtAfterOrderByPointsDesc(@Param("chosenDate") Date post_date);
+            "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
+    List<Post> findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(@Param("chosenDate") Date post_date);
 
+    /**
+     * Used for leaderboard
+     * @return
+     */
+    @Query(value = "select * from POSTS " +
+            "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL " +
+            "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
+    List<Post> findAllByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
 
 }

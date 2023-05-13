@@ -11,6 +11,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -60,6 +62,26 @@ public class PostService {
 
     public FeedService getFeedService(FeedService.FeedType ft, BigInteger uid){
         return new FeedService(postRep, ft, uid);
+    }
+
+    //modifica el nombre de esto
+    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedToday(){
+        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now()));
+    }
+    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek(){
+        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusWeeks(1)));
+    }
+
+    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth(){
+        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusMonths(1)));
+    }
+
+    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedThisYear(){
+        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusYears(1)));
+    }
+
+    public List<Post> findAllByPointedOriginalPostIdOrderByPointsDesc(){
+        return postRep.findAllByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
     }
 
     public LeaderboardService getLeaderboardService(LeaderboardService.LeaderboardType ft, BigInteger uid){
