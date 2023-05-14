@@ -105,6 +105,9 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     }
 
+    /**
+     * Following or unfollowing a user and refresing the buttons.
+     */
     void follow(){
         if (!isFollowing(user)) userService.follow(authenticatedUser, user);
         else userService.unfollow(authenticatedUser, user);
@@ -112,6 +115,11 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         follow.setText(!isFollowing(user) ? "Follow" : "Unfollow");
     }
 
+    /**
+     * Is the current user following user.
+     * @param user The user followed?
+     * @return true if followed. false otherwise.
+     */
     boolean isFollowing(User user){
         return userService.getFollowing(authenticatedUser).contains(user);
     }
