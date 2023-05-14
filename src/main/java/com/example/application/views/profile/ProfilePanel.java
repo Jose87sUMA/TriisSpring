@@ -33,11 +33,11 @@ public class ProfilePanel extends Scroller {
 
         this.addClassName("profile-panel");
 
-        List<Post> myPosts = postService.findAllByUserAndDate(authenticatedUser);
+        //List<Post> myPosts = postService.findAllByUserAndDate(authenticatedUser);
 
-        for(int i = 0; i < min(15,myPosts.size()); ++i){
-            content.add(new PostPanel(myPosts.get(i), userService, postService));
-        }
+        //for(int i = 0; i < min(15,myPosts.size()); ++i){
+        //    content.add(new PostPanel(myPosts.get(i), userService, postService));
+        //}
 
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);

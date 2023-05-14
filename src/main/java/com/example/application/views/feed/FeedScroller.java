@@ -46,7 +46,7 @@ public class FeedScroller extends VerticalLayout {
      * @param userService
      * @param postService
      */
-    FeedScroller(FeedType feedType, User authenticatedUser, UserService userService, PostService postService) {
+    public FeedScroller(FeedType feedType, User authenticatedUser, UserService userService, PostService postService) {
         this.userService = userService;
         this.postService = postService;
         this.feedService = new FeedService(this.postService.getPostRepository(), feedType, authenticatedUser.getUserId());
@@ -148,5 +148,9 @@ public class FeedScroller extends VerticalLayout {
         loadPosts();
         loadPosts();
         addPosts();
+    }
+
+    public void addFirst(PostPanel postPanel) {
+        content.addComponentAsFirst(postPanel);
     }
 }

@@ -21,10 +21,14 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
+import java.util.List;
 
 
 @Service
@@ -77,7 +81,7 @@ public class PostService {
      * @return
      */
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
-    public List<Post> findAllByUserAndDate(User user){ return postRep.findAllByUserIdOrderByPostDateDesc(user.getUserId()); }
+    //public List<Post> findAllByUserAndDate(User user){ return postRep.findAllByUserIdOrderByPostDateDesc(user.getUserId()); }
 
     public Image getContent(Post post){
 
@@ -140,13 +144,6 @@ public class PostService {
 
         return bais.readAllBytes();
 
-    }
-
-    public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
-
-    public Post save(Post post){
-        postRep.save(post);
-        return post;
     }
 
     /**

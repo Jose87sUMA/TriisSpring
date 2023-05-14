@@ -43,7 +43,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     @Query(value = "SELECT * FROM POSTS WHERE POST_ID IN (WITH PARENT_POST (P) AS (SELECT REPOST_ID AS P FROM POSTS WHERE POST_ID = :postId UNION ALL SELECT REPOST_ID FROM PARENT_POST, POSTS WHERE PARENT_POST.P = POSTS.POST_ID) SELECT * FROM PARENT_POST)", nativeQuery = true)
     List<Post> findPostBranch(@Param("postId") BigInteger postId);
 
-    List<Post> findAllByUserIdOrderByPostDateDesc(BigInteger userId);
+    //List<Post> findAllByUserIdOrderByPostDateDesc(BigInteger userId);
     /**
      * Get all posts.
      * @param pageable Page request.
@@ -67,5 +67,6 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
      * @param userId User ID.
      * @return List of posts determined by page.
      */
+    @Query(value = "select * from POSTS P WHERE P.USER_ID = :userId", nativeQuery = true)
     List<Post> findAllByUserId(Pageable pageable, BigInteger userId);
 }

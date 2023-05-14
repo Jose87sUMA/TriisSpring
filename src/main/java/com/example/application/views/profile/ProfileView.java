@@ -2,9 +2,11 @@ package com.example.application.views.profile;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.data.services.FeedService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.MainLayout;
+import com.example.application.views.feed.FeedScroller;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -31,7 +33,7 @@ import java.io.InputStream;
 @PermitAll
 public class ProfileView extends VerticalLayout implements HasUrlParameter<String> {
 
-    private ProfilePanel profilePanel;
+    private FeedScroller profilePanel;
     private User user, authenticatedUser;
     private final UserService userService;
     private final PostService postService;
@@ -55,7 +57,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             return;
         }
 
-        profilePanel = new ProfilePanel(user, userService, postService);
+        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, authenticatedUser, userService, postService);
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
         this.setMargin(true);

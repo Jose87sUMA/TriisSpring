@@ -55,7 +55,20 @@ public class Post implements Serializable {
     public Post() {
     }
 
+    //FOR POST
+    public Post(User user, boolean pointed, InputStream inputStream) {
 
+
+        this.postId = null;
+        this.originalPostId = null;
+        this.repostId = null;
+        this.post_date = Date.from(Instant.now());
+        this.userId = user.getUserId();
+        this.content = getBlobFromInputStream(inputStream);
+        this.points = BigInteger.ZERO;
+        this.pointed = pointed ? "Y":"N";
+        this.likes = BigInteger.ZERO;
+    }
     //FOR REPOST
     public Post(Post post, User user, boolean pointed) {
         if(post.originalPostId == null) this.originalPostId = post.getPostId();
@@ -63,7 +76,7 @@ public class Post implements Serializable {
 
         this.postId = null;
         this.repostId = post.getPostId();
-        this.post_date = Date.valueOf(LocalDate.now());
+        this.post_date = Date.from(Instant.now());
         this.userId = user.getUserId();
         this.content = null;
         this.points = BigInteger.ZERO;
