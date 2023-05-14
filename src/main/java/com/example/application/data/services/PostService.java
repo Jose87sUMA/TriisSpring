@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 public class PostService {
-    protected final PostsRepository postRep;
+    private final PostsRepository postRep;
     public PostService(PostsRepository postRep) {
         this.postRep = postRep;
     }
