@@ -22,7 +22,7 @@ public class Post implements Serializable {
     private BigInteger userId;
     @Basic
     @Column(name = "POST_DATE")
-    private Date postDate;
+    private Date post_date;
     @Basic
     @Column(name = "POINTS")
     private BigInteger points;
@@ -79,12 +79,12 @@ public class Post implements Serializable {
         this.userId = userId;
     }
 
-    public Date getPostDate() {
-        return postDate;
+    public Date getPost_date() {
+        return post_date;
     }
 
-    public void setPostDate(Date postDate) {
-        this.postDate = postDate;
+    public void setPost_date(Date postDate) {
+        this.post_date = postDate;
     }
 
     public BigInteger getPoints() {
@@ -140,12 +140,12 @@ public class Post implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post that = (Post) o;
-        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(postDate, that.postDate) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Arrays.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
+        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(post_date, that.post_date) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Arrays.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(postId, userId, postDate, points, likes, pointed, repostId, originalPostId);
+        int result = Objects.hash(postId, userId, post_date, points, likes, pointed, repostId, originalPostId);
         result = 31 * result + Arrays.hashCode(content);
         return result;
     }

@@ -23,7 +23,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -32,12 +31,14 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 
+
 @Service
 public class PostService {
-    private final LikesRepository likeRep;
+
     private final PostsRepository postRep;
     private final UsersRepository userRep;
     private final CommentsRepository commentsRep;
+    private final LikesRepository likeRep;
 
     public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, CommentsRepository commentsRep) {
         this.likeRep = likeRep;
@@ -390,5 +391,13 @@ public class PostService {
         commentsRep.save(comment);
     }
 
+
+    /**
+     * Returns Post Repository.
+     * @return
+     */
+    public PostsRepository getPostRepository(){
+        return postRep;
+    }
 
 }
