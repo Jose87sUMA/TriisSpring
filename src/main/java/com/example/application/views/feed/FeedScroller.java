@@ -149,8 +149,4 @@ public class FeedScroller extends VerticalLayout {
         loadPosts();
         addPosts();
     }
-
-    public void addFirst(PostPanel postPanel) {
-        content.addComponentAsFirst(postPanel);
-    }
 }
