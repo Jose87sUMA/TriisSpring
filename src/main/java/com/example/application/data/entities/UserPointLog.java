@@ -3,15 +3,14 @@ package com.example.application.data.entities;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
-
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Date;
 
 @Entity
-@Table(name = "PostsPointLogs", schema = "UBD3336", catalog = "")
+@Table(name = "UserPointLogs", schema = "UBD3336", catalog = "")
 @DynamicUpdate
-public class PostsPointLog {
+public class UserPointLog {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -19,12 +18,12 @@ public class PostsPointLog {
     private BigInteger logId;
 
     @Basic
-    @Column(name = "USER_ID")
-    private BigInteger userId;
+    @Column(name = "BENEFICIARY_USER_ID")
+    private BigInteger benfUserId;
 
     @Basic
-    @Column(name = "POST_ID")
-    private BigInteger postId;
+    @Column(name = "PAYER_USER_ID")
+    private BigInteger payerUserId;
 
     @Basic
     @Column(name = "POINTS")
@@ -38,13 +37,13 @@ public class PostsPointLog {
     @Column(name = "DIRECT")
     private boolean direct;
 
-    public PostsPointLog(){}
+    public UserPointLog(){}
 
-    public PostsPointLog(Post post, User user, int points, boolean direct){
+    public UserPointLog(User userBen, User userPay, int points, boolean direct){
 
         this.logId = null;
-        this.userId = user.getUserId();
-        this.postId = post.getPostId();
+        this.benfUserId = userBen.getUserId();
+        this.payerUserId = userPay.getUserId();
         this.points = BigInteger.valueOf(points);
         this.logDate = Date.from(Instant.now());
         this.direct = direct;
@@ -55,12 +54,12 @@ public class PostsPointLog {
         return logId;
     }
 
-    public BigInteger getUserId() {
-        return userId;
+    public BigInteger getBenfUserId() {
+        return benfUserId;
     }
 
-    public BigInteger getPostId() {
-        return postId;
+    public BigInteger getPayerUserId() {
+        return payerUserId;
     }
 
     public BigInteger getPoints() {
@@ -86,4 +85,5 @@ public class PostsPointLog {
     public void setDirect(boolean direct) {
         this.direct = direct;
     }
+
 }

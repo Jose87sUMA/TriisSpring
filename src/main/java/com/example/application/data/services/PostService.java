@@ -34,13 +34,16 @@ public class PostService {
     private final ReportRepository reportRep;
     private final CommentsRepository commentsRep;
     private final PostPointLogRepository postPointLogRep;
-    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, ReportRepository reportRep, CommentsRepository commentsRep,  PostPointLogRepository postPointLogRep) {
+    private final UserPointLogRepository userPointLogRep;
+
+    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, ReportRepository reportRep, CommentsRepository commentsRep, PostPointLogRepository postPointLogRep, UserPointLogRepository userPointLogRep) {
         this.likeRep = likeRep;
         this.postRep = postRep;
         this.userRep = userRep;
         this.reportRep = reportRep;
         this.commentsRep = commentsRep;
         this.postPointLogRep = postPointLogRep;
+        this.userPointLogRep = userPointLogRep;
     }
 
     public Post save(Post post){
@@ -268,9 +271,12 @@ public class PostService {
 
         User directUser = null;
         if(!original.equals(direct)){
+
             directUser = userRep.findFirstByUserId(direct.getUserId());
+
             direct.setPoints(BigInteger.valueOf(direct.getPoints().intValue() + 5));
             directUser.setType1Points(BigInteger.valueOf(directUser.getType1Points().intValue() + 5));
+
             userRep.save(directUser);
         }
 
@@ -287,6 +293,7 @@ public class PostService {
             int addedPoints = poster.equals(originalPoster) ? 15 : poster.equals(directUser) ? 10 : 5;
             boolean directBool = (directUser != null ? directUser : originalPoster).getUserId().equals(p.getUserId());
             postPointLogRep.save(new PostsPointLog(p, authUser, addedPoints, directBool));
+            userPointLogRep.save(new UserPointLog(userRep.findFirstByUserId(p.getUserId()), authUser, addedPoints, directBool));
         }
 
         UI ui = UI.getCurrent();

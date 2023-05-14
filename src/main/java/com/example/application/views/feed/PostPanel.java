@@ -30,12 +30,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.theme.lumo.LumoIcon;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceContext;
+import jakarta.validation.constraints.NegativeOrZero;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.Configuration;
@@ -202,6 +204,7 @@ public class PostPanel extends VerticalLayout {
         dialog.setHeader("Point Statistics");
         dialog.setCancelable(true);
         dialog.setConfirmText("Ok");
+        dialog.setCancelText("Close");
 
         VerticalLayout directRepostersLayout = new VerticalLayout();
 
@@ -215,7 +218,7 @@ public class PostPanel extends VerticalLayout {
             if(postLog.isDirect()){
 
                 String username = userService.findById(postLog.getUserId()).getUsername();
-                H6 profileName = new H6(username + " - " + 15);
+                Label profileName = new Label(username + " - " + 15);
                 directPoints += postLog.getPoints().intValue();
                 directRepostersLayout.add(profileName);
 
@@ -225,7 +228,29 @@ public class PostPanel extends VerticalLayout {
 
         }
 
-        dialog.add(new Details("Direct Points: " + directPoints, directRepostersLayout), new H6("Indirect Points: " + indirectPoints));
+
+        Notification directPointsInfoNot = new Notification("Points from people that reposted you directly");
+        Notification indirectPointsInfoNot = new Notification("Points from people that reposted your direct reposters");
+
+        Icon directPointsInfoIcon = new Icon(VaadinIcon.QUESTION_CIRCLE_O);
+        directPointsInfoIcon.setSize("17px");
+
+        Icon indirectPointsInfoIcon = new Icon(VaadinIcon.QUESTION_CIRCLE_O);
+        indirectPointsInfoIcon.setSize("17px");
+
+        directPointsInfoIcon.getElement().addEventListener("mouseover", e -> directPointsInfoNot.open());
+        indirectPointsInfoIcon.getElement().addEventListener("mouseover", e -> indirectPointsInfoNot.open());
+
+        directPointsInfoIcon.getElement().addEventListener("mouseout", e -> directPointsInfoNot.close());
+        indirectPointsInfoIcon.getElement().addEventListener("mouseout", e -> indirectPointsInfoNot.close());
+
+        HorizontalLayout directLayout = new HorizontalLayout(new Details("Direct Points: " + directPoints, directRepostersLayout), directPointsInfoIcon);
+        directLayout.setAlignItems(Alignment.BASELINE);
+
+        HorizontalLayout indirectLayout = new HorizontalLayout(new Label("Indirect Points: " + indirectPoints), indirectPointsInfoIcon);
+        directLayout.setAlignItems(Alignment.BASELINE);
+
+        dialog.add(directLayout, indirectLayout, directPointsInfoNot, indirectPointsInfoNot);
         return dialog;
 
     }
