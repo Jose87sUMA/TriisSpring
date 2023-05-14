@@ -1,13 +1,7 @@
 package com.example.application.data.services;
 
-import com.example.application.data.entities.Comment;
-import com.example.application.data.entities.Like;
-import com.example.application.data.entities.Post;
-import com.example.application.data.entities.User;
-import com.example.application.data.repositories.CommentsRepository;
-import com.example.application.data.repositories.LikesRepository;
-import com.example.application.data.repositories.PostsRepository;
-import com.example.application.data.repositories.UsersRepository;
+import com.example.application.data.entities.*;
+import com.example.application.data.repositories.*;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -23,7 +17,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -33,18 +26,26 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 
+
 @Service
 public class PostService {
-    private final LikesRepository likeRep;
+
     private final PostsRepository postRep;
     private final UsersRepository userRep;
+    private final ReportRepository reportRep;
     private final CommentsRepository commentsRep;
+    private final LikesRepository likeRep;
+    private final PostPointLogRepository postPointLogRep;
+    private final UserPointLogRepository userPointLogRep;
 
-    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, CommentsRepository commentsRep) {
+    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, ReportRepository reportRep, CommentsRepository commentsRep, PostPointLogRepository postPointLogRep, UserPointLogRepository userPointLogRep) {
         this.likeRep = likeRep;
         this.postRep = postRep;
         this.userRep = userRep;
+        this.reportRep = reportRep;
         this.commentsRep = commentsRep;
+        this.postPointLogRep = postPointLogRep;
+        this.userPointLogRep = userPointLogRep;
     }
 
     /**
@@ -252,7 +253,7 @@ public class PostService {
                 //Enough Points?
                 if(authUser.getType2Points().compareTo(BigInteger.valueOf(5)) >= 0){
                     Post newRepost = this.save(new Post(post, authUser, true));
-                    this.pointDistribution(newRepost);
+                    this.pointDistribution(newRepost, authUser);
                     authUser.setType2Points(BigInteger.valueOf(authUser.getType2Points().intValue() - 5));
                     userRep.save(authUser);
                     UI.getCurrent().access(() -> {
@@ -261,9 +262,9 @@ public class PostService {
                 }else{
                     Notification notEnough = new Notification("Not enough points for repost! Wait for next refill :)");
                     notEnough.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    notEnough.open();
 
                     UI.getCurrent().access(() -> {
+                        notEnough.open();
                         ref.repostSuccess = false;
                     });
                 }
@@ -273,10 +274,10 @@ public class PostService {
             });
             Button no = new Button("No");
             no.addClickListener(event -> {
-                usePoints.close();
                 this.save(new Post(post, authUser, false));
 
                 UI.getCurrent().access(() -> {
+                    usePoints.close();
                     repostButton.setEnabled(true);
                     repostSuccessNoti.open();
                 });
@@ -321,16 +322,21 @@ public class PostService {
 
         Button yes = new Button("Yes");
         yes.addClickListener(event -> {
-            deletePostCheck.close();
             this.deleteRepost(authUser, post);
-            repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
-            Notification.show("Unreposted");
-            repostButton.setEnabled(true);
+
+            UI.getCurrent().access(() -> {
+                deletePostCheck.close();
+                repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
+                Notification.show("Unreposted");
+                repostButton.setEnabled(true);
+            });
         });
         Button no = new Button("No");
         no.addClickListener(event -> {
-            deletePostCheck.close();
-            repostButton.setEnabled(true);
+            UI.getCurrent().access(() -> {
+                deletePostCheck.close();
+                repostButton.setEnabled(true);
+            });
         });
         HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
         buttons.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -345,31 +351,43 @@ public class PostService {
 
 
 
-    public void pointDistribution(Post post) {
+    public void pointDistribution(Post post, User authUser) {
 
         List<Post> branch = postRep.findPostBranch(post.getPostId());
 
-        Post original = branch.get(0);
-        Post direct = branch.get(branch.size()-1);
+        Post original = branch.get(branch.size()-1);
+        Post direct = branch.get(0);
         User originalPoster = userRep.findFirstByUserId(original.getUserId());
 
         original.setPoints(BigInteger.valueOf(original.getPoints().intValue() + 10));
         originalPoster.setType1Points(BigInteger.valueOf(originalPoster.getType1Points().intValue() + 10));
         userRep.save(originalPoster);
 
+        User directUser = null;
         if(!original.equals(direct)){
-            User directUser = userRep.findFirstByUserId(direct.getUserId());
+
+            directUser = userRep.findFirstByUserId(direct.getUserId());
+
             direct.setPoints(BigInteger.valueOf(direct.getPoints().intValue() + 5));
             directUser.setType1Points(BigInteger.valueOf(directUser.getType1Points().intValue() + 5));
+
             userRep.save(directUser);
         }
 
         for(Post p : branch){
+
             User poster = userRep.findFirstByUserId(p.getUserId());
+
             p.setPoints(BigInteger.valueOf(p.getPoints().intValue() + 5));
             poster.setType1Points(BigInteger.valueOf(poster.getType1Points().intValue() + 5));
-            save(p);
+
+            postRep.save(p);
             userRep.save(poster);
+
+            int addedPoints = poster.equals(originalPoster) ? 15 : poster.equals(directUser) ? 10 : 5;
+            boolean directBool = (directUser != null ? directUser : originalPoster).getUserId().equals(p.getUserId());
+            postPointLogRep.save(new PostsPointLog(p, authUser, addedPoints, directBool));
+            userPointLogRep.save(new UserPointLog(userRep.findFirstByUserId(p.getUserId()), authUser, addedPoints, directBool));
         }
 
         UI ui = UI.getCurrent();
@@ -384,7 +402,10 @@ public class PostService {
      * @param post
      */
     public void deleteRepost(User reposter, Post post){
-        deletePost(postRep.findByRepostIdAndUserId(post.getPostId(),reposter.getUserId()));
+
+        BigInteger id = post.getOriginalPostId() != null ? post.getOriginalPostId() : post.getPostId();
+
+        deletePost(postRep.findByOriginalPostIdAndUserId(id, reposter.getUserId()));
     }
 
 
@@ -427,6 +448,27 @@ public class PostService {
         comment.setUserComment(text);
 
         commentsRep.save(comment);
+    }
+
+
+    /**
+     * Returns Post Repository.
+     * @return
+     */
+    public PostsRepository getPostRepository(){
+        return postRep;
+    }
+
+    public void newReport(User authenticatedUser, Post post, String reason) {
+        reportRep.save(new Report(authenticatedUser, post, reason));
+    }
+
+    //POINTS LOGS
+
+    public List<PostsPointLog> findAllLogsByPost (Post post){
+
+        return postPointLogRep.findAllByPostIdOrderByLogDateDesc(post.getPostId());
+
     }
 
 
