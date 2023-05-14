@@ -24,7 +24,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
 
     Post findByPostIdAndUserId(BigInteger postId, BigInteger userId);
 
-    Post findByRepostIdAndUserId(BigInteger repostId, BigInteger userId);
+    Post findByOriginalPostIdAndUserId(BigInteger originalPostId, BigInteger userId);
     //ordered
     @Query(value = "select * from POSTS P WHERE P.USER_ID = :userId AND P.POST_ID = :postId ORDER BY POST_DATE DESC", nativeQuery = true)
     List<Post> findAllByPostIdAndUserId(@Param("postId") BigInteger postId,@Param("userId") BigInteger userId);

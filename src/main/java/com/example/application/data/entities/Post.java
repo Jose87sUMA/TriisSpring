@@ -5,9 +5,11 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.sql.Date;
-import java.time.*;
-import java.util.*;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
@@ -41,7 +43,8 @@ public class Post implements Serializable {
     @Basic
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
-
+    @OneToMany(mappedBy = "reportedPost")
+    private List<Report> reports;
 
     public Post() {
     }
@@ -134,6 +137,14 @@ public class Post implements Serializable {
     public void setOriginalPostId(BigInteger originalPostId) {
         this.originalPostId = originalPostId;
     }
+
+    /*public List<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }*/
 
     @Override
     public boolean equals(Object o) {

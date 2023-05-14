@@ -8,6 +8,7 @@ import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.persistence.Index;
 
@@ -19,7 +20,6 @@ public class FeedPanel extends Scroller {
     private final UserService userService;
     private final PostService postService;
     private VerticalLayout content = new VerticalLayout();
-
 
     public FeedPanel(User authenticatedUser, UserService userService, PostService postService){
 
