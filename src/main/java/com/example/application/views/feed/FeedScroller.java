@@ -26,6 +26,7 @@ public class FeedScroller extends VerticalLayout {
     SortType current = null;
 
     Button loadMore;
+    MenuBar sorting;
 
     final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.naturalOrder()),
                                                           SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
@@ -52,7 +53,8 @@ public class FeedScroller extends VerticalLayout {
 
         loadMore = new Button("Load More Posts", e -> loadMore());
 
-        this.add(sortChooser());
+        sorting = sortChooser();
+        this.add(sorting);
 
         this.setSpacing(true);
 
