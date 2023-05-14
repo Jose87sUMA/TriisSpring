@@ -54,7 +54,7 @@ public class Post implements Serializable {
 
         this.postId = null;
         this.repostId = post.getPostId();
-        this.postDate = Date.valueOf(LocalDate.now());
+        this.post_date = Date.valueOf(LocalDate.now());
         this.userId = user.getUserId();
         this.content = null;
         this.points = BigInteger.ZERO;
