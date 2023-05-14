@@ -1,6 +1,7 @@
 package com.example.application.data.services;
 
 import com.example.application.data.entities.Follow;
+import com.example.application.data.entities.FollowCompositePK;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.UsersRepository;
@@ -71,6 +72,13 @@ public class UserService {
 
         }
         return followers;
+    }
+    public void follow(User follower, User following){
+        followRep.save(new Follow(follower.getUserId(), following.getUserId()));
+    }
+
+    public void unfollow(User follower, User following){
+        followRep.delete(followRep.findByUserIdFollowerAndUserIdFollowing(follower.getUserId(), following.getUserId()));
     }
 
     public User save(User user){
