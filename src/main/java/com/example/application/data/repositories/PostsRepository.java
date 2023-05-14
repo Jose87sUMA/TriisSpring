@@ -60,8 +60,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findAllByUserId(Pageable pageable, BigInteger userId);
 
     /**
-     * Used for leaderboard
-     * @return
+     * @return 10 original pointed posts between a given date and today with the highest number of points
      */
     @Query(value = "select * from POSTS " +
             "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL AND " +
@@ -70,8 +69,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(@Param("chosenDate") Date post_date);
 
     /**
-     * Used for leaderboard
-     * @return
+     * @return 10 original pointed posts with the highest number of points
      */
     @Query(value = "select * from POSTS " +
             "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL " +

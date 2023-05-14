@@ -69,9 +69,6 @@ public class UserService {
         return user;
     }
 
-    public List<User>  findUsersHighestType1Points(){
-        return userRep.findTenOrderByType1PointsDesc();
-    }
 
 
 }

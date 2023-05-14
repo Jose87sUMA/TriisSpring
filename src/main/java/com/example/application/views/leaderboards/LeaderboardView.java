@@ -1,8 +1,6 @@
 package com.example.application.views.leaderboards;
 
-import com.example.application.data.entities.User;
 import com.example.application.data.services.LeaderboardService;
-import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -13,8 +11,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 @PageTitle("Triis - Leaderboard")
 @Route(value = "leaderboard", layout = MainLayout.class)
 @RouteAlias(value = "leaderboard", layout = MainLayout.class)
@@ -22,28 +18,34 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class LeaderboardView extends HorizontalLayout {
 
     private TabSheet leaderboardPanel;
-    private User authenticatedUser;
-
     private final UserService userService;
-    private final PostService postService;
+    private final LeaderboardService leaderboardService;
 
-    public LeaderboardView(UserService userService, PostService postService) {
+    /**
+     * contains a Tab to select a leaderboard
+     * each leaderboard initializes its own type of scroller (predefined types)
+     * leaderboard types are divided into:
+     * - 10 top posts with the highest number of points from a given type span
+     * - 10 top users with the highest number of points
+     * @param userService
+     * @param leaderboardService
+     */
+    public LeaderboardView(UserService userService, LeaderboardService leaderboardService) {
 
-        this.postService = postService;
         this.userService = userService;
-        this.authenticatedUser =  userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        this.leaderboardService = leaderboardService;
 
         leaderboardPanel = new TabSheet();
 
         leaderboardPanel.addClassName("leaderboard-panel");
         leaderboardPanel.addClassName(LumoUtility.AlignItems.CENTER);
 
-        leaderboardPanel.add("Today", new LeaderboardScroller(LeaderboardService.LeaderboardType.TODAY, authenticatedUser, userService, postService));
-        leaderboardPanel.add("This week", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_WEEK, authenticatedUser, userService, postService));
-        leaderboardPanel.add("This month", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_MONTH, authenticatedUser, userService, postService));
-        leaderboardPanel.add("This year", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_YEAR, authenticatedUser, userService, postService));
-        leaderboardPanel.add("All time", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME, authenticatedUser, userService, postService));
-        leaderboardPanel.add("Users", new LeaderboardScroller(LeaderboardService.LeaderboardType.USERS, authenticatedUser, userService, postService));
+        leaderboardPanel.add("Today", new LeaderboardScroller(LeaderboardService.LeaderboardType.TODAY, userService, leaderboardService));
+        leaderboardPanel.add("This week", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_WEEK, userService, leaderboardService));
+        leaderboardPanel.add("This month", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_MONTH,  userService,  leaderboardService));
+        leaderboardPanel.add("This year", new LeaderboardScroller(LeaderboardService.LeaderboardType.THIS_YEAR, userService,  leaderboardService));
+        leaderboardPanel.add("All time", new LeaderboardScroller(LeaderboardService.LeaderboardType.ALL_TIME,  userService,  leaderboardService));
+        leaderboardPanel.add("Users", new LeaderboardScroller(LeaderboardService.LeaderboardType.USERS, userService,  leaderboardService));
         leaderboardPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
 
 

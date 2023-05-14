@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 public class PostService {
-    private final PostsRepository postRep;
+    protected final PostsRepository postRep;
     public PostService(PostsRepository postRep) {
         this.postRep = postRep;
     }
@@ -68,23 +68,5 @@ public class PostService {
         return postRep;
     }
 
-    //modifica el nombre de esto
-    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedToday(){
-        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now()));
-    }
-    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek(){
-        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusWeeks(1)));
-    }
 
-    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth(){
-        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusMonths(1)));
-    }
-
-    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisYear(){
-        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusYears(1)));
-    }
-
-    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDesc(){
-        return postRep.findTenByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
-    }
 }
