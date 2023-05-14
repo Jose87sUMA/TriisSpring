@@ -5,6 +5,11 @@ import com.example.application.data.entities.User;
 import com.example.application.data.services.LeaderboardService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.example.application.views.feed.PostPanel;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -18,6 +23,7 @@ public class LeaderboardScroller extends VerticalLayout {
     private final LeaderboardService.LeaderboardType leaderboardType;
 
     private List<Post> posts;
+    private List<User> users;
     private VerticalLayout content = new VerticalLayout();
 
     LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, User authenticatedUser, UserService userService, PostService postService) {
@@ -36,18 +42,31 @@ public class LeaderboardScroller extends VerticalLayout {
 
     private void addResult(){
         switch (leaderboardType){
-            case TODAY -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedToday();
-            case THIS_WEEK -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek();
-            case THIS_MONTH -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth();
-            case THIS_YEAR -> posts = postService.findByPointedOriginalPostIdOrderByPointsDescCreatedThisYear();
-            case ALL_TIME -> posts = postService.findAllByPointedOriginalPostIdOrderByPointsDesc();
-            case USERS -> posts = postService.findAllByPointedOriginalPostIdOrderByPointsDesc(); //arregla eso
+            case TODAY -> posts = postService.findTenByPointedOriginalPostIdOrderByPointsDescCreatedToday();
+            case THIS_WEEK -> posts = postService.findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek();
+            case THIS_MONTH -> posts = postService.findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth();
+            case THIS_YEAR -> posts = postService.findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisYear();
+            case ALL_TIME -> posts = postService.findTenByPointedOriginalPostIdOrderByPointsDesc();
+            case USERS -> users = userService.findUsersHighestType1Points();
         }
 
-        for(int i = 0; i < Math.min(10, posts.size()); i++){
-            content.add(new H4(posts.get(i).getPoints().toString()));
-            //añade lo de null y comment
+        if(posts != null && posts.size() != 0){
+            for(int i = 0; i < Math.min(10, posts.size()); i++){
+                content.add(new H4 ((i+1) + " Position"), new PostPanel(posts.get(i), userService, postService));
+            }
+        }else if(users != null && users.size() != 0){
+            Button buttonUser[] = new Button[users.size()];
+            for(int i = 0; i < Math.min(10, users.size()); i++){
+                buttonUser[i] = new Button(users.get(i).getUsername() + ":   " + users.get(i).getType1Points() + " points");
+                buttonUser[i].setWidth("100%");
+                //button[i].addClickListener(UI.getCurrent().navigate(ProfileView.class, username));
+                content.add(new H4 ((i+1) + " Position"), buttonUser[i]);
+            }
+        }else{
+            content.add(new H4("Competition is tight isn't it? D;"));
         }
+
     }
+
 
 }

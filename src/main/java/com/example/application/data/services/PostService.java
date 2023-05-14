@@ -69,22 +69,22 @@ public class PostService {
     }
 
     //modifica el nombre de esto
-    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedToday(){
-        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now()));
+    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedToday(){
+        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now()));
     }
-    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek(){
-        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusWeeks(1)));
-    }
-
-    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth(){
-        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusMonths(1)));
+    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek(){
+        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusWeeks(1)));
     }
 
-    public List<Post> findByPointedOriginalPostIdOrderByPointsDescCreatedThisYear(){
-        return postRep.findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusYears(1)));
+    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth(){
+        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusMonths(1)));
     }
 
-    public List<Post> findAllByPointedOriginalPostIdOrderByPointsDesc(){
-        return postRep.findAllByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
+    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisYear(){
+        return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusYears(1)));
+    }
+
+    public List<Post> findTenByPointedOriginalPostIdOrderByPointsDesc(){
+        return postRep.findTenByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
     }
 }

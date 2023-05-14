@@ -67,7 +67,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
             "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL AND " +
             "POST_DATE BETWEEN TO_DATE(:chosenDate ,'dd/mm/yy') AND TO_DATE(SYSDATE,'dd/mm/yy')" +
             "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
-    List<Post> findAllByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(@Param("chosenDate") Date post_date);
+    List<Post> findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(@Param("chosenDate") Date post_date);
 
     /**
      * Used for leaderboard
@@ -76,6 +76,6 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     @Query(value = "select * from POSTS " +
             "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL " +
             "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
-    List<Post> findAllByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
+    List<Post> findTenByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
 
 }

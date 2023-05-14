@@ -7,6 +7,7 @@ import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -66,6 +67,10 @@ public class UserService {
     public User save(User user){
         userRep.save(user);
         return user;
+    }
+
+    public List<User>  findUsersHighestType1Points(){
+        return userRep.findTenOrderByType1PointsDesc();
     }
 
 
