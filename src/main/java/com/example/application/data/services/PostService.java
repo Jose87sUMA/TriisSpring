@@ -46,15 +46,34 @@ public class PostService {
         this.commentsRep = commentsRep;
     }
 
+    /**
+     * This method updates information about a post or saves a new Post.
+     * @param post
+     * @return
+     */
     public Post save(Post post){
         postRep.save(post);
         return post;
     }
 
+    /**
+     * Given a PostID, this method finds and removes the Post.
+     * @param post
+     */
     public void deletePost(Post post){postRep.delete(post);}
 
-
+    /**
+     * Finds a post that has the given ID
+     * @param postId
+     * @return
+     */
     public Post findById(BigInteger postId){ return postRep.findFirstByPostId(postId); }
+
+    /**
+     * Returns a list of the posts of the given user.
+     * @param user
+     * @return
+     */
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
 
     public Image getContent(Post post){
@@ -89,11 +108,28 @@ public class PostService {
         }
     }
 
+
+    /**
+     * Returns a list of Post from users followed by the given user.
+     * @param user
+     * @return
+     */
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
+    /**
+     * Returns an integer with the ammount of likes of the given Post.
+     * @param p
+     * @return
+     */
     public int getAllLikes(Post p){
         return likeRep.findAllByPostId(p.getPostId()).size();
     }
+
+    /**
+     * This method returns a list of users that liked the given Post.
+     * @param p
+     * @return
+     */
     public List<User> getAllUsersLiking(Post p) {
 
         List <Like> likeEntries =  likeRep.findAllByPostId(p.getPostId());
@@ -107,6 +143,12 @@ public class PostService {
     }
 
     //LIKE BUTTON
+
+    /**
+     * This method adds a like given by the user.
+     * @param user
+     * @param post
+     */
     @Async
     public void newLike(User user, Post post) {
         post.setLikes(post.getLikes().add(BigInteger.ONE));
@@ -114,6 +156,11 @@ public class PostService {
         likeRep.save(new Like(user.getUserId(), post.getPostId()));
     }
 
+    /**
+     * This method deletes the like given by the user.
+     * @param user
+     * @param post
+     */
     @Async
     public void dislike(User user, Post post) {
         post.setLikes(post.getLikes().subtract(BigInteger.ONE));
@@ -122,6 +169,13 @@ public class PostService {
     }
 
     //REPOST BUTTON
+
+    /**
+     * Given a post and a user, this method checks whether the named post is reposted by the user.
+     * @param post
+     * @param user
+     * @return
+     */
     public boolean isReposted(Post post, User user){
                 //User reposting a repost and has already reposted any post refering to the same original post as the repost he is reposting
        return (post.getOriginalPostId() != null && !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getOriginalPostId()).isEmpty())
@@ -285,13 +339,21 @@ public class PostService {
         });
     }
 
-
+    /**
+     * Given a User and a Post that has been reposted, this method deletes the repost from user's profile.
+     * @param reposter
+     * @param post
+     */
     public void deleteRepost(User reposter, Post post){
         deletePost(postRep.findByRepostIdAndUserId(post.getPostId(),reposter.getUserId()));
     }
 
 
-    //COMMENT RELATED
+    /**
+     * Takes a Post and returns a list of MessageListItem, which are the comments related to that post.
+     * @param post
+     * @return
+     */
     public List<MessageListItem> commentItems(Post post){
         List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
         List<MessageListItem> itemList =new ArrayList<>();
@@ -305,6 +367,16 @@ public class PostService {
         }
         return itemList;
     }
+
+
+    /**
+     * This method takes a post, a user that comments in that post
+     * and a String containing the text. A new object Comment is
+     * created and then saved by a method of the CommentsRepository.
+     * @param post
+     * @param user
+     * @param text
+     */
 
 
     public void newComment(Post post, User user, String text){

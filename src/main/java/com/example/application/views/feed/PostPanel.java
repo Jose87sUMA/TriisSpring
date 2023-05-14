@@ -183,6 +183,12 @@ public class PostPanel extends VerticalLayout {
             this.add(likeButton, repostButton, commentButton);
         }
 
+        /**
+         * Actioned when the like button has been pressed. This method adds or subtracts a like to the post.
+         * @param post
+         * @param authUser
+         * @param likeButton
+         */
         public void likeClick(Post post, User authUser, Button likeButton) {
             if (!postService.getAllUsersLiking(post).contains(authUser)) {
                 postService.newLike(authUser, post);
@@ -196,6 +202,12 @@ public class PostPanel extends VerticalLayout {
             postService.save(post);
         }
 
+        /**
+         * Actioned when the repost button has been pressed. This method adds or deletes a repost for the user.
+         * @param post
+         * @param authUser
+         * @param repostButton
+         */
         private void repostClick(Post post, User authUser, Button repostButton) {
             boolean reposted = postService.isReposted(post, authUser);
             repostButton.setEnabled(false);
@@ -210,6 +222,12 @@ public class PostPanel extends VerticalLayout {
         }
     }
 
+
+    /**
+     * The comment section is conformed by MessageList and a MessageInput, both are added to a Vertical layout.
+     * The MessageInput includes the text field and a send button. The MessageList needs a list of MessageListItems to be filled,
+     * which is retrieved using the commentItems method from the postService.
+     */
     protected class CommentSection extends VerticalLayout{
         MessageInput input;
         MessageList list;
