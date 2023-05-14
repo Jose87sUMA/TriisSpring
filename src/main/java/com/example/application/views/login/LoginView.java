@@ -6,6 +6,7 @@ import com.example.application.views.register.RegisterView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
@@ -32,7 +33,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         this.setSizeFull();
         this.authenticatedUser = authenticatedUser;
 
-        this.add(new TriisLoginForm(this), new RouterLink("Register", RegisterView.class));
+        this.add(new H3("Use niks 123password to enter"),new TriisLoginForm(this), new RouterLink("Register", RegisterView.class));
 
     }
 

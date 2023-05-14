@@ -2,6 +2,7 @@ package com.example.application.data.entities;
 
 import com.vaadin.flow.component.html.Image;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -10,11 +11,13 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.time.*;
 import java.util.*;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
+@DynamicUpdate
 public class Post implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -49,24 +52,21 @@ public class Post implements Serializable {
     public Post() {
     }
 
-    //FOR POST
-    public Post(User user, boolean pointed, InputStream inputStream) {
 
+    //FOR REPOST
+    public Post(Post post, User user, boolean pointed) {
+        if(post.originalPostId == null) this.originalPostId = post.getPostId();
+        else this.originalPostId = post.getOriginalPostId();
 
         this.postId = null;
-        this.originalPostId = null;
-        this.repostId = null;
-        this.postDate = Date.from(Instant.now());
+        this.repostId = post.getPostId();
+        this.postDate = Date.valueOf(LocalDate.now());
         this.userId = user.getUserId();
-        this.content = getBlobFromInputStream(inputStream);
+        this.content = null;
         this.points = BigInteger.ZERO;
         this.pointed = pointed ? "Y":"N";
         this.likes = BigInteger.ZERO;
     }
-
-
-
-
 
 
     public BigInteger getPostId() {
