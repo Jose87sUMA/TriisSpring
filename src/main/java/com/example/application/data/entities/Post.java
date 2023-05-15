@@ -28,7 +28,7 @@ public class Post implements Serializable {
     @Column(name = "LIKES")
     private BigInteger likes;
     @Basic
-    @Column(name = "CONTENT")
+    @Column(name = "CONTENT_DEPRECATED")
     private byte[] content;
     @Basic
     @Column(name = "POINTED")
