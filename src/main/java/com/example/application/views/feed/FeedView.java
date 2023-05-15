@@ -1,5 +1,10 @@
 package com.example.application.views.feed;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.UploadErrorException;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
@@ -15,7 +20,6 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 
 /**
  * View manager for the feed.

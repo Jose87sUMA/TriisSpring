@@ -14,6 +14,11 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.notification.Notification;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.UploadErrorException;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
@@ -42,10 +47,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 
 public class PostPanel extends VerticalLayout {
 

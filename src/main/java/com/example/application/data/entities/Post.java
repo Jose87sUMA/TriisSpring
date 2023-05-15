@@ -21,6 +21,7 @@ import java.util.Objects;
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
 @DynamicUpdate
 public class Post implements Serializable {
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "POST_ID")
@@ -56,15 +57,13 @@ public class Post implements Serializable {
     }
 
     //FOR POST
-    public Post(User user, boolean pointed, InputStream inputStream) {
-
+    public Post(User user, boolean pointed) {
 
         this.postId = null;
         this.originalPostId = null;
         this.repostId = null;
         this.post_date = Date.from(Instant.now());
         this.userId = user.getUserId();
-        this.content = getBlobFromInputStream(inputStream);
         this.points = BigInteger.ZERO;
         this.pointed = pointed ? "Y":"N";
         this.likes = BigInteger.ZERO;
@@ -125,11 +124,11 @@ public class Post implements Serializable {
         this.likes = likes;
     }
 
-    public byte[] getContent() {
+    public String getContent() {
         return content;
     }
 
-    public void setContent(byte[] content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -170,7 +169,7 @@ public class Post implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post that = (Post) o;
-        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(post_date, that.post_date) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Arrays.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
+        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(post_date, that.post_date) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Objects.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
     }
 
     @Override

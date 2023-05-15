@@ -37,7 +37,7 @@ public class User implements Serializable {
     private String verified;
     @Basic
     @Column(name = "PROFILE_PICTURE")
-    private byte[] profilePicture;
+    private String profilePicture;
     @Basic
     @Column(name = "TREE_ID")
     private BigInteger treeId;
@@ -104,11 +104,11 @@ public class User implements Serializable {
         this.verified = verified;
     }
 
-    public byte[] getProfilePicture() {
+    public String getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(byte[] profilePicture) {
+    public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
     }
 
@@ -155,11 +155,13 @@ public class User implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User that = (User) o;
-        return Objects.equals(userId, that.userId);
+        return Objects.equals(userId, that.userId) && Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(email, that.email) && Objects.equals(type1Points, that.type1Points) && Objects.equals(type2Points, that.type2Points) && Objects.equals(verified, that.verified) && Objects.equals(profilePicture, that.profilePicture) && Objects.equals(treeId, that.treeId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId);
+        int result = Objects.hash(userId, username, password, email, type1Points, type2Points, verified, treeId, profilePicture);
+        result = 31 * result;
+        return result;
     }
 }

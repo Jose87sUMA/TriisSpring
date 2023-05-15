@@ -25,34 +25,6 @@ public class EditProfilePanel extends VerticalLayout {
         Binder<User> binder = new BeanValidationBinder<>(User.class);
         //field creation
 
-        TextField username = new TextField("Username");
-        Button editUsername = new Button("Edit Username");
-        editUsername.addClickListener(e -> {
-            if (userService.editUsername(user, username.getValue())) {
-                Notification notification = new Notification("Username changed");
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.open();
-            }else{
-                Notification notification = new Notification("Username invalid");
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.open();
-            }
-        });
-
-        EmailField email = new EmailField("Email");
-        Button editEmail = new Button("Edit email");
-        editEmail.addClickListener(e -> {
-            if (!email.isInvalid() && userService.editEmail(user, email.getValue())) {
-                Notification notification = new Notification("Email changed");
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.open();
-            }else{
-                Notification notification = new Notification("Email invalid");
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.open();
-            }
-        });
-
         PasswordField currentPassword = new PasswordField("Current password");
         PasswordField newPassword = new PasswordField("New password");
         PasswordField confirmPassword = new PasswordField("Confirm new password");
@@ -84,13 +56,6 @@ public class EditProfilePanel extends VerticalLayout {
                 notification.open();
             }
         });
-        HorizontalLayout usernameLayout = new HorizontalLayout();
-        usernameLayout.addAndExpand(username, editUsername);
-        usernameLayout.setAlignItems(Alignment.BASELINE);
-
-        HorizontalLayout emailLayout = new HorizontalLayout();
-        emailLayout.addAndExpand(email, editEmail);
-        emailLayout.setAlignItems(Alignment.BASELINE);
 
         HorizontalLayout passwordLayout1 = new HorizontalLayout();
         passwordLayout1.addAndExpand(newPassword, confirmPassword);
@@ -110,8 +75,6 @@ public class EditProfilePanel extends VerticalLayout {
         this.setMaxWidth("500px");
         this.setAlignItems(Alignment.CENTER);
         this.add(
-                usernameLayout,
-                emailLayout,
                 passwordLayout1,
                 passwordLayout2,
                 goBack

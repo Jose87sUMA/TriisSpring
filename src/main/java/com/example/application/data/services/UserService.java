@@ -1,5 +1,8 @@
 package com.example.application.data.services;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
 import com.example.application.data.entities.Follow;
 import com.example.application.data.entities.FollowCompositePK;
 import com.example.application.data.entities.User;
@@ -7,10 +10,15 @@ import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +26,7 @@ import java.util.List;
 @Service
 public class UserService {
 
+    private final String ACCESS_TOKEN = "sl.BeYi82OjcuWIxFq-zQtFvMqeLCh-pPKkPbMWtYYLQCne3PMgPG2uL_o_53R5FSWMmA42xIokuwrR_DhBDGTWyP-TlAlFZLyjj3pv4MtLeVzLKvCdFfoxT6NP3aE7VsFgEXgNURU";
 
     private final UsersRepository userRep;
     private final FollowRepository followRep;
@@ -29,22 +38,87 @@ public class UserService {
     public User findByUsername(String username){ return userRep.findFirstByUsername(username); }
     public User findByEmail(String email){ return userRep.findFirstByEmail(email); }
 
-    public Image getProfilePicImage(User user){
+    /**
+     * Gets the bytes of the profile picture of a user. Gets from dropbox the image to be displayed which can be the default
+     * one in case the user doesn't have a profile picture.
+     * @param user
+     * @return bytes of the profile picture
+     */
+    @Async
+    public byte [] getProfilePicImageBytes(User user) {
 
-        byte[] imageBytes = user.getProfilePicture();
-        StreamResource resource = new StreamResource(user.getUsername()+".jpg", () -> new ByteArrayInputStream(imageBytes));
-        Image image = new Image(resource, user.getUsername());
+        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
 
+        return getBytesFromDropbox(pathFile);
+
+    }
+
+    /**
+     * Gets the profile picture to be displayed for a user. Gets from dropbox the image to be displayed which can be the default
+     * one in case the user doesn't have a profile picture.
+     * @param user
+     * @return Vaadin.Image object of the profile picture
+     */
+    @Async
+    public Image getProfilePicImage(User user) {
+        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
+        byte [] profilePictureBytes = getProfilePicImageBytes(user);
+
+        Image image;
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(profilePictureBytes);
+            BufferedImage bImg = ImageIO.read(bis);
+
+            StreamResource resource = new StreamResource(user.getUsername(), () -> new ByteArrayInputStream(profilePictureBytes));
+            image = new Image(resource, String.valueOf(user.getUserId()));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return image;
 
     }
 
+    /**
+     * Gets the profile picture to be displayed for a user. Gets from dropbox the image to be displayed which can be the default
+     * one in case the user doesn't have a profile picture.
+     * @param user
+     * @return Vaadin.StreamResource object of the profile picture
+     */
+    @Async
     public StreamResource getProfilePicImageResource(User user){
 
-        byte[] imageBytes = user.getProfilePicture();
-        StreamResource resource = new StreamResource(user.getUsername()+".jpg", () -> new ByteArrayInputStream(imageBytes));
+        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
+        byte [] profilePictureBytes = getProfilePicImageBytes(user);
+
+        StreamResource resource = new StreamResource(user.getUsername(), () -> new ByteArrayInputStream(profilePictureBytes));
 
         return resource;
+
+    }
+
+    /**
+     * Gets the bytes of the picture to be displayed. Gets from dropbox the image to be displayed from the pathFile
+     * @param pathFile
+     * @return bytes of image on dropbox
+     */
+    @Async
+    protected byte[] getBytesFromDropbox(String pathFile){
+
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
+        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+        byte[] imageBytes;
+        try {
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            client.files().download(pathFile).download(outputStream);
+            imageBytes = outputStream.toByteArray();
+
+        } catch (DbxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return imageBytes;
 
     }
 

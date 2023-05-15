@@ -6,6 +6,15 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.UploadErrorException;
+import com.example.application.data.entities.Post;
+import com.example.application.data.entities.User;
+import com.example.application.data.repositories.PostsRepository;
+import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -34,6 +43,7 @@ import java.util.List;
 @Service
 public class PostService {
 
+    private final String ACCESS_TOKEN = "sl.BeYi82OjcuWIxFq-zQtFvMqeLCh-pPKkPbMWtYYLQCne3PMgPG2uL_o_53R5FSWMmA42xIokuwrR_DhBDGTWyP-TlAlFZLyjj3pv4MtLeVzLKvCdFfoxT6NP3aE7VsFgEXgNURU";
     private final PostsRepository postRep;
     private final UsersRepository userRep;
     private final ReportRepository reportRep;
@@ -83,15 +93,35 @@ public class PostService {
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
     //public List<Post> findAllByUserAndDate(User user){ return postRep.findAllByUserIdOrderByPostDateDesc(user.getUserId()); }
 
+    /**
+     * Gets the content to be displayed from a post. Gets from dropbox the image to be displayed which can be from another
+     * post in case the parameter is a repost.
+     * @param post
+     * @return Vaadin.Image object of the content ot be displayed
+     */
+    @Async
     public Image getContent(Post post){
 
-        byte[] imageBytes = post.getContent();
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
+        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+        String pathFile = post.getContent() != null ? post.getContent()  : postRep.findFirstByPostId(post.getOriginalPostId()).getContent();
+        byte[] imageBytes;
+        try {
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            client.files().download("/posts/" + pathFile).download(outputStream);
+            imageBytes = outputStream.toByteArray();
+
+        } catch (DbxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
         Image image;
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
             BufferedImage bImg = ImageIO.read(bis);
 
-            StreamResource resource = new StreamResource(post.getPostId()+".jpg", () -> new ByteArrayInputStream(imageBytes));
+            StreamResource resource = new StreamResource(pathFile, () -> new ByteArrayInputStream(imageBytes));
             image = new Image(resource, String.valueOf(post.getPostId()));
             scaleImage(image, bImg);
 
@@ -152,7 +182,6 @@ public class PostService {
      * @return
      */
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
-
     /**
      * Returns an integer with the ammount of likes of the given Post.
      * @param p
@@ -189,6 +218,9 @@ public class PostService {
     @Async
     public void newLike(User user, Post post) {
         post.setLikes(post.getLikes().add(BigInteger.ONE));
+
+    @Async
+    public Post save(Post post){
         postRep.save(post);
         likeRep.save(new Like(user.getUserId(), post.getPostId()));
     }
@@ -469,4 +501,30 @@ public class PostService {
     }
 
 
+    /**
+     * Creates a new post object and stores fileData in dropbox server with name postId.jpg
+     * @param authenticatedUser
+     * @param b
+     * @param fileData
+     * @return
+     */
+    @Async
+    public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
+
+        Post post = postRep.save(new Post(authenticatedUser, b));
+
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
+        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+
+        try {
+            FileMetadata metadata = client.files().uploadBuilder("/Posts/" + post.getPostId() + ".jpg")
+                    .uploadAndFinish(fileData);
+            post.setContent(metadata.getName());
+            postRep.save(post);
+        } catch (DbxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return post;
+    }
 }
