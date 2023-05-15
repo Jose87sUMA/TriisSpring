@@ -98,4 +98,13 @@ public class PostService {
         return post;
     }
 
+    public List<Post> findAllPost(String stringFilter, User user) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return getAllByPeopleFollowed(user);  // devulver current feed panel
+        } else {
+
+            return  postRep.searchPosts(stringFilter);
+        }
+    }
+
 }

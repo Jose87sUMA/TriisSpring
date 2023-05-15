@@ -27,4 +27,8 @@ public interface UsersRepository extends CrudRepository<User, BigInteger> {
             "where lower(c.username) like lower(concat(:searchFilter, '%'))"  + "and c IN(:userFollower)")
     List<User> searchFollowers(@Param("searchFilter")String stringFilter,@Param("userFollower") List<User> userFollower );
 
+
+
+
+
 }

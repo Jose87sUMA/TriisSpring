@@ -34,4 +34,12 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
 
 
     List<Post> findAllByUserIdOrderByPostDateDesc(BigInteger userId);
+
+
+    @Query("select p from Post p JOIN  User c ON(c.userId = p.userId )"+
+            "where lower(c.username) like lower(concat(:filterSearch, '%'))"  )
+    List<Post> searchPosts(@Param("filterSearch")String filterSearch);
+// poner todos los posts de ese usuario
+
+
 }

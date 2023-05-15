@@ -44,4 +44,25 @@ public class FeedPanel extends Scroller {
 
     }
 
+    public FeedPanel(List<Post> updatedFeed, UserService userService, PostService postService){
+
+        this.userService = userService;
+        this.postService = postService;
+        for(int i = 0; i < Math.min(updatedFeed.size(), 15); ++i){
+
+            content.add(new PostPanel(updatedFeed.get(i), userService, postService));
+
+        }
+
+        content.setSpacing(true);
+        content.addClassName(LumoUtility.AlignItems.CENTER);
+
+        this.addClassName(LumoUtility.AlignItems.CENTER);
+        this.setContent(content);
+
+    }
+
+
+
+
 }
