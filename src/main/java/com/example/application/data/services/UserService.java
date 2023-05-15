@@ -36,13 +36,26 @@ public class UserService {
     public User findByUsername(String username){ return userRep.findFirstByUsername(username); }
     public User findByEmail(String email){ return userRep.findFirstByEmail(email); }
 
+    /**
+     * Gets the bytes of the profile picture of a user. Gets from dropbox the image to be displayed which can be the default
+     * one in case the user doesn't have a profile picture.
+     * @param user
+     * @return bytes of the profile picture
+     */
     public byte [] getProfilePicImageBytes(User user) {
 
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
 
-        return getBytesFromDropbox(user, pathFile);
+        return getBytesFromDropbox(pathFile);
 
     }
+
+    /**
+     * Gets the profile picture to be displayed for a user. Gets from dropbox the image to be displayed which can be the default
+     * one in case the user doesn't have a profile picture.
+     * @param user
+     * @return Vaadin.Image object of the profile picture
+     */
     public Image getProfilePicImage(User user) {
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
         byte [] profilePictureBytes = getProfilePicImageBytes(user);
@@ -62,6 +75,13 @@ public class UserService {
 
     }
 
+    /**
+     * Gets the profile picture to be displayed for a user. Gets from dropbox the image to be displayed which can be the default
+     * one in case the user doesn't have a profile picture.
+     * @param user
+     * @return Vaadin.StreamResource object of the profile picture
+     */
+
     public StreamResource getProfilePicImageResource(User user){
 
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
@@ -73,7 +93,12 @@ public class UserService {
 
     }
 
-    private byte[] getBytesFromDropbox(User user, String pathFile){
+    /**
+     * Gets the bytes of the picture to be displayed. Gets from dropbox the image to be displayed from the pathFile
+     * @param pathFile
+     * @return bytes of image on dropbox
+     */
+    private byte[] getBytesFromDropbox(String pathFile){
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
         DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);

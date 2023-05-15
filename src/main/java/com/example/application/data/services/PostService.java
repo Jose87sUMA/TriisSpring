@@ -34,6 +34,12 @@ public class PostService {
     public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
     public List<Post> findAllByUserAndDate(User user){ return postRep.findAllByUserIdOrderByPostDateDesc(user.getUserId()); }
 
+    /**
+     * Gets the content to be displayed from a post. Gets from dropbox the image to be displayed which can be from another
+     * post in case the parameter is a repost.
+     * @param post
+     * @return Vaadin.Image object of the content ot be displayed
+     */
     public Image getContent(Post post){
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
@@ -110,6 +116,11 @@ public class PostService {
 
     }
 
+    /**
+     * Get All the Posts of people followed by user given as parameter
+     * @param user
+     * @return
+     */
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
     public Post save(Post post){
@@ -117,6 +128,13 @@ public class PostService {
         return post;
     }
 
+    /**
+     * Creates a new post object and stores fileData in dropbox server with name postId.jpg
+     * @param authenticatedUser
+     * @param b
+     * @param fileData
+     * @return
+     */
     public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));
