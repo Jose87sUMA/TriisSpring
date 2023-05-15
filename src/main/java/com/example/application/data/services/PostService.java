@@ -106,13 +106,13 @@ public class PostService {
         int imgWidth = bufferedImage.getWidth();
         double aspect = (double) imgHeight / (double) imgWidth;
 
-        if(aspect <= 1){
+//        if(aspect <= 1) {
             image.setWidth("400px");
-            image.setHeight(400*aspect + "px");
-        }else{
-            image.setWidth(400*aspect + "px");
-            image.setHeight("400px");
-        }
+            image.setHeight(400 * aspect + "px");
+//        }else{
+//            image.setWidth(400/aspect + "px");
+//            image.setHeight("400px");
+//        }
     }
 
 
