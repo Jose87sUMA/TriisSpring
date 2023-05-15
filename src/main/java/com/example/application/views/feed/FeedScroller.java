@@ -42,14 +42,14 @@ public class FeedScroller extends VerticalLayout {
     /**
      * Constructs the feed.
      * @param feedType Type of feed.
-     * @param authenticatedUser
+     * @param user If SortType PROFILE user must be the profile. Otherwise, user is authenticated user.
      * @param userService
      * @param postService
      */
-    public FeedScroller(FeedType feedType, User authenticatedUser, UserService userService, PostService postService) {
+    public FeedScroller(FeedType feedType, User user, UserService userService, PostService postService) {
         this.userService = userService;
         this.postService = postService;
-        this.feedService = new FeedService(this.postService.getPostRepository(), feedType, authenticatedUser.getUserId());
+        this.feedService = new FeedService(this.postService.getPostRepository(), feedType, user.getUserId());
 
         loadMore = new Button("Load More Posts", e -> loadMore());
 

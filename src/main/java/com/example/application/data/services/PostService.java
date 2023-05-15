@@ -29,10 +29,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.sql.*;
 import java.time.*;
@@ -43,7 +40,7 @@ import java.util.List;
 @Service
 public class PostService {
 
-    private final String ACCESS_TOKEN = "sl.BeYi82OjcuWIxFq-zQtFvMqeLCh-pPKkPbMWtYYLQCne3PMgPG2uL_o_53R5FSWMmA42xIokuwrR_DhBDGTWyP-TlAlFZLyjj3pv4MtLeVzLKvCdFfoxT6NP3aE7VsFgEXgNURU";
+    private final String ACCESS_TOKEN = "sl.BeYlJ4Fjd-cjtCM_HMAlBBkE4Mh_3dDRM3zgJXhfXFWun0FmBI5GuM_24Rr9FxLkfyhvg26aQtysco6tedht0zExFb7Ej6kfQwkDGyTaposN25AFwmgacAl2ySXLwPxSRtAZrR4";
     private final PostsRepository postRep;
     private final UsersRepository userRep;
     private final ReportRepository reportRep;
@@ -99,7 +96,6 @@ public class PostService {
      * @param post
      * @return Vaadin.Image object of the content ot be displayed
      */
-    @Async
     public Image getContent(Post post){
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
@@ -218,10 +214,6 @@ public class PostService {
     @Async
     public void newLike(User user, Post post) {
         post.setLikes(post.getLikes().add(BigInteger.ONE));
-
-    @Async
-    public Post save(Post post){
-        postRep.save(post);
         likeRep.save(new Like(user.getUserId(), post.getPostId()));
     }
 
@@ -508,7 +500,6 @@ public class PostService {
      * @param fileData
      * @return
      */
-    @Async
     public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));

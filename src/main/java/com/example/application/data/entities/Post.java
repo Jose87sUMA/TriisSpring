@@ -1,6 +1,5 @@
 package com.example.application.data.entities;
 
-import com.vaadin.flow.component.html.Image;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -10,12 +9,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
@@ -39,8 +34,8 @@ public class Post implements Serializable {
     @Column(name = "LIKES")
     private BigInteger likes;
     @Basic
-    @Column(name = "CONTENT_DEPRECATED")
-    private byte[] content;
+    @Column(name = "CONTENT")
+    private String content;
     @Basic
     @Column(name = "POINTED")
     private String pointed;
@@ -174,8 +169,8 @@ public class Post implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(postId, userId, post_date, points, likes, pointed, repostId, originalPostId);
-        result = 31 * result + Arrays.hashCode(content);
+        int result = Objects.hash(postId, userId, post_date, points, likes, pointed, repostId, originalPostId, content);
+        result = 31 * result;
         return result;
     }
 

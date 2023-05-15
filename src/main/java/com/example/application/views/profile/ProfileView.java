@@ -50,6 +50,8 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
 
+        this.removeAll();
+
         if(parameter == null)
             user = authenticatedUser;
         else if((user = userService.findByUsername(parameter)) == null){
@@ -57,7 +59,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             return;
         }
 
-        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, authenticatedUser, userService, postService);
+        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, user, userService, postService);
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
         this.setMargin(true);

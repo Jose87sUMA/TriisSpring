@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private final String ACCESS_TOKEN = "sl.BeYi82OjcuWIxFq-zQtFvMqeLCh-pPKkPbMWtYYLQCne3PMgPG2uL_o_53R5FSWMmA42xIokuwrR_DhBDGTWyP-TlAlFZLyjj3pv4MtLeVzLKvCdFfoxT6NP3aE7VsFgEXgNURU";
+    private final String ACCESS_TOKEN = "sl.BeYlJ4Fjd-cjtCM_HMAlBBkE4Mh_3dDRM3zgJXhfXFWun0FmBI5GuM_24Rr9FxLkfyhvg26aQtysco6tedht0zExFb7Ej6kfQwkDGyTaposN25AFwmgacAl2ySXLwPxSRtAZrR4";
 
     private final UsersRepository userRep;
     private final FollowRepository followRep;
@@ -44,7 +44,6 @@ public class UserService {
      * @param user
      * @return bytes of the profile picture
      */
-    @Async
     public byte [] getProfilePicImageBytes(User user) {
 
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
@@ -59,7 +58,6 @@ public class UserService {
      * @param user
      * @return Vaadin.Image object of the profile picture
      */
-    @Async
     public Image getProfilePicImage(User user) {
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
         byte [] profilePictureBytes = getProfilePicImageBytes(user);
@@ -85,7 +83,6 @@ public class UserService {
      * @param user
      * @return Vaadin.StreamResource object of the profile picture
      */
-    @Async
     public StreamResource getProfilePicImageResource(User user){
 
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
@@ -102,7 +99,6 @@ public class UserService {
      * @param pathFile
      * @return bytes of image on dropbox
      */
-    @Async
     protected byte[] getBytesFromDropbox(String pathFile){
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
