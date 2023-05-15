@@ -4,6 +4,7 @@ import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.example.application.data.services.threads.SpringAsyncConfig;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -18,17 +19,20 @@ import com.example.application.data.services.FeedService;
 
 
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Class that manages a feed.
  */
 public class FeedScroller extends VerticalLayout {
     SortType current = null;
+    SpringAsyncConfig executor = new SpringAsyncConfig();
 
     Button loadMore;
     MenuBar sorting;
-
-    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.naturalOrder()),
+    UI ui;
+    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.reverseOrder()),
                                                           SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
 
     PriorityQueue<Post> buffer;
@@ -46,7 +50,9 @@ public class FeedScroller extends VerticalLayout {
      * @param userService
      * @param postService
      */
-    public FeedScroller(FeedType feedType, User user, UserService userService, PostService postService) {
+    public FeedScroller(FeedType feedType, User user, UserService userService, PostService postService, UI ui) {
+
+        this.ui = ui;
         this.userService = userService;
         this.postService = postService;
         this.feedService = new FeedService(this.postService.getPostRepository(), feedType, user.getUserId());
@@ -107,14 +113,33 @@ public class FeedScroller extends VerticalLayout {
      * Adds posts into the feed.
      */
     private void addPosts(){
+        Map<Post, Boolean> newPostPanelsBool = new TreeMap<>(sorter.get(current));
+        Map<Post, PostPanel> newPostPanels = new TreeMap<>(sorter.get(current));
+        boolean empty = false;
         for(int i = 0; i < FeedService.ELEMENTS; i++){
             if (buffer.isEmpty()) {
-                content.add(new Text("No more posts available."));
+                empty = true;
                 loadMore.setEnabled(false);
                 break;
             }
-            content.add(new PostPanel(buffer.poll(), userService, postService));
+            PostPanel postPanel = new PostPanel(buffer.poll(), userService, postService);
+            newPostPanelsBool.put(postPanel.post, false);
+            newPostPanels.put(postPanel.post, postPanel);
+
+            executor.getAsyncExecutor().execute(() -> {
+                postPanel.loadPostPanel(ui);
+                newPostPanelsBool.put(postPanel.post, true);
+            });
         }
+        for(Map.Entry<Post, PostPanel> entry :  newPostPanels.entrySet()){
+            while(!newPostPanelsBool.get(entry.getKey())){}
+            content.add(entry.getValue());
+        }
+
+        if(empty)
+            content.add(new Text("No more posts available."));
+        
+        System.out.println("Outside addPosts");
     }
 
     /**

@@ -1,10 +1,7 @@
 package com.example.application.views.feed;
 import com.example.application.data.entities.PostsPointLog;
 import com.example.application.data.entities.Role;
-import com.example.application.data.repositories.PostPointLogRepository;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
@@ -14,11 +11,6 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.notification.Notification;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.UploadErrorException;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
@@ -35,24 +27,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.theme.lumo.LumoIcon;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.annotation.Resource;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
-import jakarta.persistence.PersistenceContext;
-import jakarta.validation.constraints.NegativeOrZero;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
-import java.math.BigInteger;
+
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.concurrent.CompletableFuture;
 
 
 public class PostPanel extends VerticalLayout {
@@ -74,8 +54,13 @@ public class PostPanel extends VerticalLayout {
         this.userService = userService;
         this.postService = postService;
         this.authenticatedUser =  userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        System.out.println("Outside constructor: " + post.getPostId());
 
-        this.content = postService.getContent(post);
+    }
+
+    @Async
+    public CompletableFuture<Void> loadPostPanel(UI ui){
+        this.content = postService.getContent(post, ui);
 
         Float height = Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))+60;
         this.setHeight(height + "px");
@@ -96,8 +81,9 @@ public class PostPanel extends VerticalLayout {
         this.setAlignItems(FlexComponent.Alignment.CENTER);
 
         this.add(postHeader, content, interactionFooter,commentSection);
+        System.out.println("Finished load: " + post.getPostId());
 
-
+        return CompletableFuture.completedFuture(null);
     }
 
     protected class PostHeader extends HorizontalLayout {
@@ -109,7 +95,7 @@ public class PostPanel extends VerticalLayout {
             Avatar profileAvatar = new Avatar(poster.getUsername());
             profileAvatar.setImageResource(userService.getProfilePicImageResource(poster));
 
-            Button profileName = new Button(poster.getUsername() + " - " + post.getPoints());
+            Button profileName = new Button(poster.getUsername() + " - " + post.getPoints() + " - " + post.getPost_date());
             profileName.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
             profileName.setWidth("270px");
             profileName.setHeight("30px");

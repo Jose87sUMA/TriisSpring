@@ -12,7 +12,9 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.persistence.Index;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class FeedPanel extends Scroller {
 

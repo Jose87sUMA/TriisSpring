@@ -10,6 +10,7 @@ import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.data.services.FeedService.FeedType;
 import com.example.application.views.MainLayout;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
@@ -46,8 +47,8 @@ public class FeedView extends HorizontalLayout {
         feedPanel.addClassName("feed-panel");
         feedPanel.addClassName(LumoUtility.AlignItems.CENTER);
 
-        feedPanel.add("Discovery", new FeedScroller(FeedType.DISCOVERY, authenticatedUser, userService, postService));
-        feedPanel.add("Following", new FeedScroller(FeedType.FOLLOWING, authenticatedUser, userService, postService));
+        feedPanel.add("Discovery", new FeedScroller(FeedType.DISCOVERY, authenticatedUser, userService, postService, UI.getCurrent()));
+        feedPanel.add("Following", new FeedScroller(FeedType.FOLLOWING, authenticatedUser, userService, postService, UI.getCurrent()));
         feedPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
 
 //        getElement().executeJs("""
