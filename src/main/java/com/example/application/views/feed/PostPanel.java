@@ -59,6 +59,13 @@ public class PostPanel extends VerticalLayout {
     InteractionFooter interactionFooter;
     CommentSection commentSection;
 
+    /**
+     * this class represents the visual representation of a single post
+     * it is divided into a header, an image and a footer
+     * @param post
+     * @param userService
+     * @param postService
+     */
     public PostPanel(Post post, UserService userService, PostService postService){
 
         this.post = post;
@@ -92,6 +99,10 @@ public class PostPanel extends VerticalLayout {
 
     }
 
+
+    /**
+     * HEADER: includes an avatar, information about the user and post and a menu
+     */
     protected class PostHeader extends HorizontalLayout {
         public PostHeader(String width) {
 
@@ -121,6 +132,13 @@ public class PostPanel extends VerticalLayout {
     }
 
 
+    /**
+     * MENU:
+     * if it's the user's pointed post or the user is an admin: options are delete post or view statistics
+     * if it's the user's not pointed post or the user is an admin: options are delete post
+     * if not, report option is available
+     * @return menubar component with the corresponding options
+     */
     private MenuBar createPostMenuLayout(){
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
@@ -128,28 +146,33 @@ public class PostPanel extends VerticalLayout {
         SubMenu subItems = options.getSubMenu();
         if(poster.equals(authenticatedUser) || authenticatedUser.getRoles().contains(Role.ADMIN)){
             MenuItem delete = subItems.addItem("Delete");
-            MenuItem statistics = subItems.addItem("View statistics");
-
             delete.addClickListener(e -> {
-                    createConfirmDelete().open();
+                createConfirmDelete().open();
             });
 
-            statistics.addClickListener(e -> {
-                createStatisticsLayout().open();
-            });
+            if(post.getPointed().equals("Y")){
+                MenuItem statistics = subItems.addItem("View statistics");
+
+
+
+                statistics.addClickListener(e -> {
+                    createStatisticsLayout().open();
+                });
+            }
 
         }else{
             MenuItem report = subItems.addItem("Report");
             report.addClickListener(e -> {
                 createReportLayout().open();
             });
-
-
         }
-
         return menuBar;
     }
 
+    /**
+     * options for reporting appear, user can choose between a predefined value or type a reason
+     * @return confirmation dialog for report
+     */
     private ConfirmDialog createReportLayout(){
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setWidth("475px");
@@ -158,7 +181,7 @@ public class PostPanel extends VerticalLayout {
         RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroup.setLabel("Reason for reporting");
-        radioGroup.setItems("Violence", "Sexual content", "Discriminatory content", "Other (write your reason)");
+        radioGroup.setItems("Violence", "Sexual content", "I'm in this picture and I don't like it", "Other (write your reason)");
         TextField other = new TextField("Other");
         dialog.add(radioGroup, other);
 
@@ -180,6 +203,10 @@ public class PostPanel extends VerticalLayout {
 
     }
 
+    /**
+     *
+     * @return confirmation dialog for delete
+     */
     private ConfirmDialog createConfirmDelete(){
 
         ConfirmDialog dialog = new ConfirmDialog();
@@ -191,7 +218,7 @@ public class PostPanel extends VerticalLayout {
         dialog.setConfirmText("Delete");
         dialog.setConfirmButtonTheme("error primary");
         dialog.addConfirmListener(e -> {
-            //postService.deletePost(post);
+            postService.deletePost(post);
             this.removeFromParent();
         });
         return dialog;
@@ -256,6 +283,9 @@ public class PostPanel extends VerticalLayout {
     }
 
 
+    /**
+     *
+     */
     protected class InteractionFooter extends HorizontalLayout {
 
         public InteractionFooter(String width, Post post) {
