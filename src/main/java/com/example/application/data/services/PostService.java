@@ -11,6 +11,7 @@ import com.example.application.data.repositories.PostsRepository;
 import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -40,6 +41,7 @@ public class PostService {
      * @param post
      * @return Vaadin.Image object of the content ot be displayed
      */
+    @Async
     public Image getContent(Post post){
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
@@ -123,6 +125,7 @@ public class PostService {
      */
     public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
 
+    @Async
     public Post save(Post post){
         postRep.save(post);
         return post;
@@ -135,6 +138,7 @@ public class PostService {
      * @param fileData
      * @return
      */
+    @Async
     public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));

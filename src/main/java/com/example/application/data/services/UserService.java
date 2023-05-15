@@ -9,6 +9,7 @@ import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,7 @@ public class UserService {
      * @param user
      * @return bytes of the profile picture
      */
+    @Async
     public byte [] getProfilePicImageBytes(User user) {
 
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
@@ -56,6 +58,7 @@ public class UserService {
      * @param user
      * @return Vaadin.Image object of the profile picture
      */
+    @Async
     public Image getProfilePicImage(User user) {
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
         byte [] profilePictureBytes = getProfilePicImageBytes(user);
@@ -81,7 +84,7 @@ public class UserService {
      * @param user
      * @return Vaadin.StreamResource object of the profile picture
      */
-
+    @Async
     public StreamResource getProfilePicImageResource(User user){
 
         String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
@@ -98,7 +101,8 @@ public class UserService {
      * @param pathFile
      * @return bytes of image on dropbox
      */
-    private byte[] getBytesFromDropbox(String pathFile){
+    @Async
+    protected byte[] getBytesFromDropbox(String pathFile){
 
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
         DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
