@@ -19,6 +19,7 @@ import java.util.List;
 public class LeaderboardScroller extends VerticalLayout {
 
     private final UserService userService;
+    private final PostService postService;
     private final LeaderboardService leaderboardService;
     private final LeaderboardService.LeaderboardType leaderboardType;
     /**
@@ -37,8 +38,9 @@ public class LeaderboardScroller extends VerticalLayout {
      * @param userService
      * @param leaderboardService
      */
-    LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, UserService userService, LeaderboardService leaderboardService) {
+    LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, UserService userService, PostService postService, LeaderboardService leaderboardService) {
         this.userService = userService;
+        this.postService =postService;
         this.leaderboardService = leaderboardService;
         this.leaderboardType = leaderboardType;
 
@@ -64,7 +66,7 @@ public class LeaderboardScroller extends VerticalLayout {
 
         if(posts != null && posts.size() != 0){
             for(int i = 0; i < Math.min(10, posts.size()); i++){
-                content.add(new H4 ((i+1) + " Position"), new PostPanel(posts.get(i), userService, leaderboardService));
+                content.add(new H4 ((i+1) + " Position"), new PostPanel(posts.get(i), userService, postService));
             }
         }else if(users != null && users.size() != 0){
             Button buttonUser[] = new Button[users.size()];

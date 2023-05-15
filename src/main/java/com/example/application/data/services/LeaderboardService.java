@@ -13,14 +13,13 @@ import java.util.List;
 
 
 @Service
-public class LeaderboardService extends PostService{
+public class LeaderboardService{
     private final UsersRepository userRep;
     private final PostsRepository postRep;
 
     public enum LeaderboardType {TODAY, THIS_WEEK,THIS_MONTH, THIS_YEAR, ALL_TIME, USERS}
 
     public LeaderboardService(PostsRepository postRep, UsersRepository userRep) {
-        super(postRep);
         this.userRep = userRep;
         this.postRep = postRep;
     }
