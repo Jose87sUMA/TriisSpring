@@ -35,6 +35,7 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Future;
 
 
 @Service
@@ -64,6 +65,7 @@ public class PostService {
      * @param post
      * @return
      */
+    @Async
     public Post save(Post post){
         postRep.save(post);
         return post;
@@ -97,21 +99,17 @@ public class PostService {
      * @return Vaadin.Image object of the content ot be displayed
      */
     public Image getContent(Post post){
-
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
         DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
         String pathFile = post.getContent() != null ? post.getContent()  : postRep.findFirstByPostId(post.getOriginalPostId()).getContent();
         byte[] imageBytes;
         try {
-
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             client.files().download("/posts/" + pathFile).download(outputStream);
             imageBytes = outputStream.toByteArray();
-
         } catch (DbxException | IOException e) {
             throw new RuntimeException(e);
         }
-
         Image image;
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
@@ -500,6 +498,7 @@ public class PostService {
      * @param fileData
      * @return
      */
+    @Async
     public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));

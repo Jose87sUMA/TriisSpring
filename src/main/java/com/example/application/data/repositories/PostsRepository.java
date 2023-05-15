@@ -20,6 +20,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findAllByUserId(BigInteger userId);
     Post findFirstByPostId(BigInteger postId);
 
+
     Post save(Post p);
 
     Post findByPostIdAndUserId(BigInteger postId, BigInteger userId);
