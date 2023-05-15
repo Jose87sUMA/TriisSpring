@@ -2,6 +2,7 @@ package com.example.application.data.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -10,6 +11,7 @@ import java.util.*;
 @Entity
 @Table(name = "USERS", schema = "UBD3336", catalog = "")
 @DynamicUpdate
+@Transactional
 public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -42,13 +44,8 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Role> roles;
-
-    @Transient
-    private Map<BigInteger, User> followers;
-    @Transient
-    private Map<BigInteger, User> following;
-    @Transient
-    private Map<BigInteger, Post> posts;
+    @OneToMany(mappedBy = "reporter")
+    private List<Report> reports;
 
 
     public BigInteger getUserId() {
@@ -131,6 +128,13 @@ public class User implements Serializable {
         this.roles = roles;
     }
 
+   /* public List<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }*/
 
     public User(){}
 
@@ -141,10 +145,7 @@ public class User implements Serializable {
         email = newEmail;
         type1Points = BigInteger.valueOf(500);
         type2Points = BigInteger.valueOf(100);
-        posts = new TreeMap<>();
         verified = "N";
-        following = new TreeMap<>();
-        followers = new TreeMap<>();
         profilePicture = null;
         //tree = new Tree();
 

@@ -8,7 +8,9 @@ import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import jakarta.persistence.Index;
 
 import java.util.List;
 
@@ -18,7 +20,6 @@ public class FeedPanel extends Scroller {
     private final UserService userService;
     private final PostService postService;
     private VerticalLayout content = new VerticalLayout();
-
 
     public FeedPanel(User authenticatedUser, UserService userService, PostService postService){
 
@@ -31,9 +32,7 @@ public class FeedPanel extends Scroller {
         List<Post> postsByFollowing = postService.getAllByPeopleFollowed(authenticatedUser);
 
         for(int i = 0; i < Math.min(postsByFollowing.size(), 15); ++i){
-
             content.add(new PostPanel(postsByFollowing.get(i), userService, postService));
-
         }
 
         content.setSpacing(true);

@@ -2,9 +2,11 @@ package com.example.application.views.profile;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.data.services.FeedService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.MainLayout;
+import com.example.application.views.feed.FeedScroller;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -31,8 +33,8 @@ import java.io.InputStream;
 @PermitAll
 public class ProfileView extends VerticalLayout implements HasUrlParameter<String> {
 
-    private ProfilePanel profilePanel;
-    private User user;
+    private FeedScroller profilePanel;
+    private User user, authenticatedUser;
     private final UserService userService;
     private final PostService postService;
 
@@ -41,6 +43,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
         this.postService = postService;
         this.userService = userService;
+        this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
     }
 
@@ -48,13 +51,13 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
 
         if(parameter == null)
-            user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+            user = authenticatedUser;
         else if((user = userService.findByUsername(parameter)) == null){
             event.forwardTo("feed");
             return;
         }
 
-        profilePanel = new ProfilePanel(user, userService, postService);
+        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, authenticatedUser, userService, postService);
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
         this.setMargin(true);
@@ -69,6 +72,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     }
 
+    Button followers, follow;
 
     /**
      * CUSTOMIZING  BUTTONS
@@ -78,9 +82,13 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         Button following = new Button("Following: " + userService.getFollowing(user).size());
         following.addClickListener(event -> UI.getCurrent().navigate("profile/?following/" + user.getUsername()));
 
-        Button follow = new Button("Followers: " + userService.getFollowers(user).size());
+        followers = new Button("Followers: " + userService.getFollowers(user).size());
         Button type1 = new Button("Type 1 points: " + user.getType1Points());
         Button type2 = new Button("Type 2 points: " + user.getType2Points());
+
+        follow = new Button(!isFollowing(user) ? "Follow" : "Unfollow");
+        follow.addClickListener(e -> follow());
+
         Button makePost = new Button("Make a Post");
 
         Button editProfile = new Button("Edit Profile");
@@ -90,10 +98,30 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             makePost.setVisible(false);
             editProfile.setVisible(false);
         }else{
+            follow.setVisible(false);
             makePost.addClickListener(e -> new MakePostBox(postService, userService, profilePanel).open()) ;
         }
-        return new HorizontalLayout(follow, following, type1, type2, makePost, editProfile);
+        return new HorizontalLayout(followers, following, type1, type2, follow, makePost, editProfile);
 
+    }
+
+    /**
+     * Following or unfollowing a user and refresing the buttons.
+     */
+    void follow(){
+        if (!isFollowing(user)) userService.follow(authenticatedUser, user);
+        else userService.unfollow(authenticatedUser, user);
+        followers.setText("Followers: " + userService.getFollowers(user).size());
+        follow.setText(!isFollowing(user) ? "Follow" : "Unfollow");
+    }
+
+    /**
+     * Is the current user following user.
+     * @param user The user followed?
+     * @return true if followed. false otherwise.
+     */
+    boolean isFollowing(User user){
+        return userService.getFollowing(authenticatedUser).contains(user);
     }
 
     /*private Image createProfilePicture(){

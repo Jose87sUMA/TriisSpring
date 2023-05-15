@@ -4,6 +4,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.example.application.data.entities.Follow;
+import com.example.application.data.entities.FollowCompositePK;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.UsersRepository;
@@ -127,9 +128,7 @@ public class UserService {
         List<User> followingUsers = new ArrayList<>();
 
         for(Follow followEntry: followingEntries){
-
             followingUsers.add(this.findById(followEntry.getUserIdFollowing()));
-
         }
         return followingUsers;
     }
@@ -147,6 +146,29 @@ public class UserService {
         return followers;
     }
 
+    /**
+     * Adds a Follow entity to the database.
+     * @param follower User who is following.
+     * @param following User who is being followed.
+     */
+    public void follow(User follower, User following){
+        followRep.save(new Follow(follower.getUserId(), following.getUserId()));
+    }
+
+    /**
+     * Removes a Follow entity to the database.
+     * @param follower User who was following.
+     * @param following User who was being followed.
+     */
+    public void unfollow(User follower, User following){
+        followRep.delete(followRep.findByUserIdFollowerAndUserIdFollowing(follower.getUserId(), following.getUserId()));
+    }
+
+    /**
+     * This method updates information about a user or saves a new User.
+     * @param user
+     * @return
+     */
     public User save(User user){
         userRep.save(user);
         return user;

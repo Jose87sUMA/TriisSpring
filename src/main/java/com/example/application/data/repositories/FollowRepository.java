@@ -12,7 +12,5 @@ public interface FollowRepository extends CrudRepository<Follow, BigInteger> {
 
     List<Follow> findAllByUserIdFollower(BigInteger UserIdFollower);
     List<Follow> findAllByUserIdFollowing(BigInteger UserIdFollowing);
-
-
-
+    Follow findByUserIdFollowerAndUserIdFollowing(BigInteger userId, BigInteger userId1);
 }

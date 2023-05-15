@@ -10,6 +10,7 @@ import java.util.Objects;
 @jakarta.persistence.Table(name = "LIKES", schema = "UBD3336", catalog = "")
 @IdClass(LikesCompositePK.class)
 public class Like implements Serializable {
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @jakarta.persistence.Column(name = "USER_ID")
@@ -20,9 +21,20 @@ public class Like implements Serializable {
     @jakarta.persistence.Column(name = "POST_ID")
     private BigInteger postId;
 
+    @EmbeddedId
+    LikesCompositePK id = new LikesCompositePK();
+
+
+
     public LikesCompositePK getId() {
         return new LikesCompositePK(userId, postId);
     }
+
+    public void setId(LikesCompositePK key) {
+        this.userId = key.getUserId();
+        this.postId = key.getPostId();
+    }
+
 
     public BigInteger getUserId() {
         return userId;
@@ -36,6 +48,12 @@ public class Like implements Serializable {
     }
 
     public void setPostId(BigInteger postId) {
+        this.postId = postId;
+    }
+
+    public Like(){}
+    public Like(BigInteger userId, BigInteger postId){
+        this.userId = userId;
         this.postId = postId;
     }
 

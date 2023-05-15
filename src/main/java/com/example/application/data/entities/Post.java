@@ -2,6 +2,7 @@ package com.example.application.data.entities;
 
 import com.vaadin.flow.component.html.Image;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -10,11 +11,15 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.time.*;
-import java.util.*;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
+@DynamicUpdate
 public class Post implements Serializable {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +31,7 @@ public class Post implements Serializable {
     private BigInteger userId;
     @Basic
     @Column(name = "POST_DATE")
-    private Date postDate;
+    private Date post_date;
     @Basic
     @Column(name = "POINTS")
     private BigInteger points;
@@ -34,8 +39,8 @@ public class Post implements Serializable {
     @Column(name = "LIKES")
     private BigInteger likes;
     @Basic
-    @Column(name = "CONTENT")
-    private String content;
+    @Column(name = "CONTENT_DEPRECATED")
+    private byte[] content;
     @Basic
     @Column(name = "POINTED")
     private String pointed;
@@ -45,7 +50,8 @@ public class Post implements Serializable {
     @Basic
     @Column(name = "ORIGINAL_POST_ID")
     private BigInteger originalPostId;
-
+    @OneToMany(mappedBy = "reportedPost")
+    private List<Report> reports;
 
     public Post() {
     }
@@ -56,16 +62,26 @@ public class Post implements Serializable {
         this.postId = null;
         this.originalPostId = null;
         this.repostId = null;
-        this.postDate = Date.from(Instant.now());
+        this.post_date = Date.from(Instant.now());
         this.userId = user.getUserId();
         this.points = BigInteger.ZERO;
         this.pointed = pointed ? "Y":"N";
         this.likes = BigInteger.ZERO;
     }
+    //FOR REPOST
+    public Post(Post post, User user, boolean pointed) {
+        if(post.originalPostId == null) this.originalPostId = post.getPostId();
+        else this.originalPostId = post.getOriginalPostId();
 
-
-
-
+        this.postId = null;
+        this.repostId = post.getPostId();
+        this.post_date = Date.from(Instant.now());
+        this.userId = user.getUserId();
+        this.content = null;
+        this.points = BigInteger.ZERO;
+        this.pointed = pointed ? "Y":"N";
+        this.likes = BigInteger.ZERO;
+    }
 
 
     public BigInteger getPostId() {
@@ -84,12 +100,12 @@ public class Post implements Serializable {
         this.userId = userId;
     }
 
-    public Date getPostDate() {
-        return postDate;
+    public Date getPost_date() {
+        return post_date;
     }
 
-    public void setPostDate(Date postDate) {
-        this.postDate = postDate;
+    public void setPost_date(Date postDate) {
+        this.post_date = postDate;
     }
 
     public BigInteger getPoints() {
@@ -140,18 +156,26 @@ public class Post implements Serializable {
         this.originalPostId = originalPostId;
     }
 
+    /*public List<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }*/
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post that = (Post) o;
-        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(postDate, that.postDate) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Objects.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
+        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(post_date, that.post_date) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Objects.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(postId, userId, postDate, points, likes, pointed, repostId, originalPostId, content);
-        result = 31 * result;
+        int result = Objects.hash(postId, userId, post_date, points, likes, pointed, repostId, originalPostId);
+        result = 31 * result + Arrays.hashCode(content);
         return result;
     }
 

@@ -4,6 +4,7 @@ import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.example.application.views.feed.FeedScroller;
 import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -17,6 +18,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
@@ -29,6 +31,7 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Vector;
 
 import static java.lang.Math.min;
 
@@ -41,7 +44,7 @@ public class MakePostBox extends Dialog {
     /**
      * next attribute is used to add the post uploaded directly to profile panel
      */
-    private final ProfilePanel profilePanel;
+    private final FeedScroller profilePanel;
     boolean pointedPost;
     boolean notPointedPost;
     private InputStream fileData;
@@ -57,7 +60,7 @@ public class MakePostBox extends Dialog {
 
 
 
-    public MakePostBox(PostService postService, UserService userService, ProfilePanel profilePanel) {
+    public MakePostBox(PostService postService, UserService userService, FeedScroller profilePanel) {
         this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         this.postService = postService;
         this.userService = userService;
@@ -166,7 +169,7 @@ public class MakePostBox extends Dialog {
         if(validFile && notPointedPost){
             try{
                 Post post = postService.creatPost(authenticatedUser, false, fileData);
-                profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
+                profilePanel.refresh();
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Not-pointed post saved correctly");
                 notification.open();
@@ -182,7 +185,7 @@ public class MakePostBox extends Dialog {
         }else if(validFile && enoughPoints){
             try{
                 Post post = postService.creatPost(authenticatedUser, true, fileData);
-                profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
+                profilePanel.refresh();
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Pointed post saved correctly");
                 notification.open();
