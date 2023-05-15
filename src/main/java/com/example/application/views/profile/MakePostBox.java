@@ -2,6 +2,8 @@ package com.example.application.views.profile;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.data.exceptions.MakePostException;
+import com.example.application.data.services.MakePostService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.feed.FeedScroller;
@@ -41,14 +43,13 @@ public class MakePostBox extends Dialog {
     private final PostService postService;
     private final User authenticatedUser;
     private final UserService userService;
+    private final MakePostService makePostService;
     /**
      * next attribute is used to add the post uploaded directly to profile panel
      */
     private final FeedScroller profilePanel;
     boolean pointedPost;
-    boolean notPointedPost;
     private InputStream fileData;
-    private boolean validFile = false;
     private boolean uploadByLink = false;
     /**
      *  components that appear and disappear from the window
@@ -59,22 +60,27 @@ public class MakePostBox extends Dialog {
     private Button linkButton = new Button("Link");
 
 
-
+    /**
+     * constructor initializes a window for making posts
+     * @param postService
+     * @param userService
+     * @param profilePanel
+     */
     public MakePostBox(PostService postService, UserService userService, FeedScroller profilePanel) {
         this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         this.postService = postService;
         this.userService = userService;
         this.profilePanel = profilePanel;
         this.pointedPost = false;
-        this.notPointedPost = true;
         this.fileData = null;
+        this.makePostService = new MakePostService(authenticatedUser, userService, postService);
         createUploadPictureLayout();
 
     }
 
-    /**ADDS AND STYLES THE COMPONENT OF MAKE POST WINDOW,
-     * ADDS CLOSING FUNCTIONALITY
-     * CALLS AUXILIAR FUNCTIONS TO CREATE COMPONENTS AND MODEL BEHAVIOUR
+    /**adds and styles the component of make post window,
+     * adds closing functionality
+     * calls auxiliar functions to create components and model behaviour
      * */
     private void createUploadPictureLayout(){
         this.setDraggable(true);
@@ -135,172 +141,55 @@ public class MakePostBox extends Dialog {
     }
 
     /**
-     * USES POST CONSTRUCTOR TO SAVE PICTURE UPLOADED BY USER IN DATABASE
-     * if user can make a post: a non-pointed post or enough points for a pointed one: check the validity of the file first
-     * pictures can be uploaded by means of files or a link to a picture
-     * the input stream is taken in both cases
-     * there is a function to take the input stream from an url
-     * when files are uploaded, upload component is used
-     * error checking is done with notifications for the user
-     * validFile means we can try to put it in the database
+     * SAVES PICTURE UPLOADED BY USER IN DATABASE
+     * calls the appropriate methods depending on the type of post (pointed or not) and if it is done by link or file
      */
 
     private void post(){
+        boolean success = false;
         Notification notification = new Notification();
-        notification.setDuration(2000);
-        boolean enoughPoints = false;
+        notification.setDuration(4000);
+        notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
+        notification.removeThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        try{
+            if(uploadByLink && pointedPost){
+                makePostService.postPointedByLink(linkField.getValue());
+            }else if(uploadByLink && !pointedPost){
+                makePostService.postNotPointedByLink(linkField.getValue());
+            }else if(pointedPost){
+                makePostService.postPointedByFile(this.fileData);
 
-        //if we can make the post we check the validity of the file
-        if(notPointedPost || enoughPoints){
-            if(uploadByLink){
-                manageImageURL();
             }else{
-                validatePostContentFromFile();
+                makePostService.postNotPointedByFile(this.fileData);
             }
-
-
-        }else{ //if not enough points and pointed post nothing is done
+            success = true;
+            this.close();
+            profilePanel.refresh();
+            this.close();
+        }catch(MakePostException e){
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            notification.setText("Sorry, not enough points");
+            notification.setText(e.getMessage());
             notification.open();
-        }
-
-        //now we manage the posting
-        if(validFile && notPointedPost){
-            try{
-                Post post = postService.creatPost(authenticatedUser, false, fileData);
-                profilePanel.refresh();
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.setText("Not-pointed post saved correctly");
-                notification.open();
-                this.close();
-            }catch(Exception exception){
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.setText("Server error: not available at the moment :(");
-                notification.open();
-                this.close();
-            }
-
-
-        }else if(validFile && enoughPoints){
-            try{
-                Post post = postService.creatPost(authenticatedUser, true, fileData);
-                profilePanel.refresh();
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.setText("Pointed post saved correctly");
-                notification.open();
-                this.close();
-            }catch (Exception exception){
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.setText("Server error: not available at the moment");
-                notification.open();
-            }
-
-
-
-            //resta los points y eso
-        }
-
-    }
-
-
-    /**
-     * sets validFile and shows notifications appropriately
-     * depending on whether there is a valid file loaded at the moment of posting
-     * checks if file is empty
-     */
-    private void validatePostContentFromFile(){
-        Notification notification = new Notification();
-        notification.setDuration(4000);
-        if(!validFile) {
+        }catch(Exception e){
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            notification.setText("No file");
+           // System.out.println(e.getMessage());
+            notification.setText("Internal error while working with file");
             notification.open();
-        }else{
-            try {
-                if(fileData == null || fileData.available() == 0){
-                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    notification.setText("File is empty or not valid");
-                    notification.open();
-                    validFile = false;
-                    this.close();
-                    this.open();
-                }else{
-                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    notification.setText("Nice picture :D");
-                    validFile = true;
-                    notification.open();
-
-                }
-            } catch (IOException ex) {
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.setText("Error while dealing with file");
-                validFile = false;
-                notification.open();
-            }
+            this.close();
         }
 
-    }
-
-
-    /**
-     * sets validFile and shows notifications appropriately
-     * depending on whether the right format of image can be extracted from the url at the moment of posting
-     * checks if file is empty
-     */
-    private void validatePostContentFromLink(){
-        Notification notification = new Notification();
-        notification.setDuration(4000);
-
-        try {
-            if(fileData == null || fileData.available() == 0){
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                notification.setText("Not the right format, try jpeg, jpg or pdf");
-                validFile = false;
-                notification.open();
-            }else{
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.setText("Nice picture:D");
-                validFile = true;
-                notification.open();
-            }
-        } catch (IOException e) {
-            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            notification.setText("Error while dealing with file");
-            validFile = false;
+        if(success){
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            notification.setText(pointedPost?"Pointed post uploaded correctly": "Not pointed post uploaded correctly");
             notification.open();
+            this.close();
         }
+
 
     }
 
     /**
-     * Creates an input stream from image link
-     */
-    private void manageImageURL(){
-        URL imageUrl = null;
-        Notification notification = new Notification();
-        notification.setDuration(4000);
-        try {
-            imageUrl = new URL(linkField.getValue());
-            URLConnection connection = imageUrl.openConnection();
-            String contentType = connection.getHeaderField("Content-Type");
-            if (contentType.equals("image/jpeg") || contentType.equals("image/jpg") || contentType.equals("image/png")) {
-                fileData = connection.getInputStream();
-
-            }
-            validatePostContentFromLink();
-
-        } catch (IOException e) {
-            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            notification.setText("Could not upload a picture with provided link");
-            validFile = false;
-            notification.open();
-        }
-    }
-
-
-    /**
-     * CREATE BUTTONS TO MANAGE WHETHER A POST IS POINTED OR NOT
+     * create buttons to manage whether a post is pointed or not
      * @return Horizontal Layout with two buttons
      */
     private HorizontalLayout createPointedButtons(){
@@ -318,14 +207,12 @@ public class MakePostBox extends Dialog {
             pointed.getStyle().set("background-color","#0C6CE9");
             notPointed.getStyle().set("background-color","#2D3D52");
             pointedPost = true;
-            notPointedPost = false;
         });
 
         notPointed.addClickListener(event -> {
             notPointed.getStyle().set("background-color","#0C6CE9");
             pointed.getStyle().set("background-color","#2D3D52");
             pointedPost = false;
-            notPointedPost = true;
         });
         return pointedButtons;
     }
@@ -348,12 +235,12 @@ public class MakePostBox extends Dialog {
                     5000,
                     Notification.Position.MIDDLE
             );
-            validFile = false;
+
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         });
 
         uploadComponent.addSucceededListener(event -> {
-            validFile = true;
+
             this.fileData = uploadBuffer.getInputStream();
             try {
                 Thread.sleep(200);

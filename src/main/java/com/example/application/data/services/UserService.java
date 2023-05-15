@@ -26,8 +26,7 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private final String ACCESS_TOKEN = "sl.BeYlJ4Fjd-cjtCM_HMAlBBkE4Mh_3dDRM3zgJXhfXFWun0FmBI5GuM_24Rr9FxLkfyhvg26aQtysco6tedht0zExFb7Ej6kfQwkDGyTaposN25AFwmgacAl2ySXLwPxSRtAZrR4";
-
+    private final String ACCESS_TOKEN = "sl.Bee1ZEEpAqyABocpTctUBufdIpQAsx2vQh50t6kNVTLWXzuQlMpLazdMs_e0l2t0wMPaAQEpts0wz8CVBY60BcAC1phk4toeMr7MM3LHllS8V7Q7_H1U5XytAch6yIDmmnZugt0";
     private final UsersRepository userRep;
     private final FollowRepository followRep;
     public UserService(UsersRepository userRepository, FollowRepository followRep) {
