@@ -165,8 +165,7 @@ public class MakePostBox extends Dialog {
         //now we manage the posting
         if(validFile && notPointedPost){
             try{
-                Post post = new Post(authenticatedUser,false, fileData);
-                postService.save(post);
+                Post post = postService.creatPost(authenticatedUser, false, fileData);
                 profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Not-pointed post saved correctly");
@@ -182,8 +181,7 @@ public class MakePostBox extends Dialog {
 
         }else if(validFile && enoughPoints){
             try{
-                Post post = new Post(authenticatedUser,true, fileData);
-                postService.save(post);
+                Post post = postService.creatPost(authenticatedUser, true, fileData);
                 profilePanel.getContent().addComponentAsFirst(new PostPanel(post, userService, postService));
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setText("Pointed post saved correctly");
@@ -226,7 +224,7 @@ public class MakePostBox extends Dialog {
                     this.open();
                 }else{
                     notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    notification.setText("Nice picture:D");
+                    notification.setText("Nice picture :D");
                     validFile = true;
                     notification.open();
 

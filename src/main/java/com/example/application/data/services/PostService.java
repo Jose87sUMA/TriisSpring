@@ -1,5 +1,10 @@
 package com.example.application.data.services;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.UploadErrorException;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.PostsRepository;
@@ -20,6 +25,7 @@ import java.util.List;
 @Service
 public class PostService {
 
+    private final String ACCESS_TOKEN = "sl.BeYi82OjcuWIxFq-zQtFvMqeLCh-pPKkPbMWtYYLQCne3PMgPG2uL_o_53R5FSWMmA42xIokuwrR_DhBDGTWyP-TlAlFZLyjj3pv4MtLeVzLKvCdFfoxT6NP3aE7VsFgEXgNURU";
     private final PostsRepository postRep;
     public PostService(PostsRepository postRep) {
         this.postRep = postRep;
@@ -30,13 +36,26 @@ public class PostService {
 
     public Image getContent(Post post){
 
-        byte[] imageBytes = post.getContent();
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
+        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+        String pathFile = post.getContent() != null ? post.getContent()  : postRep.findFirstByPostId(post.getOriginalPostId()).getContent();
+        byte[] imageBytes;
+        try {
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            client.files().download("/posts/" + pathFile).download(outputStream);
+            imageBytes = outputStream.toByteArray();
+
+        } catch (DbxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
         Image image;
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
             BufferedImage bImg = ImageIO.read(bis);
 
-            StreamResource resource = new StreamResource(post.getPostId()+".jpg", () -> new ByteArrayInputStream(imageBytes));
+            StreamResource resource = new StreamResource(pathFile, () -> new ByteArrayInputStream(imageBytes));
             image = new Image(resource, String.valueOf(post.getPostId()));
             scaleImage(image, bImg);
 
@@ -98,4 +117,22 @@ public class PostService {
         return post;
     }
 
+    public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
+
+        Post post = postRep.save(new Post(authenticatedUser, b));
+
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
+        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+
+        try {
+            FileMetadata metadata = client.files().uploadBuilder("/Posts/" + post.getPostId() + ".jpg")
+                    .uploadAndFinish(fileData);
+            post.setContent(metadata.getName());
+            postRep.save(post);
+        } catch (DbxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return post;
+    }
 }

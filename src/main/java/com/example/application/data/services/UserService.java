@@ -1,5 +1,8 @@
 package com.example.application.data.services;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
 import com.example.application.data.entities.Follow;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.FollowRepository;
@@ -9,7 +12,11 @@ import com.vaadin.flow.server.StreamResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +24,7 @@ import java.util.List;
 @Service
 public class UserService {
 
+    private final String ACCESS_TOKEN = "sl.BeYi82OjcuWIxFq-zQtFvMqeLCh-pPKkPbMWtYYLQCne3PMgPG2uL_o_53R5FSWMmA42xIokuwrR_DhBDGTWyP-TlAlFZLyjj3pv4MtLeVzLKvCdFfoxT6NP3aE7VsFgEXgNURU";
 
     private final UsersRepository userRep;
     private final FollowRepository followRep;
@@ -28,22 +36,59 @@ public class UserService {
     public User findByUsername(String username){ return userRep.findFirstByUsername(username); }
     public User findByEmail(String email){ return userRep.findFirstByEmail(email); }
 
-    public Image getProfilePicImage(User user){
+    public byte [] getProfilePicImageBytes(User user) {
 
-        byte[] imageBytes = user.getProfilePicture();
-        StreamResource resource = new StreamResource(user.getUsername()+".jpg", () -> new ByteArrayInputStream(imageBytes));
-        Image image = new Image(resource, user.getUsername());
+        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
 
+        return getBytesFromDropbox(user, pathFile);
+
+    }
+    public Image getProfilePicImage(User user) {
+        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
+        byte [] profilePictureBytes = getProfilePicImageBytes(user);
+
+        Image image;
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(profilePictureBytes);
+            BufferedImage bImg = ImageIO.read(bis);
+
+            StreamResource resource = new StreamResource(user.getUsername(), () -> new ByteArrayInputStream(profilePictureBytes));
+            image = new Image(resource, String.valueOf(user.getUserId()));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return image;
 
     }
 
     public StreamResource getProfilePicImageResource(User user){
 
-        byte[] imageBytes = user.getProfilePicture();
-        StreamResource resource = new StreamResource(user.getUsername()+".jpg", () -> new ByteArrayInputStream(imageBytes));
+        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
+        byte [] profilePictureBytes = getProfilePicImageBytes(user);
+
+        StreamResource resource = new StreamResource(user.getUsername(), () -> new ByteArrayInputStream(profilePictureBytes));
 
         return resource;
+
+    }
+
+    private byte[] getBytesFromDropbox(User user, String pathFile){
+
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
+        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+        byte[] imageBytes;
+        try {
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            client.files().download(pathFile).download(outputStream);
+            imageBytes = outputStream.toByteArray();
+
+        } catch (DbxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return imageBytes;
 
     }
 

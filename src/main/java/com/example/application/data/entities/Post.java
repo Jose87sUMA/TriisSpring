@@ -16,6 +16,7 @@ import java.util.*;
 @Entity
 @Table(name = "POSTS", schema = "UBD3336", catalog = "")
 public class Post implements Serializable {
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "POST_ID")
@@ -34,7 +35,7 @@ public class Post implements Serializable {
     private BigInteger likes;
     @Basic
     @Column(name = "CONTENT")
-    private byte[] content;
+    private String content;
     @Basic
     @Column(name = "POINTED")
     private String pointed;
@@ -50,15 +51,13 @@ public class Post implements Serializable {
     }
 
     //FOR POST
-    public Post(User user, boolean pointed, InputStream inputStream) {
-
+    public Post(User user, boolean pointed) {
 
         this.postId = null;
         this.originalPostId = null;
         this.repostId = null;
         this.postDate = Date.from(Instant.now());
         this.userId = user.getUserId();
-        this.content = getBlobFromInputStream(inputStream);
         this.points = BigInteger.ZERO;
         this.pointed = pointed ? "Y":"N";
         this.likes = BigInteger.ZERO;
@@ -109,11 +108,11 @@ public class Post implements Serializable {
         this.likes = likes;
     }
 
-    public byte[] getContent() {
+    public String getContent() {
         return content;
     }
 
-    public void setContent(byte[] content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -146,13 +145,13 @@ public class Post implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post that = (Post) o;
-        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(postDate, that.postDate) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Arrays.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
+        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(postDate, that.postDate) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Objects.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(postId, userId, postDate, points, likes, pointed, repostId, originalPostId);
-        result = 31 * result + Arrays.hashCode(content);
+        int result = Objects.hash(postId, userId, postDate, points, likes, pointed, repostId, originalPostId, content);
+        result = 31 * result;
         return result;
     }
 

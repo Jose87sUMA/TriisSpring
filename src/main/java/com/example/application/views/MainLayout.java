@@ -1,6 +1,7 @@
 package com.example.application.views;
 
 import com.example.application.data.entities.User;
+import com.example.application.data.services.UserService;
 import com.example.application.security.AuthenticatedUser;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.feed.FeedView;
@@ -80,10 +81,12 @@ public class MainLayout extends AppLayout {
 
     private AuthenticatedUser authenticatedUser;
     private AccessAnnotationChecker accessChecker;
+    private final UserService userService;
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
+    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker, UserService userService) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
+        this.userService = userService;
 
         addToNavbar(createHeaderContent());
     }
@@ -105,7 +108,7 @@ public class MainLayout extends AppLayout {
 
             Avatar avatar = new Avatar(user.getUsername());
             StreamResource resource = new StreamResource("profile-pic",
-                    () -> new ByteArrayInputStream(user.getProfilePicture()));
+                    () -> new ByteArrayInputStream(userService.getProfilePicImageBytes(user)));
             avatar.setImageResource(resource);
             avatar.setThemeName("xsmall");
             avatar.getElement().setAttribute("tabindex", "-1");
