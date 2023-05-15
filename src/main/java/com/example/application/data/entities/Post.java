@@ -33,7 +33,7 @@ public class Post implements Serializable {
     @Column(name = "LIKES")
     private BigInteger likes;
     @Basic
-    @Column(name = "CONTENT")
+    @Column(name = "CONTENT_DEPRECATED")
     private byte[] content;
     @Basic
     @Column(name = "POINTED")
@@ -58,7 +58,7 @@ public class Post implements Serializable {
         this.repostId = null;
         this.postDate = Date.from(Instant.now());
         this.userId = user.getUserId();
-        this.content = getBlobFromInputStream(inputStream);
+        this.content= getBlobFromInputStream(inputStream);
         this.points = BigInteger.ZERO;
         this.pointed = pointed ? "Y":"N";
         this.likes = BigInteger.ZERO;

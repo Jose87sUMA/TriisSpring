@@ -110,7 +110,7 @@ public class UserService {
             return getFollowing(user);
         } else {
 
-            return userRep.searchFollowing(stringFilter);
+            return userRep.searchFollowing(stringFilter,getFollowing(user));
         }
     }
    public List<User> findAllFollower(String stringFilter, User user) {
@@ -118,7 +118,7 @@ public class UserService {
             return getFollowers(user);
         } else {
 
-            return userRep.searchFollowers(stringFilter);
+            return userRep.searchFollowers(stringFilter, getFollowers(user));
         }
     }
 }

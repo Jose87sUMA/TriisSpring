@@ -19,12 +19,12 @@ public interface UsersRepository extends CrudRepository<User, BigInteger> {
     List<User> findAllByUsernameContainsIgnoreCase(String match);
 
     @Query("select c from User c " +
-            "where lower(c.username) like lower(concat('%', :searchTerm, '%'))")
+            "where lower(c.username) like lower(concat(:searchTerm, '%'))" + "and c IN(:userFollowing)")
 
-    List<User> searchFollowing(@Param("searchTerm") String searchTerm);
+    List<User> searchFollowing(@Param("searchTerm") String searchTerm,@Param("userFollowing") List<User> userFollowing );
 
     @Query("select c from User c " +
-            "where lower(c.username) like lower(concat('%', :searchFilter, '%'))")
-    List<User> searchFollowers(@Param("searchFilter")String stringFilter);
+            "where lower(c.username) like lower(concat(:searchFilter, '%'))"  + "and c IN(:userFollower)")
+    List<User> searchFollowers(@Param("searchFilter")String stringFilter,@Param("userFollower") List<User> userFollower );
 
 }
