@@ -70,6 +70,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         this.setHorizontalComponentAlignment(Alignment.CENTER, buttons);
         this.setAlignItems(Alignment.CENTER);
 
+        removeAll();
         add(new H1(user.getUsername()), buttons, profilePanel);
 
     }
