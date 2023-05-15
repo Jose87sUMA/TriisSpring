@@ -3,13 +3,10 @@ package com.example.application.data.services;
 import com.example.application.data.exceptions.MakePostException;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.views.feed.FeedScroller;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -19,6 +16,10 @@ public class MakePostService {
     private final UserService userService;
     boolean pointedPost;
     private InputStream fileData;
+    private BigInteger userPoints =  new BigInteger("0");
+
+    // Perform operations with the BigInteger;
+    private BigInteger necessaryPointsToMakeAPost =  new BigInteger("0");;
 
     /**
      * auxiliary functions related with making a post
@@ -31,6 +32,7 @@ public class MakePostService {
             this.postService = postService;
             this.userService = userService;
             this.pointedPost = false;
+
     }
     /**
      * post a pointed post by file
@@ -44,6 +46,8 @@ public class MakePostService {
                 validateFileContent();
                 Post post = postService.creatPost(authenticatedUser, true, fileData);
                 //substract points from user
+                subtractPointsFromUser();
+
             }catch(Exception exception){
                 throw new MakePostException("Something went wrong with server");
             }
@@ -51,6 +55,15 @@ public class MakePostService {
             throw new MakePostException("Not enough points");
         }
 
+    }
+
+    /**
+     * substracts points from user
+     */
+    private void subtractPointsFromUser(){
+        userPoints.subtract(necessaryPointsToMakeAPost);
+        authenticatedUser.setType1Points(userPoints);
+        userService.save(authenticatedUser);
     }
 
     /**
@@ -62,7 +75,7 @@ public class MakePostService {
         fileData = postInputStream;
         validateFileContent();
         try{
-            Post post = postService.creatPost(authenticatedUser, false, fileData);
+            Post post = postService.creatPost(authenticatedUser, false, null);
         }catch(Exception exception){
             throw new MakePostException("Something went wrong with server when inserting " + fileData.toString());
         }
@@ -94,6 +107,10 @@ public class MakePostService {
      * @return
      */
     private boolean checkEnoughPointsForPost() {
+        this.userPoints = userService.findById(authenticatedUser.getUserId()).getType1Points();
+        if(userPoints.compareTo(necessaryPointsToMakeAPost) >= 0){
+            return true;
+        }
         return false;
     }
 

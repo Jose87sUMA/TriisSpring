@@ -194,4 +194,5 @@ public class UserService {
     public void editPassword(User user, String password) {
         user.setPassword((new BCryptPasswordEncoder()).encode(password));
     }
+
 }
