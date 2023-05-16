@@ -172,6 +172,8 @@ public class UserService {
     @Async
     public void loadRecommendations(User user){
 
+        recommendationRep.deleteAllByRecommendedUserId(user.getUserId());
+
         Map<User, Integer> recommendationScore = new HashMap<>();
         List<User> following = this.getFollowing(user);
 
@@ -180,23 +182,17 @@ public class UserService {
 
             for(User userFollowingFollowing : followingFollowing){
                 if(!following.contains(userFollowingFollowing) && !userFollowingFollowing.equals(user))
-                    recommendationScore.put(userFollowingFollowing, recommendationScore.getOrDefault(userFollowingFollowing,0)+1);
+                    recommendationScore.put(userFollowingFollowing,
+                                            recommendationScore.getOrDefault(userFollowingFollowing,0)+1);
 
             }
         }
 
         for(Map.Entry<User, Integer> entry :  recommendationScore.entrySet()){
-
-            Recommendation recommendation = recommendationRep.findByRecommendedUserIdAndRecommendationUserId(user.getUserId(), entry.getKey().getUserId());
-
-            if(recommendation == null){
-                recommendation = new Recommendation(user.getUserId(), entry.getKey().getUserId(), BigInteger.valueOf(entry.getValue()));
-            }else{
-                recommendation.setScore(BigInteger.valueOf(entry.getValue()));
-            }
-
+            Recommendation recommendation = new Recommendation(user.getUserId(),
+                                                               entry.getKey().getUserId(),
+                                                               BigInteger.valueOf(entry.getValue()));
             recommendationRep.save(recommendation);
-
         }
 
     }
