@@ -44,7 +44,6 @@ public class PostService {
     private final PostPointLogRepository postPointLogRep;
     private final UserPointLogRepository userPointLogRep;
 
-
     @Autowired
     DropboxService dropboxService;
     @Autowired

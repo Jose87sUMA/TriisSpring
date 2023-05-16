@@ -78,14 +78,6 @@ public class Post implements Serializable {
         this.likes = BigInteger.ZERO;
     }
 
-    private Instant getCurrentZonedInstant(ZoneId zoneId) {
-        LocalDate date = LocalDate.now();
-        LocalTime time = LocalTime.now();
-        LocalDateTime localDateTime = LocalDateTime.of(date, time);
-        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
-        return zonedDateTime.toInstant();
-    }
-
     public BigInteger getPostId() {
         return postId;
     }
@@ -171,31 +163,12 @@ public class Post implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post that = (Post) o;
-        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(post_date, that.post_date) && Objects.equals(points, that.points) && Objects.equals(likes, that.likes) && Objects.equals(content, that.content) && Objects.equals(pointed, that.pointed) && Objects.equals(repostId, that.repostId) && Objects.equals(originalPostId, that.originalPostId);
+        return Objects.equals(postId, that.postId);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(postId, userId, post_date, points, likes, pointed, repostId, originalPostId, content);
-        result = 31 * result;
-        return result;
+        return Objects.hash(postId);
     }
-
-    public static byte[] getBlobFromInputStream(InputStream inputStream){
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[4096];
-        int bytesRead;
-        while (true) {
-            try {
-                if (!((bytesRead = inputStream.read(buffer)) != -1)) break;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            outputStream.write(buffer, 0, bytesRead);
-        }
-        byte[] bytes = outputStream.toByteArray();
-        return bytes;
-    }
-
 
 }
