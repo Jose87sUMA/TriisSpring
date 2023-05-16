@@ -7,6 +7,7 @@ import com.example.application.data.repositories.UsersRepository;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -63,6 +64,7 @@ public class UserService {
         userRep.save(user);
         return user;
     }
+
 
 
 }

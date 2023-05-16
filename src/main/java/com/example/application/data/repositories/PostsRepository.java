@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.util.List;
 
 @Repository("postsRepository")
@@ -67,4 +68,22 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
      * @return List of posts determined by page.
      */
     List<Post> findAllByUserId(Pageable pageable, BigInteger userId);
+
+    /**
+     * @return 10 original pointed posts between a given date and today with the highest number of points
+     */
+    @Query(value = "select * from POSTS " +
+            "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL AND " +
+            "POST_DATE BETWEEN TO_DATE(:chosenDate ,'dd/mm/yy') AND TO_DATE(SYSDATE,'dd/mm/yy')" +
+            "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
+    List<Post> findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(@Param("chosenDate") Date post_date);
+
+    /**
+     * @return 10 original pointed posts with the highest number of points
+     */
+    @Query(value = "select * from POSTS " +
+            "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL " +
+            "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
+    List<Post> findTenByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
+
 }
