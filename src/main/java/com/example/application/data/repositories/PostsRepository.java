@@ -70,4 +70,13 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
      */
     @Query(value = "select * from POSTS P WHERE P.USER_ID = :userId", nativeQuery = true)
     List<Post> findAllByUserId(Pageable pageable, BigInteger userId);
+
+    /**
+     * Get all posts by a certain user.
+     * @param pageable Page request.
+     * @param userId User ID.
+     * @return List of posts determined by page.
+     */
+    @Query(value = "select * FROM POSTS P WHERE P.USER_ID IN (SELECT R.RECOMMENDATION_USER_ID FROM RECOMMENDATION R WHERE R.RECOMMENDED_USER_ID = :userId ORDER BY R.SCORE DESC FETCH FIRST 10 ROWS ONLY)", nativeQuery = true)
+    List<Post> findAllRecommendedToUserId(Pageable pageable, BigInteger userId);
 }

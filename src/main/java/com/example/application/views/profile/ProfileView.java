@@ -59,7 +59,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             return;
         }
 
-        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, user, userService, postService);
+        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, user, userService, postService, UI.getCurrent());
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
         this.setMargin(true);
