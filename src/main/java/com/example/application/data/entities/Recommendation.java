@@ -49,5 +49,9 @@ public class Recommendation implements Serializable {
     public BigInteger getScore() {
         return score;
     }
+    public void setScore(BigInteger score) {
+        this.score = score;
+    }
+
 
 }

@@ -10,6 +10,6 @@ import java.math.BigInteger;
 @Repository("recommendationRepository")
 public interface RecommendationRepository extends CrudRepository<Recommendation, BigInteger> {
 
-
+    Recommendation findByRecommendedUserIdAndRecommendationUserId(BigInteger recommendedUserId, BigInteger recommendationUserId);
 
 }

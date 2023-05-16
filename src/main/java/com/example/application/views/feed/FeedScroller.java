@@ -26,8 +26,10 @@ import java.util.concurrent.ThreadPoolExecutor;
  * Class that manages a feed.
  */
 public class FeedScroller extends VerticalLayout {
-    SortType current = null;
+
     SpringAsyncConfig executor = new SpringAsyncConfig();
+
+    SortType current = null;
 
     Button loadMore;
     MenuBar sorting;

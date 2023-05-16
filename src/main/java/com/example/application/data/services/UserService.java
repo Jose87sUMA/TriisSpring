@@ -1,15 +1,14 @@
 package com.example.application.data.services;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v2.DbxClientV2;
 import com.example.application.data.entities.Follow;
-import com.example.application.data.entities.FollowCompositePK;
+import com.example.application.data.entities.Post;
 import com.example.application.data.entities.Recommendation;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.FollowRepository;
+import com.example.application.data.repositories.RecommendationRepository;
 import com.example.application.data.repositories.UsersRepository;
 import com.example.application.security.DropboxService;
+import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,24 +19,24 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserService {
 
     private final UsersRepository userRep;
     private final FollowRepository followRep;
+    private final RecommendationRepository recommendationRep;
 
     @Autowired
     DropboxService dropboxService;
 
-    public UserService(UsersRepository userRepository, FollowRepository followRep) {
+    public UserService(UsersRepository userRepository, FollowRepository followRep, RecommendationRepository recommendationRep) {
         this.userRep = userRepository;
         this.followRep = followRep;
+        this.recommendationRep = recommendationRep;
     }
     public User findById(BigInteger userId){ return userRep.findFirstByUserId(userId); }
     public User findByUsername(String username){ return userRep.findFirstByUsername(username); }
@@ -173,14 +172,33 @@ public class UserService {
         user.setPassword((new BCryptPasswordEncoder()).encode(password));
     }
 
+    @Async
     public void loadRecommendations(User user){
 
+        Map<User, Integer> recommendationScore = new HashMap<>();
         List<User> following = this.getFollowing(user);
 
         for(User userFollowing : following){
-
             List<User> followingFollowing = this.getFollowing(userFollowing);
-            
+
+            for(User userFollowingFollowing : followingFollowing){
+                if(!following.contains(userFollowingFollowing) && !userFollowingFollowing.equals(user))
+                    recommendationScore.put(userFollowingFollowing, recommendationScore.getOrDefault(userFollowingFollowing,0)+1);
+
+            }
+        }
+
+        for(Map.Entry<User, Integer> entry :  recommendationScore.entrySet()){
+
+            Recommendation recommendation = recommendationRep.findByRecommendedUserIdAndRecommendationUserId(user.getUserId(), entry.getKey().getUserId());
+
+            if(recommendation == null){
+                recommendation = new Recommendation(user.getUserId(), entry.getKey().getUserId(), BigInteger.valueOf(entry.getValue()));
+            }else{
+                recommendation.setScore(BigInteger.valueOf(entry.getValue()));
+            }
+
+            recommendationRep.save(recommendation);
 
         }
 

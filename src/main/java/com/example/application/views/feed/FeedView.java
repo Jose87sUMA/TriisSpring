@@ -9,15 +9,14 @@ import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.data.services.FeedService.FeedType;
+import com.example.application.data.services.threads.SpringAsyncConfig;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.TabSheetVariant;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +30,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @PermitAll
 public class FeedView extends HorizontalLayout {
 
+    SpringAsyncConfig executor = new SpringAsyncConfig();
+
     private TabSheet feedPanel;
     private User authenticatedUser;
 
@@ -41,6 +42,9 @@ public class FeedView extends HorizontalLayout {
         this.postService = postService;
         this.userService = userService;
         User authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        executor.getAsyncExecutor().execute(() -> {
+            userService.loadRecommendations(authenticatedUser);
+        });
 
         feedPanel = new TabSheet();
 
