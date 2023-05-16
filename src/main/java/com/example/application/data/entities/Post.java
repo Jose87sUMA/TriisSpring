@@ -5,7 +5,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.time.Instant;
+import java.time.*;
 import java.util.Arrays;
 import java.util.Objects;
 import java.io.Serializable;
@@ -78,6 +78,13 @@ public class Post implements Serializable {
         this.likes = BigInteger.ZERO;
     }
 
+    private Instant getCurrentZonedInstant(ZoneId zoneId) {
+        LocalDate date = LocalDate.now();
+        LocalTime time = LocalTime.now();
+        LocalDateTime localDateTime = LocalDateTime.of(date, time);
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+        return zonedDateTime.toInstant();
+    }
 
     public BigInteger getPostId() {
         return postId;

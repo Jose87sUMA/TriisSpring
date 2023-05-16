@@ -16,4 +16,6 @@ public interface PostPointLogRepository extends CrudRepository<PostsPointLog, Bi
 
     List<PostsPointLog> findAllByPostIdOrderByLogDateDesc (BigInteger postId);
 
+    @Query(value = "select * from POSTS_POINT_LOGS WHERE LOG_ID IN (SELECT MAX(LOG_ID) FROM POSTS_POINT_LOGS)", nativeQuery = true)
+    PostsPointLog findLastInsertedLog();
 }

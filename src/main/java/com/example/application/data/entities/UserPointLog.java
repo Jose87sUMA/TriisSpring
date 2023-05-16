@@ -3,7 +3,10 @@ package com.example.application.data.entities;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Date;
 
@@ -36,10 +39,18 @@ public class UserPointLog {
     @Basic
     @Column(name = "DIRECT")
     private boolean direct;
+    @Basic
+    @Column(name = "PREVIOUS_HASH")
+    private String previousHash;
+
+    @Basic
+    @Column(name = "CURRENT_HASH")
+    private String currentHash;
+
 
     public UserPointLog(){}
 
-    public UserPointLog(User userBen, User userPay, int points, boolean direct){
+    public UserPointLog(User userBen, User userPay, int points, boolean direct, String previousHash){
 
         this.logId = null;
         this.benfUserId = userBen.getUserId();
@@ -47,8 +58,16 @@ public class UserPointLog {
         this.points = BigInteger.valueOf(points);
         this.logDate = Date.from(Instant.now());
         this.direct = direct;
+        this.previousHash = previousHash;
 
     }
+
+    /**
+     * Calculates the hash for an entry
+     *
+     * @return
+     */
+
 
     public BigInteger getLogId() {
         return logId;
@@ -86,4 +105,31 @@ public class UserPointLog {
         this.direct = direct;
     }
 
+    public void setLogId(BigInteger logId) {
+        this.logId = logId;
+    }
+
+    public void setBenfUserId(BigInteger benfUserId) {
+        this.benfUserId = benfUserId;
+    }
+
+    public void setPayerUserId(BigInteger payerUserId) {
+        this.payerUserId = payerUserId;
+    }
+
+    public String getPreviousHash() {
+        return previousHash;
+    }
+
+    public void setPreviousHash(String previousHash) {
+        this.previousHash = previousHash;
+    }
+
+    public String getCurrentHash() {
+        return currentHash;
+    }
+
+    public void setCurrentHash(String currentHash) {
+        this.currentHash = currentHash;
+    }
 }

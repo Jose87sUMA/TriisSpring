@@ -2,8 +2,6 @@ package com.example.application.data.services;
 
 import com.example.application.data.entities.*;
 import com.example.application.data.repositories.*;
-import com.example.application.security.DropboxService;
-import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -33,7 +31,6 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Future;
 
 
 @Service
@@ -47,8 +44,11 @@ public class PostService {
     private final PostPointLogRepository postPointLogRep;
     private final UserPointLogRepository userPointLogRep;
 
+
     @Autowired
     DropboxService dropboxService;
+    @Autowired
+    PointLogService postPointLogService;
 
     public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, ReportRepository reportRep, CommentsRepository commentsRep, PostPointLogRepository postPointLogRep, UserPointLogRepository userPointLogRep) {
         this.likeRep = likeRep;
@@ -403,8 +403,11 @@ public class PostService {
 
             int addedPoints = poster.equals(originalPoster) ? 15 : poster.equals(directUser) ? 10 : 5;
             boolean directBool = (directUser != null ? directUser : originalPoster).getUserId().equals(p.getUserId());
-            postPointLogRep.save(new PostsPointLog(p, authUser, addedPoints, directBool));
-            userPointLogRep.save(new UserPointLog(userRep.findFirstByUserId(p.getUserId()), authUser, addedPoints, directBool));
+            PostsPointLog postsPointLog = postPointLogRep.save(new PostsPointLog(p, authUser, addedPoints, directBool, postPointLogService.findLastInsertedPostLog().getCurrentHash()));
+            postPointLogService.calculatePointLogHash(postsPointLog);
+            UserPointLog userPointLog = userPointLogRep.save(new UserPointLog(userRep.findFirstByUserId(p.getUserId()), authUser, addedPoints, directBool, postPointLogService.findLastInsertedUserLog().getCurrentHash()));
+            postPointLogService.calculatePointLogHash(userPointLog);
+
         }
 
         UI ui = UI.getCurrent();
@@ -495,7 +498,7 @@ public class PostService {
      * @return The newly created post
      */
     @Async
-    public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
+    public Post createPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));
         dropboxService.uploadPost(post, fileData);

@@ -1,14 +1,11 @@
 package com.example.application.data.services;
 
 import com.example.application.data.entities.Follow;
-import com.example.application.data.entities.Post;
 import com.example.application.data.entities.Recommendation;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.RecommendationRepository;
 import com.example.application.data.repositories.UsersRepository;
-import com.example.application.security.DropboxService;
-import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.beans.factory.annotation.Autowired;
