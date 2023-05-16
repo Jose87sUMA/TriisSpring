@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class SpringAsyncConfig implements AsyncConfigurer {
    @Override
-    public Executor getAsyncExecutor() {
+    public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.initialize();
         return threadPoolTaskExecutor;

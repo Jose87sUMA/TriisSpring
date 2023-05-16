@@ -2,15 +2,12 @@ package com.example.application.data.services;
 
 import com.example.application.data.entities.*;
 import com.example.application.data.repositories.*;
+import com.example.application.security.DropboxService;
+import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.UploadErrorException;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.PostsRepository;
@@ -24,6 +21,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.StreamResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
@@ -41,7 +39,6 @@ import java.util.concurrent.Future;
 @Service
 public class PostService {
 
-    private final String ACCESS_TOKEN = "sl.BeYlJ4Fjd-cjtCM_HMAlBBkE4Mh_3dDRM3zgJXhfXFWun0FmBI5GuM_24Rr9FxLkfyhvg26aQtysco6tedht0zExFb7Ej6kfQwkDGyTaposN25AFwmgacAl2ySXLwPxSRtAZrR4";
     private final PostsRepository postRep;
     private final UsersRepository userRep;
     private final ReportRepository reportRep;
@@ -49,6 +46,9 @@ public class PostService {
     private final LikesRepository likeRep;
     private final PostPointLogRepository postPointLogRep;
     private final UserPointLogRepository userPointLogRep;
+
+    @Autowired
+    DropboxService dropboxService;
 
     public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, ReportRepository reportRep, CommentsRepository commentsRep, PostPointLogRepository postPointLogRep, UserPointLogRepository userPointLogRep) {
         this.likeRep = likeRep;
@@ -72,7 +72,7 @@ public class PostService {
     }
 
     /**
-     * Given a PostID, this method finds and removes the Post.
+     * This method removes a Post given as parameter.
      * @param post
      */
     public void deletePost(Post post){postRep.delete(post);}
@@ -95,32 +95,30 @@ public class PostService {
     /**
      * Gets the content to be displayed from a post. Gets from dropbox the image to be displayed which can be from another
      * post in case the parameter is a repost.
+     *
      * @param post
+     * @param ui
      * @return Vaadin.Image object of the content ot be displayed
      */
-    public Image getContent(Post post){
-        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
-        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
-        String pathFile = post.getContent() != null ? post.getContent()  : postRep.findFirstByPostId(post.getOriginalPostId()).getContent();
-        byte[] imageBytes;
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            client.files().download("/posts/" + pathFile).download(outputStream);
-            imageBytes = outputStream.toByteArray();
-        } catch (DbxException | IOException e) {
-            throw new RuntimeException(e);
-        }
+    public Image getContent(Post post, UI ui){
+
+        UI.setCurrent(ui);
+
+        byte [] imageBytes = dropboxService.downloadPostContent(post);
+        String pathFile = post.getContent() != null ? post.getContent() : postRep.findFirstByPostId(post.getOriginalPostId()).getContent();
+
         Image image;
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
             BufferedImage bImg = ImageIO.read(bis);
 
-            StreamResource resource = new StreamResource(pathFile, () -> new ByteArrayInputStream(imageBytes));
+            byte[] finalImageBytes = imageBytes;
+            StreamResource resource = new StreamResource(pathFile, () -> new ByteArrayInputStream(finalImageBytes));
             image = new Image(resource, String.valueOf(post.getPostId()));
             scaleImage(image, bImg);
 
         } catch (Exception e) {
-            image = getContent(this.findById(post.getOriginalPostId()));
+            image = getContent(this.findById(post.getOriginalPostId()), ui);
         }
         return image;
     }
@@ -485,9 +483,7 @@ public class PostService {
     //POINTS LOGS
 
     public List<PostsPointLog> findAllLogsByPost (Post post){
-
         return postPointLogRep.findAllByPostIdOrderByLogDateDesc(post.getPostId());
-
     }
 
 
@@ -496,25 +492,13 @@ public class PostService {
      * @param authenticatedUser
      * @param b
      * @param fileData
-     * @return
+     * @return The newly created post
      */
     @Async
     public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));
-
-        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
-        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
-
-        try {
-            FileMetadata metadata = client.files().uploadBuilder("/Posts/" + post.getPostId() + ".jpg")
-                    .uploadAndFinish(fileData);
-            post.setContent(metadata.getName());
-            postRep.save(post);
-        } catch (DbxException | IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        dropboxService.uploadPost(post, fileData);
         return post;
     }
 }

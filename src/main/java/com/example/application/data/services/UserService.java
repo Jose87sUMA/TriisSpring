@@ -1,15 +1,17 @@
 package com.example.application.data.services;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v2.DbxClientV2;
 import com.example.application.data.entities.Follow;
-import com.example.application.data.entities.FollowCompositePK;
+import com.example.application.data.entities.Post;
+import com.example.application.data.entities.Recommendation;
 import com.example.application.data.entities.User;
 import com.example.application.data.repositories.FollowRepository;
+import com.example.application.data.repositories.RecommendationRepository;
 import com.example.application.data.repositories.UsersRepository;
+import com.example.application.security.DropboxService;
+import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,22 +19,24 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserService {
 
-    private final String ACCESS_TOKEN = "sl.BeYlJ4Fjd-cjtCM_HMAlBBkE4Mh_3dDRM3zgJXhfXFWun0FmBI5GuM_24Rr9FxLkfyhvg26aQtysco6tedht0zExFb7Ej6kfQwkDGyTaposN25AFwmgacAl2ySXLwPxSRtAZrR4";
-
     private final UsersRepository userRep;
     private final FollowRepository followRep;
-    public UserService(UsersRepository userRepository, FollowRepository followRep) {
+    private final RecommendationRepository recommendationRep;
+
+    @Autowired
+    DropboxService dropboxService;
+
+    public UserService(UsersRepository userRepository, FollowRepository followRep, RecommendationRepository recommendationRep) {
         this.userRep = userRepository;
         this.followRep = followRep;
+        this.recommendationRep = recommendationRep;
     }
     public User findById(BigInteger userId){ return userRep.findFirstByUserId(userId); }
     public User findByUsername(String username){ return userRep.findFirstByUsername(username); }
@@ -44,12 +48,8 @@ public class UserService {
      * @param user
      * @return bytes of the profile picture
      */
-    public byte [] getProfilePicImageBytes(User user) {
-
-        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
-
-        return getBytesFromDropbox(pathFile);
-
+    public byte [] getProfilePicBytes(User user) {
+        return dropboxService.downloadProfilePicture(user);
     }
 
     /**
@@ -59,15 +59,15 @@ public class UserService {
      * @return Vaadin.Image object of the profile picture
      */
     public Image getProfilePicImage(User user) {
-        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
-        byte [] profilePictureBytes = getProfilePicImageBytes(user);
+        String pathFile = (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
+        byte [] profilePictureBytes = getProfilePicBytes(user);
 
         Image image;
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(profilePictureBytes);
             BufferedImage bImg = ImageIO.read(bis);
 
-            StreamResource resource = new StreamResource(user.getUsername(), () -> new ByteArrayInputStream(profilePictureBytes));
+            StreamResource resource = new StreamResource(pathFile, () -> new ByteArrayInputStream(profilePictureBytes));
             image = new Image(resource, String.valueOf(user.getUserId()));
 
         } catch (IOException e) {
@@ -85,36 +85,12 @@ public class UserService {
      */
     public StreamResource getProfilePicImageResource(User user){
 
-        String pathFile = "/ProfilePictures/" + (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
-        byte [] profilePictureBytes = getProfilePicImageBytes(user);
+        String pathFile = (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
+        byte [] profilePictureBytes = getProfilePicBytes(user);
 
-        StreamResource resource = new StreamResource(user.getUsername(), () -> new ByteArrayInputStream(profilePictureBytes));
+        StreamResource resource = new StreamResource(pathFile, () -> new ByteArrayInputStream(profilePictureBytes));
 
         return resource;
-
-    }
-
-    /**
-     * Gets the bytes of the picture to be displayed. Gets from dropbox the image to be displayed from the pathFile
-     * @param pathFile
-     * @return bytes of image on dropbox
-     */
-    protected byte[] getBytesFromDropbox(String pathFile){
-
-        DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
-        DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
-        byte[] imageBytes;
-        try {
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            client.files().download(pathFile).download(outputStream);
-            imageBytes = outputStream.toByteArray();
-
-        } catch (DbxException | IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return imageBytes;
 
     }
 
@@ -194,5 +170,37 @@ public class UserService {
 
     public void editPassword(User user, String password) {
         user.setPassword((new BCryptPasswordEncoder()).encode(password));
+    }
+
+    @Async
+    public void loadRecommendations(User user){
+
+        Map<User, Integer> recommendationScore = new HashMap<>();
+        List<User> following = this.getFollowing(user);
+
+        for(User userFollowing : following){
+            List<User> followingFollowing = this.getFollowing(userFollowing);
+
+            for(User userFollowingFollowing : followingFollowing){
+                if(!following.contains(userFollowingFollowing) && !userFollowingFollowing.equals(user))
+                    recommendationScore.put(userFollowingFollowing, recommendationScore.getOrDefault(userFollowingFollowing,0)+1);
+
+            }
+        }
+
+        for(Map.Entry<User, Integer> entry :  recommendationScore.entrySet()){
+
+            Recommendation recommendation = recommendationRep.findByRecommendedUserIdAndRecommendationUserId(user.getUserId(), entry.getKey().getUserId());
+
+            if(recommendation == null){
+                recommendation = new Recommendation(user.getUserId(), entry.getKey().getUserId(), BigInteger.valueOf(entry.getValue()));
+            }else{
+                recommendation.setScore(BigInteger.valueOf(entry.getValue()));
+            }
+
+            recommendationRep.save(recommendation);
+
+        }
+
     }
 }
