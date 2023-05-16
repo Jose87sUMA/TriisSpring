@@ -29,13 +29,13 @@ public class PointLogService {
     }
 
     public void calculatePointLogHash(PostsPointLog postLog){
-        String dataToHash = postLog.getPreviousHash() + postLog.getUserId() + postLog.getPostId() + postLog.getPoints() + postLog.getLogDate() + postLog.isDirect();
+        String dataToHash = postLog.getPreviousHash() + postLog.getUserId() + postLog.getPostId() + postLog.getPoints() + postLog.getLogDate().toString() + postLog.isDirect();
         postLog.setCurrentHash(calculateEntryHash(dataToHash));
         postPointLogRep.save(postLog);
     }
 
     public void calculatePointLogHash(UserPointLog userLog){
-        String dataToHash = userLog.getPreviousHash() + userLog.getBenfUserId() + userLog.getPayerUserId() + userLog.getPoints() + userLog.getLogDate() + userLog.isDirect();
+        String dataToHash = userLog.getPreviousHash() + userLog.getBenfUserId() + userLog.getPayerUserId() + userLog.getPoints() + userLog.getLogDate().toString() + userLog.isDirect();
         userLog.setCurrentHash(calculateEntryHash(dataToHash));
         userPointLogRep.save(userLog);
     }

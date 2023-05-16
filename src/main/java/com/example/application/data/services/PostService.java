@@ -65,7 +65,6 @@ public class PostService {
      * @param post
      * @return
      */
-    @Async
     public Post save(Post post){
         postRep.save(post);
         return post;
@@ -207,7 +206,6 @@ public class PostService {
      * @param user
      * @param post
      */
-    @Async
     public void newLike(User user, Post post) {
         post.setLikes(post.getLikes().add(BigInteger.ONE));
         likeRep.save(new Like(user.getUserId(), post.getPostId()));
@@ -218,7 +216,6 @@ public class PostService {
      * @param user
      * @param post
      */
-    @Async
     public void dislike(User user, Post post) {
         post.setLikes(post.getLikes().subtract(BigInteger.ONE));
         postRep.save(post);
@@ -240,7 +237,6 @@ public class PostService {
                || !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getPostId()).isEmpty(); //
     }
 
-    @Async
     public void repost(Post post, User authUser, Button repostButton) {
 
         UI.setCurrent(repostButton.getUI().get());
@@ -327,7 +323,6 @@ public class PostService {
 
     }
 
-    @Async
     public void unrepost(Post post, User authUser, Button repostButton){
 
         UI.setCurrent(repostButton.getUI().get());
@@ -403,6 +398,7 @@ public class PostService {
 
             int addedPoints = poster.equals(originalPoster) ? 15 : poster.equals(directUser) ? 10 : 5;
             boolean directBool = (directUser != null ? directUser : originalPoster).getUserId().equals(p.getUserId());
+
             PostsPointLog postsPointLog = postPointLogRep.save(new PostsPointLog(p, authUser, addedPoints, directBool, postPointLogService.findLastInsertedPostLog().getCurrentHash()));
             postPointLogService.calculatePointLogHash(postsPointLog);
             UserPointLog userPointLog = userPointLogRep.save(new UserPointLog(userRep.findFirstByUserId(p.getUserId()), authUser, addedPoints, directBool, postPointLogService.findLastInsertedUserLog().getCurrentHash()));
@@ -497,7 +493,6 @@ public class PostService {
      * @param fileData
      * @return The newly created post
      */
-    @Async
     public Post createPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));
