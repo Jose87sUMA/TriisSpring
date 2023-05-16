@@ -189,7 +189,7 @@ public class PostPanel extends VerticalLayout {
         dialog.setConfirmText("Delete");
         dialog.setConfirmButtonTheme("error primary");
         dialog.addConfirmListener(e -> {
-            //postService.deletePost(post);
+            postService.deletePost(post);
             this.removeFromParent();
         });
         return dialog;

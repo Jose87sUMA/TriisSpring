@@ -70,7 +70,7 @@ public class PostService {
     }
 
     /**
-     * Given a PostID, this method finds and removes the Post.
+     * This method removes a Post given as parameter.
      * @param post
      */
     public void deletePost(Post post){postRep.delete(post);}
