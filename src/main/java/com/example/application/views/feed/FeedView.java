@@ -51,18 +51,13 @@ public class FeedView extends HorizontalLayout {
         feedPanel.addClassName("feed-panel");
         feedPanel.addClassName(LumoUtility.AlignItems.CENTER);
 
+        feedPanel.add("Recommendations", new FeedScroller(FeedType.RECOMMENDATION, authenticatedUser, userService, postService, UI.getCurrent()));
         feedPanel.add("Discovery", new FeedScroller(FeedType.DISCOVERY, authenticatedUser, userService, postService, UI.getCurrent()));
         feedPanel.add("Following", new FeedScroller(FeedType.FOLLOWING, authenticatedUser, userService, postService, UI.getCurrent()));
         feedPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
 
-//        getElement().executeJs("""
-//            var el = this;
-//            el.addEventListener("scroll", function(e) {
-//                if(el.scrollTop + el.clientHeight == el.scrollHeight) {
-//                    this.$server.loadMore();
-//                }
-//            });
-//        """);
+        feedPanel.setSelectedIndex(1);
+        feedPanel.getElement().getChild(0).setAttribute("style", "width: 450px;");
 
         this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         this.setMargin(true);
