@@ -38,7 +38,7 @@ public class PostsPointLog {
 
     @Basic
     @Column(name = "LOG_DATE")
-    private Date logDate;
+    private Instant logDate;
 
     @Basic
     @Column(name = "DIRECT")
@@ -60,7 +60,7 @@ public class PostsPointLog {
         this.userId = user.getUserId();
         this.postId = post.getPostId();
         this.points = BigInteger.valueOf(points);
-        this.logDate = Date.from(Instant.now());
+        this.logDate = Instant.now();
         this.direct = direct;
         this.previousHash = previousHash;
 
@@ -87,11 +87,11 @@ public class PostsPointLog {
         this.points = points;
     }
 
-    public Date getLogDate() {
+    public Instant getLogDate() {
         return logDate;
     }
 
-    public void setLogDate(Date logDate) {
+    public void setLogDate(Instant logDate) {
         this.logDate = logDate;
     }
 
