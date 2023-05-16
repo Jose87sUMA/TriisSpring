@@ -3,7 +3,7 @@ package com.example.application.data.entities;
 import jakarta.persistence.*;
 
 import java.math.BigInteger;
-import java.sql.Date;
+import java.time.*;
 import java.util.Objects;
 
 @Entity
@@ -25,7 +25,17 @@ public class Comment {
     private String userComment;
     @Basic
     @Column(name = "COMMENT_DATE")
-    private Date commentDate;
+    private Instant commentDate;
+
+    private Instant getZonedDate() {
+        ZoneId zoneId =  ZoneId.of("Europe/Madrid"); // Use your desired time zone
+        LocalDate date = LocalDate.now();
+        LocalTime time = LocalTime.now();
+        LocalDateTime localDateTime = LocalDateTime.of(date, time);
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+        return zonedDateTime.toInstant();
+    }
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     public BigInteger getCommentId() {
@@ -60,11 +70,11 @@ public class Comment {
         this.userComment = userComment;
     }
 
-    public Date getCommentDate() {
+    public Instant getCommentDate() {
         return commentDate;
     }
 
-    public void setCommentDate(Date commentDate) {
+    public void setCommentDate(Instant commentDate) {
         this.commentDate = commentDate;
     }
 

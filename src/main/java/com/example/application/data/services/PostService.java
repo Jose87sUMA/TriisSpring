@@ -5,6 +5,7 @@ import com.example.application.data.repositories.*;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.charts.model.Time;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -21,8 +22,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
-import java.sql.Date;
+import java.security.Timestamp;
+import java.util.Date;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -308,9 +312,7 @@ public class PostService {
         System.out.println("thread");
 
     }
-
-
-
+    
     public void pointDistribution(Post post, User authUser) {
 
         List<Post> branch = postRep.findPostBranch(post.getPostId());
@@ -378,11 +380,7 @@ public class PostService {
         List<Comment> commentList = commentsRep.findAllByPostId(post.getPostId());
         List<MessageListItem> itemList =new ArrayList<>();
         for(Comment c : commentList){
-
-            Timestamp timestamp = new Timestamp((c.getCommentDate()).getTime());
-            Instant i = timestamp.toInstant();
-
-            MessageListItem item = new MessageListItem(c.getUserComment(), i,(userRep.findFirstByUserId(c.getUserId()).getUsername()));
+            MessageListItem item = new MessageListItem(c.getUserComment(), c.getCommentDate(),(userRep.findFirstByUserId(c.getUserId()).getUsername()));
             itemList.add(item);
         }
         return itemList;
@@ -403,7 +401,7 @@ public class PostService {
         Comment comment = new Comment();
 
         comment.setPostId(post.getPostId());
-        comment.setCommentDate(new java.sql.Date(Instant.now().toEpochMilli()));
+        comment.setCommentDate(Instant.now());
         comment.setUserId(user.getUserId());
         comment.setUserComment(text);
 

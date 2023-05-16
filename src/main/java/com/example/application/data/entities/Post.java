@@ -5,7 +5,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.time.Instant;
+import java.time.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +24,7 @@ public class Post implements Serializable {
     private BigInteger userId;
     @Basic
     @Column(name = "POST_DATE")
-    private Date post_date;
+    private Instant post_date;
     @Basic
     @Column(name = "POINTS")
     private BigInteger points;
@@ -57,7 +57,7 @@ public class Post implements Serializable {
 
         this.postId = null;
         this.repostId = post.getPostId();
-        this.post_date = Date.valueOf(LocalDate.now());
+        this.post_date = getZonedDate();
         this.userId = user.getUserId();
         this.content = null;
         this.points = BigInteger.ZERO;
@@ -65,13 +65,18 @@ public class Post implements Serializable {
         this.likes = BigInteger.ZERO;
     }
 
+    private Instant getZonedDate() {
+        ZoneId zoneId =  ZoneId.of("Europe/Madrid"); // Use your desired time zone
+        LocalDate date = LocalDate.now();
+        LocalTime time = LocalTime.now();
+        LocalDateTime localDateTime = LocalDateTime.of(date, time);
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+        return zonedDateTime.toInstant();
+    }
+
 
     public BigInteger getPostId() {
         return postId;
-    }
-
-    public void setPostId(BigInteger postId) {
-        this.postId = postId;
     }
 
     public BigInteger getUserId() {
@@ -82,12 +87,8 @@ public class Post implements Serializable {
         this.userId = userId;
     }
 
-    public Date getPost_date() {
+    public Instant getPost_date() {
         return post_date;
-    }
-
-    public void setPost_date(Date postDate) {
-        this.post_date = postDate;
     }
 
     public BigInteger getPoints() {
@@ -118,24 +119,12 @@ public class Post implements Serializable {
         return pointed;
     }
 
-    public void setPointed(String pointed) {
-        this.pointed = pointed;
-    }
-
     public BigInteger getRepostId() {
         return repostId;
     }
 
-    public void setRepostId(BigInteger repostId) {
-        this.repostId = repostId;
-    }
-
     public BigInteger getOriginalPostId() {
         return originalPostId;
-    }
-
-    public void setOriginalPostId(BigInteger originalPostId) {
-        this.originalPostId = originalPostId;
     }
 
     /*public List<Report> getReports() {
