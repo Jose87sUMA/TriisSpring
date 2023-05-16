@@ -115,6 +115,10 @@ public class UserService {
         return followers;
     }
 
+    public int getNumberOfFollowers(User user){
+        return followRep.findAllByUserIdFollowing(user.getUserId()).size();
+    }
+
     /**
      * Adds a Follow entity to the database.
      * @param follower User who is following.

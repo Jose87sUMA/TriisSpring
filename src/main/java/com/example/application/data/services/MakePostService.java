@@ -32,14 +32,14 @@ public class MakePostService {
      * post a pointed post by file
      * if error throws corresponding exception
      */
-    public void postPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
+    public Post postPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
+        Post post = null;
         validateFileContent(fileData);
         if(checkEnoughPointsForPost(user)){
             try{
                 validateFileContent(fileData);
-                Post post = postService.creatPost(user, true, fileData);
-                //substract points from user
-                //subtractPointsFromUser();
+                post = postService.creatPost(user, true, fileData);
+                subtractPointsFromUser(user);
 
             }catch(Exception exception){
                 throw new MakePostException("Something went wrong with server");
@@ -47,6 +47,7 @@ public class MakePostService {
         }else{
             throw new MakePostException("Not enough points");
         }
+        return post;
 
     }
 
@@ -54,7 +55,7 @@ public class MakePostService {
      * substracts points from user
      */
     private void subtractPointsFromUser(User user){
-        user.setType1Points(user.getType1Points().subtract(necessaryPointsToMakeAPost));
+        user.setType1Points(user.getType1Points().subtract(getPostCost(user)));
         userService.save(user);
     }
 
@@ -63,13 +64,15 @@ public class MakePostService {
      * calls an auxiliary function to convert from link to input stream
      * if error throws corresponding exception
      */
-    public void postNotPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
+    public Post postNotPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
+        Post post = null;
         validateFileContent(fileData);
         try{
-            Post post = postService.creatPost(user, false, fileData);
+            post = postService.creatPost(user, false, fileData);
         }catch(Exception exception){
             throw new MakePostException("Something went wrong with server when inserting " + fileData.toString());
         }
+        return post;
     }
 
     /**
@@ -77,8 +80,8 @@ public class MakePostService {
      * calls an auxiliary function to convert from link to input stream
      * if error throws corresponding exception
      */
-    public void postPointedByLink(User user, String link) throws MakePostException, IOException {
-        this.postPointedByFile(user, manageImageURL(link));
+    public Post postPointedByLink(User user, String link) throws MakePostException, IOException {
+        return this.postPointedByFile(user, manageImageURL(link));
 
     }
 
@@ -87,8 +90,8 @@ public class MakePostService {
      * calls an auxiliary function to convert from link to input stream
      * if error throws corresponding exception
      */
-    public void postNotPointedByLink(User user, String link) throws MakePostException,IOException {
-        this.postNotPointedByFile(user, manageImageURL(link));
+    public Post postNotPointedByLink(User user, String link) throws MakePostException,IOException {
+        return this.postNotPointedByFile(user, manageImageURL(link));
     }
 
     /**
@@ -96,7 +99,7 @@ public class MakePostService {
      * @return
      */
     private boolean checkEnoughPointsForPost(User user) {
-        return user.getType1Points().compareTo(necessaryPointsToMakeAPost) >= 0;
+        return user.getType1Points().compareTo(getPostCost(user)) >= 0;
     }
 
 
@@ -132,5 +135,14 @@ public class MakePostService {
         }
         return fileData;
 
+    }
+
+    /**
+     *
+     * @param user
+     * @return how many points user would spend in a pointed post
+     */
+    public BigInteger getPostCost(User user){
+        return new BigInteger(String.valueOf(Math.min(userService.getNumberOfFollowers(user)*3, 30000)));
     }
 }

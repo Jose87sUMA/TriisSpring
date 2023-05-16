@@ -8,6 +8,7 @@ import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.feed.FeedScroller;
 import com.example.application.views.feed.PostPanel;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -146,7 +147,6 @@ public class MakePostBox extends Dialog {
      */
 
     private void post(){
-        boolean success = false;
         Notification notification = new Notification();
         notification.setDuration(4000);
         notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -162,10 +162,13 @@ public class MakePostBox extends Dialog {
             }else{
                 makePostService.postNotPointedByFile(authenticatedUser, this.fileData);
             }
-            success = true;
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            notification.setText(pointedPost?"Pointed post uploaded correctly": "Not pointed post uploaded correctly");
+            notification.open();
             this.close();
-            profilePanel.refresh();
-            this.close();
+            UI.getCurrent().getPage().reload();
+
+
         }catch(MakePostException e){
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
             notification.setText(e.getMessage());
@@ -178,12 +181,7 @@ public class MakePostBox extends Dialog {
             this.close();
         }
 
-        if(success){
-            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            notification.setText(pointedPost?"Pointed post uploaded correctly": "Not pointed post uploaded correctly");
-            notification.open();
-            this.close();
-        }
+
 
 
     }
@@ -207,6 +205,7 @@ public class MakePostBox extends Dialog {
             pointed.getStyle().set("background-color","#0C6CE9");
             notPointed.getStyle().set("background-color","#2D3D52");
             pointedPost = true;
+            Notification.show("Make a pointed post for " + makePostService.getPostCost(authenticatedUser) + " points");
         });
 
         notPointed.addClickListener(event -> {
