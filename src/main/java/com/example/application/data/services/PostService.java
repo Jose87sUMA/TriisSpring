@@ -489,7 +489,7 @@ public class PostService {
      * @param fileData
      * @return The newly created post
      */
-    public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
+    public Post createPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));
         dropboxService.uploadPost(post, fileData);

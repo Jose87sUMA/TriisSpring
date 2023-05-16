@@ -33,21 +33,20 @@ public class MakePostService {
      * if error throws corresponding exception
      */
     public Post postPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
-        Post post = null;
         validateFileContent(fileData);
         if(checkEnoughPointsForPost(user)){
             try{
                 validateFileContent(fileData);
-                post = postService.creatPost(user, true, fileData);
-                subtractPointsFromUser(user);
-
+                Post post = postService.createPost(user, true, fileData);
+                //substract points from user
+                //subtractPointsFromUser();
+                return post;
             }catch(Exception exception){
                 throw new MakePostException("Something went wrong with server");
             }
         }else{
             throw new MakePostException("Not enough points");
         }
-        return post;
 
     }
 
@@ -55,7 +54,7 @@ public class MakePostService {
      * substracts points from user
      */
     private void subtractPointsFromUser(User user){
-        user.setType1Points(user.getType1Points().subtract(getPostCost(user)));
+        user.setType1Points(user.getType1Points().subtract(necessaryPointsToMakeAPost));
         userService.save(user);
     }
 
@@ -65,14 +64,13 @@ public class MakePostService {
      * if error throws corresponding exception
      */
     public Post postNotPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
-        Post post = null;
         validateFileContent(fileData);
         try{
-            post = postService.creatPost(user, false, fileData);
+            Post post = postService.createPost(user, false, fileData);
+            return post;
         }catch(Exception exception){
             throw new MakePostException("Something went wrong with server when inserting " + fileData.toString());
         }
-        return post;
     }
 
     /**
@@ -106,7 +104,7 @@ public class MakePostService {
     /**
      * checks if file is empty
      */
-    private void validateFileContent(InputStream fileData) throws MakePostException,IOException {
+    public void validateFileContent(InputStream fileData) throws MakePostException,IOException {
         if(fileData == null || fileData.available() == 0) {
             throw new MakePostException("File is empty");
         }
@@ -115,7 +113,7 @@ public class MakePostService {
     /**
      * creates an input stream from image link
      */
-    private InputStream manageImageURL(String link) throws MakePostException, IOException {
+    public InputStream manageImageURL(String link) throws MakePostException, IOException {
         InputStream fileData = null;
         if(link.isEmpty()){
             throw new MakePostException("No link ");
