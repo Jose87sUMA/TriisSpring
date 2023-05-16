@@ -66,14 +66,14 @@ public class MakePostBox extends Dialog {
      * @param userService
      * @param profilePanel
      */
-    public MakePostBox(PostService postService, UserService userService, FeedScroller profilePanel) {
+    public MakePostBox(PostService postService, UserService userService, MakePostService makePostService, FeedScroller profilePanel) {
         this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         this.postService = postService;
         this.userService = userService;
         this.profilePanel = profilePanel;
         this.pointedPost = false;
         this.fileData = null;
-        this.makePostService = new MakePostService(authenticatedUser, userService, postService);
+        this.makePostService = makePostService;
         createUploadPictureLayout();
 
     }
@@ -153,14 +153,14 @@ public class MakePostBox extends Dialog {
         notification.removeThemeVariants(NotificationVariant.LUMO_SUCCESS);
         try{
             if(uploadByLink && pointedPost){
-                makePostService.postPointedByLink(linkField.getValue());
+                makePostService.postPointedByLink(authenticatedUser, linkField.getValue());
             }else if(uploadByLink && !pointedPost){
-                makePostService.postNotPointedByLink(linkField.getValue());
+                makePostService.postNotPointedByLink(authenticatedUser, linkField.getValue());
             }else if(pointedPost){
-                makePostService.postPointedByFile(this.fileData);
+                makePostService.postPointedByFile(authenticatedUser, this.fileData);
 
             }else{
-                makePostService.postNotPointedByFile(this.fileData);
+                makePostService.postNotPointedByFile(authenticatedUser, this.fileData);
             }
             success = true;
             this.close();

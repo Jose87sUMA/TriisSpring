@@ -3,6 +3,7 @@ package com.example.application.views.profile;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.services.FeedService;
+import com.example.application.data.services.MakePostService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.MainLayout;
@@ -37,12 +38,14 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     private User user, authenticatedUser;
     private final UserService userService;
     private final PostService postService;
+    private final MakePostService makePostService;
 
 
-    public ProfileView(UserService userService, PostService postService) {
+    public ProfileView(UserService userService, PostService postService, MakePostService makePostService) {
 
         this.postService = postService;
         this.userService = userService;
+        this.makePostService = makePostService;
         this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
     }
@@ -102,7 +105,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             editProfile.setVisible(false);
         }else{
             follow.setVisible(false);
-            makePost.addClickListener(e -> new MakePostBox(postService, userService, profilePanel).open()) ;
+            makePost.addClickListener(e -> new MakePostBox(postService, userService, makePostService, profilePanel).open()) ;
         }
         return new HorizontalLayout(followers, following, type1, type2, follow, makePost, editProfile);
 

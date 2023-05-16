@@ -3,6 +3,9 @@ package com.example.application.data.services;
 import com.example.application.data.exceptions.MakePostException;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,43 +13,33 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 
+@Service
 public class MakePostService {
-    private final PostService postService;
-    private final User authenticatedUser;
-    private final UserService userService;
-    boolean pointedPost;
-    private InputStream fileData;
-    private BigInteger userPoints =  new BigInteger("0");
 
-    // Perform operations with the BigInteger;
+    @Autowired
+    PostService postService;
+    @Autowired
+    UserService userService;
+
     private BigInteger necessaryPointsToMakeAPost =  new BigInteger("0");;
 
     /**
      * auxiliary functions related with making a post
-     * @param authenticatedUser
-     * @param userService
-     * @param postService
      */
-    public  MakePostService ( User authenticatedUser,  UserService userService, PostService postService){
-            this.authenticatedUser = authenticatedUser;
-            this.postService = postService;
-            this.userService = userService;
-            this.pointedPost = false;
-
+    public  MakePostService (){
     }
     /**
      * post a pointed post by file
      * if error throws corresponding exception
      */
-    public void postPointedByFile(InputStream postInputStream) throws MakePostException, IOException {
-        fileData = postInputStream;
-        validateFileContent();
-        if(checkEnoughPointsForPost()){
+    public void postPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
+        validateFileContent(fileData);
+        if(checkEnoughPointsForPost(user)){
             try{
-                validateFileContent();
-                Post post = postService.creatPost(authenticatedUser, true, fileData);
+                validateFileContent(fileData);
+                Post post = postService.creatPost(user, true, fileData);
                 //substract points from user
-                subtractPointsFromUser();
+                //subtractPointsFromUser();
 
             }catch(Exception exception){
                 throw new MakePostException("Something went wrong with server");
@@ -60,10 +53,9 @@ public class MakePostService {
     /**
      * substracts points from user
      */
-    private void subtractPointsFromUser(){
-        userPoints.subtract(necessaryPointsToMakeAPost);
-        authenticatedUser.setType1Points(userPoints);
-        userService.save(authenticatedUser);
+    private void subtractPointsFromUser(User user){
+        user.setType1Points(user.getType1Points().subtract(necessaryPointsToMakeAPost));
+        userService.save(user);
     }
 
     /**
@@ -71,11 +63,10 @@ public class MakePostService {
      * calls an auxiliary function to convert from link to input stream
      * if error throws corresponding exception
      */
-    public void postNotPointedByFile(InputStream postInputStream) throws MakePostException, IOException {
-        fileData = postInputStream;
-        validateFileContent();
+    public void postNotPointedByFile(User user, InputStream fileData) throws MakePostException, IOException {
+        validateFileContent(fileData);
         try{
-            Post post = postService.creatPost(authenticatedUser, false, null);
+            Post post = postService.creatPost(user, false, fileData);
         }catch(Exception exception){
             throw new MakePostException("Something went wrong with server when inserting " + fileData.toString());
         }
@@ -86,9 +77,8 @@ public class MakePostService {
      * calls an auxiliary function to convert from link to input stream
      * if error throws corresponding exception
      */
-    public void postPointedByLink(String link) throws MakePostException, IOException {
-        manageImageURL(link);
-        this.postPointedByFile(fileData);
+    public void postPointedByLink(User user, String link) throws MakePostException, IOException {
+        this.postPointedByFile(user, manageImageURL(link));
 
     }
 
@@ -97,37 +87,33 @@ public class MakePostService {
      * calls an auxiliary function to convert from link to input stream
      * if error throws corresponding exception
      */
-    public void postNotPointedByLink(String link) throws MakePostException,IOException {
-        manageImageURL(link);
-        this.postNotPointedByFile(fileData);
+    public void postNotPointedByLink(User user, String link) throws MakePostException,IOException {
+        this.postNotPointedByFile(user, manageImageURL(link));
     }
 
     /**
      * returns if a user has enough points
      * @return
      */
-    private boolean checkEnoughPointsForPost() {
-        this.userPoints = userService.findById(authenticatedUser.getUserId()).getType1Points();
-        if(userPoints.compareTo(necessaryPointsToMakeAPost) >= 0){
-            return true;
-        }
-        return false;
+    private boolean checkEnoughPointsForPost(User user) {
+        return user.getType1Points().compareTo(necessaryPointsToMakeAPost) >= 0;
     }
 
 
     /**
      * checks if file is empty
      */
-    private void validateFileContent() throws MakePostException,IOException {
-            if(fileData == null || fileData.available() == 0) {
-                throw new MakePostException("File is empty");
-            }
+    private void validateFileContent(InputStream fileData) throws MakePostException,IOException {
+        if(fileData == null || fileData.available() == 0) {
+            throw new MakePostException("File is empty");
+        }
     }
 
     /**
      * creates an input stream from image link
      */
-    private void manageImageURL(String link) throws MakePostException, IOException {
+    private InputStream manageImageURL(String link) throws MakePostException, IOException {
+        InputStream fileData = null;
         if(link.isEmpty()){
             throw new MakePostException("No link ");
         }
@@ -144,6 +130,7 @@ public class MakePostService {
             throw new MakePostException("Not a valid link");
 
         }
+        return fileData;
 
     }
 }

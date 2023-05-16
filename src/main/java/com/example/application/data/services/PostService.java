@@ -2,8 +2,6 @@ package com.example.application.data.services;
 
 import com.example.application.data.entities.*;
 import com.example.application.data.repositories.*;
-import com.example.application.security.DropboxService;
-import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -33,7 +31,6 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Future;
 
 
 @Service
@@ -366,8 +363,6 @@ public class PostService {
 
     }
 
-
-
     public void pointDistribution(Post post, User authUser) {
 
         List<Post> branch = postRep.findPostBranch(post.getPostId());
@@ -494,7 +489,6 @@ public class PostService {
      * @param fileData
      * @return The newly created post
      */
-    @Async
     public Post creatPost(User authenticatedUser, boolean b, InputStream fileData) {
 
         Post post = postRep.save(new Post(authenticatedUser, b));
