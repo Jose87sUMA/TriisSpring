@@ -3,6 +3,7 @@ package com.example.application.data.services;
 import com.example.application.data.entities.Follow;
 import com.example.application.data.entities.Recommendation;
 import com.example.application.data.entities.User;
+import com.example.application.data.exceptions.UserException;
 import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.RecommendationRepository;
 import com.example.application.data.repositories.UsersRepository;
@@ -17,6 +18,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -89,6 +91,10 @@ public class UserService {
 
         return resource;
 
+    }
+
+    public void changeProfilePicture(User user, InputStream filedata) throws UserException {
+        dropboxService.uploadProfilePicture(user, filedata);
     }
 
     public List<User> getFollowing(User user){

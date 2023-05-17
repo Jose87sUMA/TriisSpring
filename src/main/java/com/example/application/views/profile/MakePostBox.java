@@ -38,17 +38,16 @@ public class MakePostBox extends Dialog {
      * next attribute is used to add the post uploaded directly to profile panel
      */
     private final FeedScroller profilePanel;
-    boolean pointedPost;
-    private InputStream fileData;
+    private boolean pointedPost;
+    protected InputStream fileData;
     private boolean uploadByLink = false;
     /**
      *  components that appear and disappear from the window
      */
-    private Upload uploadComponent;
+    protected Upload uploadComponent;
     private TextField linkField  = new TextField("Link");
     private Button fileButton = new Button("File");
     private Button linkButton = new Button("Link");
-
 
     /**
      * constructor initializes a window for making posts
@@ -72,18 +71,18 @@ public class MakePostBox extends Dialog {
      * adds closing functionality
      * calls auxiliar functions to create components and model behaviour
      * */
-    private void createUploadPictureLayout(){
+    public void createUploadPictureLayout(){
         this.setDraggable(true);
 
         H4 pointsQuestionText = new H4(" How do you want your post?");
         pointsQuestionText.getStyle().set("marginTop", "20px");
         pointsQuestionText.getStyle().set("marginBottom", "10px");
 
-        createUploadComponent();
+        this.uploadComponent = createUploadComponent();
 
         linkField.setWidth("100%");
         linkField.setVisible(false);
-        this.add(new H1("Create Post"),uploadComponent, linkField, pointsQuestionText, createPointedButtons());
+        this.add(new H1("Create Post"), uploadComponent, linkField, pointsQuestionText, createPointedButtons());
 
         Button cancelButton = new Button("Cancel", (e) -> this.close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -209,9 +208,9 @@ public class MakePostBox extends Dialog {
      * upload component which notifies in case of an error or saves image as an attribute of the class (fileData)
      * @return upload component for images
      */
-    private void createUploadComponent(){
+    public Upload createUploadComponent(){
         MemoryBuffer uploadBuffer= new MemoryBuffer();
-        this.uploadComponent = new Upload(uploadBuffer);
+        Upload uploadComponent = new Upload(uploadBuffer);
         uploadComponent.setAcceptedFileTypes("image/png, image/jpeg, image/jpg");
         uploadComponent.setDropLabel(new Label("Drop picture here"));
 
@@ -241,6 +240,8 @@ public class MakePostBox extends Dialog {
             uploadComponent.getDropLabelIcon().removeFromParent();
             uploadComponent.getUploadButton().removeFromParent();
         });
+
+        return uploadComponent;
 
     }
 }

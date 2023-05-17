@@ -6,10 +6,12 @@ import com.dropbox.core.InvalidAccessTokenException;
 import com.dropbox.core.oauth.DbxCredential;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.WriteMode;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.data.exceptions.UserException;
 import com.example.application.data.repositories.PostsRepository;
-import org.springframework.scheduling.annotation.Async;
+import com.example.application.data.repositories.UsersRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -25,9 +27,12 @@ public class DropboxService {
     private String APP_KEY = "t6v4qds3tflheb3";
     private String APP_SECRET = "26k0xiwwznt3r25";
     private final PostsRepository postRep;
+    private final UsersRepository userRep;
 
-    public DropboxService(PostsRepository postRep) {
+
+    public DropboxService(PostsRepository postRep, UsersRepository userRep) {
         this.postRep = postRep;
+        this.userRep = userRep;
     }
 
     public byte[] downloadPostContent(Post post){
@@ -62,8 +67,10 @@ public class DropboxService {
         boolean success = false;
         while(!success) {
             try {
+
                 FileMetadata metadata = client.files().uploadBuilder("/Posts/" + post.getPostId() + ".jpg")
-                        .uploadAndFinish(fileData);
+                                                      .withMode(WriteMode.OVERWRITE)
+                                                      .uploadAndFinish(fileData);
                 post.setContent(metadata.getName());
                 postRep.save(post);
                 success = true;
@@ -75,6 +82,51 @@ public class DropboxService {
             }
         }
         return post;
+    }
+
+    public byte[] downloadProfilePicture(User user) {
+
+        String pathFile = (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
+
+        DbxClientV2 client = getDbxClientV2();
+        byte[] imageBytes = null;
+        boolean success = false;
+        while(!success){
+            try {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                client.files().download("/ProfilePictures/" + pathFile).download(outputStream);
+                imageBytes = outputStream.toByteArray();
+                success = true;
+            } catch (InvalidAccessTokenException e) {
+                refreshToken(client);
+            }catch(IOException | DbxException e){ e.printStackTrace();}
+        }
+
+        return imageBytes;
+    }
+
+    public User uploadProfilePicture(User user, InputStream fileData){
+
+        DbxClientV2 client = getDbxClientV2();
+        boolean success = false;
+        while(!success) {
+            try {
+
+                FileMetadata metadata = client.files().uploadBuilder("/ProfilePictures/" + user.getUserId() + ".jpg")
+                                                      .withMode(WriteMode.OVERWRITE)
+                                                      .uploadAndFinish(fileData);
+                user.setProfilePicture(metadata.getName());
+                userRep.save(user);
+
+                success = true;
+
+            } catch (InvalidAccessTokenException e) {
+                refreshToken(client);
+            } catch (IOException | DbxException e) {
+                throw new UserException("Error uploading image");
+            }
+        }
+        return user;
     }
 
     protected DbxClientV2 getDbxClientV2() {
@@ -93,25 +145,5 @@ public class DropboxService {
         }
     }
 
-    public byte[] downloadProfilePicture(User user) {
 
-        String pathFile = (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
-
-        DbxClientV2 client = getDbxClientV2();
-        byte[] imageBytes = null;
-        boolean success = false;
-        while(!success){
-            try {
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                client.files().download("/ProfilePictures/" + pathFile).download(outputStream);
-                imageBytes = outputStream.toByteArray();
-                success = true;
-            } catch (InvalidAccessTokenException e) {
-                refreshToken(client);
-            }catch(IOException | DbxException e){ e.printStackTrace();}
-        }
-
-        return imageBytes;
-    }
 }
