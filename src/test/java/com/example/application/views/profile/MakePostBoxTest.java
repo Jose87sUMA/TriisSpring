@@ -48,7 +48,7 @@ class MakePostBoxTest {
         user.setType1Points(new BigInteger("10"));
 
         // Act
-        makePostService.subtractPointsFromUser(user);
+        makePostService.subtractPointsFromUser(user, makePostService.getPostCost(user));
 
         // Assert
         assertEquals(new BigInteger("0"), user.getType1Points());

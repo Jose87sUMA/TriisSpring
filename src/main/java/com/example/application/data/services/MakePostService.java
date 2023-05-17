@@ -21,8 +21,6 @@ public class MakePostService {
     @Autowired
     UserService userService;
 
-    private BigInteger necessaryPointsToMakeAPost =  new BigInteger("0");;
-
     /**
      * auxiliary functions related with making a post
      */
@@ -39,8 +37,9 @@ public class MakePostService {
                 validateFileContent(fileData);
                 Post post = postService.createPost(user, true, fileData);
                 //substract points from user
-                //subtractPointsFromUser();
+                subtractPointsFromUser(user, getPostCost(user));
                 return post;
+
             }catch(Exception exception){
                 throw new MakePostException("Something went wrong with server");
             }
@@ -48,14 +47,6 @@ public class MakePostService {
             throw new MakePostException("Not enough points");
         }
 
-    }
-
-    /**
-     * substracts points from user
-     */
-    public void subtractPointsFromUser(User user){
-        user.setType1Points(user.getType1Points().subtract(necessaryPointsToMakeAPost));
-        userService.save(user);
     }
 
     /**
@@ -90,6 +81,14 @@ public class MakePostService {
      */
     public Post postNotPointedByLink(User user, String link) throws MakePostException,IOException {
         return this.postNotPointedByFile(user, manageImageURL(link));
+    }
+
+    /**
+     * substracts points from user
+     */
+    public void subtractPointsFromUser(User user, BigInteger points){
+        user.setType1Points(user.getType1Points().subtract(points));
+        userService.save(user);
     }
 
     /**
