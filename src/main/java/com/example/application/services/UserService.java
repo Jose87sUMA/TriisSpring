@@ -1,9 +1,9 @@
-package com.example.application.data.services;
+package com.example.application.services;
 
 import com.example.application.data.entities.Follow;
 import com.example.application.data.entities.Recommendation;
 import com.example.application.data.entities.User;
-import com.example.application.data.exceptions.UserException;
+import com.example.application.exceptions.UserException;
 import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.RecommendationRepository;
 import com.example.application.data.repositories.UsersRepository;

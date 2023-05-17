@@ -1,10 +1,9 @@
-package com.example.application.data.services;
+package com.example.application.services;
 
-import com.example.application.data.exceptions.MakePostException;
+import com.example.application.exceptions.MakePostException;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

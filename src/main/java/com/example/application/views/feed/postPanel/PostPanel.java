@@ -4,8 +4,8 @@ import com.vaadin.flow.component.html.*;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;

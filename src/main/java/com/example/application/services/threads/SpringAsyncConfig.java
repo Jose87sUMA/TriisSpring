@@ -1,4 +1,4 @@
-package com.example.application.data.services.threads;
+package com.example.application.services.threads;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;

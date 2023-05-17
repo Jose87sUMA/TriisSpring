@@ -2,8 +2,8 @@ package com.example.application.views.feed;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
 import com.example.application.views.feed.postPanel.PostPanel;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

@@ -1,7 +1,7 @@
 package com.example.application.security;
 
 import com.example.application.data.entities.User;
-import com.example.application.data.services.UserService;
+import com.example.application.services.UserService;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import java.util.Optional;

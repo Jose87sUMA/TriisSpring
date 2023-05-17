@@ -1,15 +1,10 @@
 package com.example.application.views.feed;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.UploadErrorException;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
-import com.example.application.data.services.FeedService.FeedType;
-import com.example.application.data.services.threads.SpringAsyncConfig;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
+import com.example.application.services.FeedService.FeedType;
+import com.example.application.services.threads.SpringAsyncConfig;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;

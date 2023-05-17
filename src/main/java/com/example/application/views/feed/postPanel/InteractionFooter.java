@@ -2,7 +2,7 @@ package com.example.application.views.feed.postPanel;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.PostService;
+import com.example.application.services.PostService;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;

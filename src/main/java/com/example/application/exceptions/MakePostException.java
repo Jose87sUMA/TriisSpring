@@ -1,4 +1,4 @@
-package com.example.application.data.exceptions;
+package com.example.application.exceptions;
 
 public class MakePostException extends RuntimeException{
     public MakePostException() {

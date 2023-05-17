@@ -1,4 +1,4 @@
-package com.example.application.data.services;
+package com.example.application.services;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
@@ -9,7 +9,7 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.WriteMode;
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.exceptions.UserException;
+import com.example.application.exceptions.UserException;
 import com.example.application.data.repositories.PostsRepository;
 import com.example.application.data.repositories.UsersRepository;
 import org.springframework.stereotype.Service;

@@ -2,9 +2,9 @@ package com.example.application.views.feed;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
-import com.example.application.data.services.threads.SpringAsyncConfig;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
+import com.example.application.services.threads.SpringAsyncConfig;
 import com.example.application.views.feed.postPanel.PostPanel;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.*;
@@ -15,8 +15,8 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-import com.example.application.data.services.FeedService.*;
-import com.example.application.data.services.FeedService;
+import com.example.application.services.FeedService.*;
+import com.example.application.services.FeedService;
 
 
 import java.util.*;

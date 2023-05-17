@@ -1,4 +1,4 @@
-package com.example.application.data.services;
+package com.example.application.services;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.repositories.PostsRepository;

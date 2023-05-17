@@ -1,24 +1,18 @@
 package com.example.application.views.profile;
 
 import com.example.application.data.entities.User;
-import com.example.application.data.exceptions.UserException;
-import com.example.application.data.services.MakePostService;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
+import com.example.application.exceptions.UserException;
+import com.example.application.services.MakePostService;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
 import com.example.application.views.feed.FeedScroller;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-
-import java.io.InputStream;
 
 import static java.lang.Math.min;
 

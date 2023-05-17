@@ -2,10 +2,10 @@ package com.example.application.views.profile;
 
 
 import com.example.application.data.entities.User;
-import com.example.application.data.exceptions.MakePostException;
-import com.example.application.data.services.MakePostService;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
+import com.example.application.exceptions.MakePostException;
+import com.example.application.services.MakePostService;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

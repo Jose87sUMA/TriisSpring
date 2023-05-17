@@ -1,7 +1,7 @@
 package com.example.application.views;
 
 import com.example.application.data.entities.User;
-import com.example.application.data.services.UserService;
+import com.example.application.services.UserService;
 import com.example.application.security.AuthenticatedUser;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.feed.FeedView;
@@ -20,11 +20,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.page.*;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import com.vaadin.flow.shared.communication.*;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.BoxSizing;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
