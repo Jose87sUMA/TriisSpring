@@ -1,8 +1,11 @@
 package com.example.application.views.profile;
 
 import com.example.application.data.entities.User;
+import com.example.application.data.services.MakePostService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.example.application.views.feed.FeedScroller;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.notification.Notification;
@@ -14,6 +17,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class EditProfilePanel extends VerticalLayout {
@@ -66,18 +70,37 @@ public class EditProfilePanel extends VerticalLayout {
         passwordLayout2.setAlignItems(Alignment.BASELINE);
 
         Button goBack = new Button("Go back");
-        goBack.setWidth("300px");
+        goBack.setWidth("200px");
         goBack.addClickListener(e ->
                 goBack.getUI().ifPresent(ui ->
                         ui.navigate("profile/" + user.getUsername()))
         );
+        HorizontalLayout newLayout = new HorizontalLayout();
 
+        Button changeProfPic = new Button("Change Profile Picture");
+
+        /*
+        * does not update the photo
+        * */
+        if(!user.equals(userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()))) {
+            changeProfPic.setVisible(false);
+        }else{
+            FeedScroller profilePanel = null;
+            changeProfPic.addClickListener(e -> new MakeProfilePicBox(postService, userService, new MakePostService(), profilePanel).open()) ;
+        }
+
+
+
+        newLayout.addAndExpand(changeProfPic,goBack);
+        newLayout.setAlignItems(Alignment.BASELINE);
         this.setMaxWidth("500px");
         this.setAlignItems(Alignment.CENTER);
         this.add(
                 passwordLayout1,
                 passwordLayout2,
-                goBack
+                newLayout
+//                goBack,
+//                changeProfPic
         );
 
     }
