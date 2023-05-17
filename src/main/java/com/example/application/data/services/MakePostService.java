@@ -53,7 +53,7 @@ public class MakePostService {
     /**
      * substracts points from user
      */
-    private void subtractPointsFromUser(User user){
+    public void subtractPointsFromUser(User user){
         user.setType1Points(user.getType1Points().subtract(necessaryPointsToMakeAPost));
         userService.save(user);
     }
@@ -96,7 +96,7 @@ public class MakePostService {
      * returns if a user has enough points
      * @return
      */
-    private boolean checkEnoughPointsForPost(User user) {
+    public boolean checkEnoughPointsForPost(User user) {
         return user.getType1Points().compareTo(getPostCost(user)) >= 0;
     }
 
