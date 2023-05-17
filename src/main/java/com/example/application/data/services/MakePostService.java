@@ -34,7 +34,6 @@ public class MakePostService {
         validateFileContent(fileData);
         if(checkEnoughPointsForPost(user)){
             try{
-                validateFileContent(fileData);
                 Post post = postService.createPost(user, true, fileData);
                 //substract points from user
                 subtractPointsFromUser(user, getPostCost(user));

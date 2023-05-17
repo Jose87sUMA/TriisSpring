@@ -5,6 +5,7 @@ import com.example.application.data.entities.User;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.data.services.threads.SpringAsyncConfig;
+import com.example.application.views.feed.postPanel.PostPanel;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -19,8 +20,6 @@ import com.example.application.data.services.FeedService;
 
 
 import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Class that manages a feed.
@@ -125,12 +124,12 @@ public class FeedScroller extends VerticalLayout {
                 break;
             }
             PostPanel postPanel = new PostPanel(buffer.poll(), userService, postService);
-            newPostPanelsBool.put(postPanel.post, false);
-            newPostPanels.put(postPanel.post, postPanel);
+            newPostPanelsBool.put(postPanel.getPost(), false);
+            newPostPanels.put(postPanel.getPost(), postPanel);
 
             executor.getAsyncExecutor().execute(() -> {
                 postPanel.loadPostPanel(ui);
-                newPostPanelsBool.put(postPanel.post, true);
+                newPostPanelsBool.put(postPanel.getPost(), true);
             });
         }
         for(Map.Entry<Post, PostPanel> entry :  newPostPanels.entrySet()){

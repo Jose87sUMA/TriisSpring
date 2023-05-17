@@ -1,19 +1,15 @@
 package com.example.application.views.profile;
 
-import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
 import com.example.application.data.exceptions.MakePostException;
 import com.example.application.data.services.MakePostService;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
 import com.example.application.views.feed.FeedScroller;
-import com.example.application.views.feed.PostPanel;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
@@ -21,20 +17,13 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Vector;
 
 import static java.lang.Math.min;
 
@@ -163,7 +152,7 @@ public class MakePostBox extends Dialog {
                 makePostService.postNotPointedByFile(authenticatedUser, this.fileData);
             }
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            notification.setText(pointedPost?"Pointed post uploaded correctly": "Not pointed post uploaded correctly");
+            notification.setText(pointedPost ? "Pointed post uploaded correctly" : "Not pointed post uploaded correctly");
             notification.open();
             this.close();
             UI.getCurrent().getPage().reload();

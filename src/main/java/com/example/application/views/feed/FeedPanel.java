@@ -2,19 +2,14 @@ package com.example.application.views.feed;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.repositories.PostsRepository;
-import com.example.application.data.repositories.UsersRepository;
 import com.example.application.data.services.PostService;
 import com.example.application.data.services.UserService;
+import com.example.application.views.feed.postPanel.PostPanel;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.persistence.Index;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class FeedPanel extends Scroller {
 
