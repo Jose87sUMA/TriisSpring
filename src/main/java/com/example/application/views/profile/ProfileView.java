@@ -10,6 +10,7 @@ import com.example.application.views.MainLayout;
 import com.example.application.views.feed.FeedScroller;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -22,10 +23,12 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 @PageTitle("Triis - Profile")
@@ -74,7 +77,17 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         this.setAlignItems(Alignment.CENTER);
 
         removeAll();
+
+        Avatar avatar = new Avatar(user.getUsername());
+        StreamResource resource = new StreamResource("profile-pic",
+                () -> new ByteArrayInputStream(userService.getProfilePicBytes(user)));
+        avatar.setImageResource(resource);
+        avatar.setThemeName("xlarge");
+        avatar.getElement().setAttribute("tabindex", "-1");
+
+        add(avatar);
         add(new H1(user.getUsername()), buttons, profilePanel);
+
 
     }
 
