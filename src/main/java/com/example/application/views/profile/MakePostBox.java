@@ -24,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 import static java.lang.Math.min;
 

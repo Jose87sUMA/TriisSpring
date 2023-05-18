@@ -4,9 +4,15 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.logging.Level;
 
 @Entity
 @Table(name = "PostsPointLogs", schema = "UBD3336", catalog = "")
@@ -32,24 +38,34 @@ public class PostsPointLog {
 
     @Basic
     @Column(name = "LOG_DATE")
-    private Date logDate;
+    private Instant logDate;
 
     @Basic
     @Column(name = "DIRECT")
     private boolean direct;
 
+    @Basic
+    @Column(name = "PREVIOUS_HASH")
+    private String previousHash;
+
+    @Basic
+    @Column(name = "CURRENT_HASH")
+    private String currentHash;
+
     public PostsPointLog(){}
 
-    public PostsPointLog(Post post, User user, int points, boolean direct){
+    public PostsPointLog(Post post, User user, int points, boolean direct, String previousHash){
 
         this.logId = null;
         this.userId = user.getUserId();
         this.postId = post.getPostId();
         this.points = BigInteger.valueOf(points);
-        this.logDate = Date.from(Instant.now());
+        this.logDate = Instant.now();
         this.direct = direct;
+        this.previousHash = previousHash;
 
     }
+
 
     public BigInteger getLogId() {
         return logId;
@@ -71,11 +87,11 @@ public class PostsPointLog {
         this.points = points;
     }
 
-    public Date getLogDate() {
+    public Instant getLogDate() {
         return logDate;
     }
 
-    public void setLogDate(Date logDate) {
+    public void setLogDate(Instant logDate) {
         this.logDate = logDate;
     }
 
@@ -86,4 +102,17 @@ public class PostsPointLog {
     public void setDirect(boolean direct) {
         this.direct = direct;
     }
+
+    public String getPreviousHash() {
+        return previousHash;
+    }
+
+    public String getCurrentHash() {
+        return currentHash;
+    }
+
+    public void setCurrentHash(String currentHash) {
+        this.currentHash = currentHash;
+    }
+
 }

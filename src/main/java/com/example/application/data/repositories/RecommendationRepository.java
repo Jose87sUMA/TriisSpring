@@ -11,5 +11,6 @@ import java.math.BigInteger;
 public interface RecommendationRepository extends CrudRepository<Recommendation, BigInteger> {
 
     Recommendation findByRecommendedUserIdAndRecommendationUserId(BigInteger recommendedUserId, BigInteger recommendationUserId);
+    Recommendation deleteAllByRecommendedUserId(BigInteger recommendedUserId);
 
 }
