@@ -140,6 +140,12 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         int indirectPoints = 0;
 
         List<UserPointLog> userLogs = userService.findAllUserLogsByBeneficiary(user);
+
+        if(userLogs.isEmpty()){
+            dialog.add(new H3("Nothing to see here yet ;)"));
+            return dialog;
+        }
+
         Map<User, Integer> directContributers = new HashMap<>();
         for(UserPointLog userLog : userLogs){
 

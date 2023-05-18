@@ -164,6 +164,11 @@ public class PostHeader extends HorizontalLayout {
 
         List<PostsPointLog> postLogs = postService.findAllLogsByPost(post);
 
+        if(postLogs.isEmpty()){
+            dialog.add(new H3("Nothing to see here yet ;)"));
+            return dialog;
+        }
+
         for(PostsPointLog postLog : postLogs){
 
             if(postLog.isDirect()){
