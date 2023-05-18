@@ -3,6 +3,8 @@ package com.example.application.services;
 import com.example.application.data.entities.Follow;
 import com.example.application.data.entities.Recommendation;
 import com.example.application.data.entities.User;
+import com.example.application.data.entities.UserPointLog;
+import com.example.application.data.repositories.UserPointLogRepository;
 import com.example.application.exceptions.UserException;
 import com.example.application.data.repositories.FollowRepository;
 import com.example.application.data.repositories.RecommendationRepository;
@@ -28,14 +30,16 @@ public class UserService {
     private final UsersRepository userRep;
     private final FollowRepository followRep;
     private final RecommendationRepository recommendationRep;
+    private final UserPointLogRepository userPointLogRep;
 
     @Autowired
     DropboxService dropboxService;
 
-    public UserService(UsersRepository userRepository, FollowRepository followRep, RecommendationRepository recommendationRep) {
+    public UserService(UsersRepository userRepository, FollowRepository followRep, RecommendationRepository recommendationRep, UserPointLogRepository userPointLogRep) {
         this.userRep = userRepository;
         this.followRep = followRep;
         this.recommendationRep = recommendationRep;
+        this.userPointLogRep = userPointLogRep;
     }
     public User findById(BigInteger userId){ return userRep.findFirstByUserId(userId); }
     public User findByUsername(String username){ return userRep.findFirstByUsername(username); }
@@ -209,5 +213,10 @@ public class UserService {
 
         }
 
+    }
+
+    //Point logs
+    public List<UserPointLog> findAllUserLogsByBeneficiary(User user){
+        return userPointLogRep.findAllByBenfUserIdOrderByPointsDesc(user.getUserId());
     }
 }

@@ -1,6 +1,8 @@
 package com.example.application.views.profile;
 
+import com.example.application.data.entities.PostsPointLog;
 import com.example.application.data.entities.User;
+import com.example.application.data.entities.UserPointLog;
 import com.example.application.services.FeedService;
 import com.example.application.services.MakePostService;
 import com.example.application.services.PostService;
@@ -10,7 +12,12 @@ import com.example.application.views.feed.FeedScroller;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
@@ -19,6 +26,10 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @PageTitle("Triis - Profile")
 @Route(value = "profile", layout = MainLayout.class)
@@ -92,6 +103,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
         followers = new Button("Followers: " + userService.getFollowers(user).size());
         Button type1 = new Button("Type 1 points: " + user.getType1Points());
+        type1.addClickListener(e -> createStatisticsLayout().open());
         Button type2 = new Button("Type 2 points: " + user.getType2Points());
 
         follow = new Button(!isFollowing(user) ? "Follow" : "Unfollow");
@@ -110,6 +122,72 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             makePost.addClickListener(e -> new MakePostBox(postService, userService, makePostService, profilePanel).open()) ;
         }
         return new HorizontalLayout(followers, following, type1, type2, follow, makePost, editProfile);
+
+    }
+
+    private ConfirmDialog createStatisticsLayout(){
+
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setWidth("475px");
+        dialog.setHeader("Point Statistics");
+        dialog.setCancelable(true);
+        dialog.setConfirmText("Ok");
+        dialog.setCancelText("Close");
+
+        VerticalLayout directRepostersLayout = new VerticalLayout();
+
+        int directPoints = 0;
+        int indirectPoints = 0;
+
+        List<UserPointLog> userLogs = userService.findAllUserLogsByBeneficiary(user);
+        Map<User, Integer> directContributers = new HashMap<>();
+        for(UserPointLog userLog : userLogs){
+
+            if(userLog.isDirect()){
+
+                directPoints += userLog.getPoints().intValue();
+                User payer = userService.findById(userLog.getPayerUserId());
+                directContributers.put(payer, directContributers.getOrDefault(payer,0) + userLog.getPoints().intValue());
+
+            }else{
+                indirectPoints += userLog.getPoints().intValue();
+            }
+        }
+
+        Stream<Map.Entry<User,Integer>> sorted =
+                directContributers.entrySet().stream()
+                        .sorted(Map.Entry.comparingByValue());
+
+        for(Map.Entry<User,Integer> entry : sorted.toList()){
+
+            Label profileName = new Label(entry.getKey().getUsername() + " - " + entry.getValue());
+            directRepostersLayout.add(profileName);
+
+        }
+
+        Notification directPointsInfoNot = new Notification("Points from people that reposted you directly");
+        Notification indirectPointsInfoNot = new Notification("Points from people that reposted your direct reposters");
+
+        Icon directPointsInfoIcon = new Icon(VaadinIcon.QUESTION_CIRCLE_O);
+        directPointsInfoIcon.setSize("17px");
+
+        Icon indirectPointsInfoIcon = new Icon(VaadinIcon.QUESTION_CIRCLE_O);
+        indirectPointsInfoIcon.setSize("17px");
+
+        directPointsInfoIcon.getElement().addEventListener("mouseover", e -> directPointsInfoNot.open());
+        indirectPointsInfoIcon.getElement().addEventListener("mouseover", e -> indirectPointsInfoNot.open());
+
+        directPointsInfoIcon.getElement().addEventListener("mouseout", e -> directPointsInfoNot.close());
+        indirectPointsInfoIcon.getElement().addEventListener("mouseout", e -> indirectPointsInfoNot.close());
+
+        HorizontalLayout directLayout = new HorizontalLayout(new Details("Direct Points: " + directPoints, directRepostersLayout), directPointsInfoIcon);
+        directLayout.setAlignItems(Alignment.BASELINE);
+
+        HorizontalLayout indirectLayout = new HorizontalLayout(new Label("Indirect Points: " + indirectPoints), indirectPointsInfoIcon);
+        directLayout.setAlignItems(Alignment.BASELINE);
+
+        dialog.add(directLayout, indirectLayout, directPointsInfoNot, indirectPointsInfoNot);
+        return dialog;
 
     }
 
