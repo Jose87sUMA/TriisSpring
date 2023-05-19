@@ -28,6 +28,11 @@ public interface UsersRepository extends CrudRepository<User, BigInteger> {
     List<User> searchFollowers(@Param("searchFilter")String stringFilter,@Param("userFollower") List<User> userFollower );
 
 
+    @Query("select c from User c "+
+            "where lower(c.username) like lower(concat(:filterSearch, '%'))"  )
+    List<User> searchUsers(@Param("filterSearch")String filterSearch);
+
+
 
 
 

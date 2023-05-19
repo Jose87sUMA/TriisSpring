@@ -72,8 +72,7 @@ public class FollowingView extends Div  implements HasUrlParameter<String> {
 
 
     private void updateList() {
-        //List<User> users = userService.getFollowing(user);
-        //grid.setItems(users);
+
         grid.setItems(userService.findAllFollowing(filterText.getValue(),user));
     }
 

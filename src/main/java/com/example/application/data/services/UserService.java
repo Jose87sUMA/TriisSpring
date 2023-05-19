@@ -122,5 +122,17 @@ public class UserService {
         }
     }
 
+    public List<User> findAllProfiles(String stringFilter, User user) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return null;
+        } else {
+
+            return userRep.searchUsers(stringFilter);
+
+        }
+    }
+
+
+
 
 }
