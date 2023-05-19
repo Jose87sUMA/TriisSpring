@@ -1,12 +1,8 @@
 package com.example.application.views.profile;
 
-import com.example.application.data.entities.PostsPointLog;
 import com.example.application.data.entities.User;
 import com.example.application.data.entities.UserPointLog;
-import com.example.application.services.FeedService;
-import com.example.application.services.MakePostService;
-import com.example.application.services.PostService;
-import com.example.application.services.UserService;
+import com.example.application.services.*;
 import com.example.application.views.MainLayout;
 import com.example.application.views.feed.FeedScroller;
 import com.vaadin.flow.component.UI;
@@ -42,13 +38,16 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     private final UserService userService;
     private final PostService postService;
     private final MakePostService makePostService;
+    private final InteractionService interactionService;
 
 
-    public ProfileView(UserService userService, PostService postService, MakePostService makePostService) {
+    public ProfileView(UserService userService, PostService postService, MakePostService makePostService, InteractionService interactionService) {
 
         this.postService = postService;
         this.userService = userService;
         this.makePostService = makePostService;
+        this.interactionService = interactionService;
+
         this.authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
     }
@@ -65,7 +64,7 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             return;
         }
 
-        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, user, userService, postService, UI.getCurrent());
+        profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, user, userService, postService, UI.getCurrent(), interactionService);
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
         this.setMargin(true);

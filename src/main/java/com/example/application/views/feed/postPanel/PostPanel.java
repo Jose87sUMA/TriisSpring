@@ -1,4 +1,5 @@
 package com.example.application.views.feed.postPanel;
+import com.example.application.services.InteractionService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.*;
 
@@ -18,18 +19,22 @@ import java.util.concurrent.CompletableFuture;
 public class PostPanel extends VerticalLayout {
 
     private final User authenticatedUser;
-    Post post;
-    User poster;
+    private Post post;
+    private User poster;
+
     private final UserService userService;
     private final PostService postService;
-    PostHeader postHeader;
-    Image content;
-    InteractionFooter interactionFooter;
-    CommentSection commentSection;
+    private final InteractionService interactionService;
 
-    public PostPanel(Post post, UserService userService, PostService postService){
+    protected PostHeader postHeader;
+    protected Image content;
+    protected InteractionFooter interactionFooter;
+    protected CommentSection commentSection;
+
+    public PostPanel(Post post, UserService userService, PostService postService, InteractionService interactionService){
 
         this.post = post;
+        this.interactionService = interactionService;
         this.poster = userService.findById(post.getUserId());
         this.userService = userService;
         this.postService = postService;
@@ -47,8 +52,8 @@ public class PostPanel extends VerticalLayout {
         this.setWidth(content.getWidth());
 
         this.postHeader = new PostHeader(content.getWidth(), postService, userService, poster, authenticatedUser, post);
-        this.interactionFooter = new InteractionFooter(content.getWidth(),post, postService, authenticatedUser, this);
-        this.commentSection = new CommentSection(content.getWidth(),post, postService, userService, this);
+        this.interactionFooter = new InteractionFooter(content.getWidth(),post, postService, interactionService, authenticatedUser, this);
+        this.commentSection = new CommentSection(content.getWidth(),post, postService, userService, this, interactionService);
 
         this.addClassName(LumoUtility.Border.ALL);
         this.addClassName(LumoUtility.BorderColor.CONTRAST_90);

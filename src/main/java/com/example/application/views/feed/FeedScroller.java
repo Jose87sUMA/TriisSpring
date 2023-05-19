@@ -2,6 +2,7 @@ package com.example.application.views.feed;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.services.InteractionService;
 import com.example.application.services.PostService;
 import com.example.application.services.UserService;
 import com.example.application.services.threads.SpringAsyncConfig;
@@ -41,21 +42,25 @@ public class FeedScroller extends VerticalLayout {
     private final UserService userService;
     private final PostService postService;
     private final FeedService feedService;
+    private final InteractionService interactionService;
 
     private VerticalLayout content = new VerticalLayout();
 
     /**
      * Constructs the feed.
-     * @param feedType Type of feed.
-     * @param user If SortType PROFILE user must be the profile. Otherwise, user is authenticated user.
+     *
+     * @param feedType           Type of feed.
+     * @param user               If SortType PROFILE user must be the profile. Otherwise, user is authenticated user.
      * @param userService
      * @param postService
+     * @param interactionService
      */
-    public FeedScroller(FeedType feedType, User user, UserService userService, PostService postService, UI ui) {
+    public FeedScroller(FeedType feedType, User user, UserService userService, PostService postService, UI ui, InteractionService interactionService) {
 
         this.ui = ui;
         this.userService = userService;
         this.postService = postService;
+        this.interactionService = interactionService;
         this.feedService = new FeedService(this.postService.getPostRepository(), feedType, user.getUserId());
 
         loadMore = new Button("Load More Posts", e -> loadMore());
@@ -123,7 +128,7 @@ public class FeedScroller extends VerticalLayout {
                 loadMore.setEnabled(false);
                 break;
             }
-            PostPanel postPanel = new PostPanel(buffer.poll(), userService, postService);
+            PostPanel postPanel = new PostPanel(buffer.poll(), userService, postService, interactionService);
             newPostPanelsBool.put(postPanel.getPost(), false);
             newPostPanels.put(postPanel.getPost(), postPanel);
 

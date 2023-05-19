@@ -1,6 +1,7 @@
 package com.example.application.views.feed;
 
 import com.example.application.data.entities.User;
+import com.example.application.services.InteractionService;
 import com.example.application.services.PostService;
 import com.example.application.services.UserService;
 import com.example.application.services.FeedService.FeedType;
@@ -32,10 +33,13 @@ public class FeedView extends HorizontalLayout {
 
     private final UserService userService;
     private final PostService postService;
+    private final InteractionService interactionService;
 
-    public FeedView(UserService userService, PostService postService) {
+    public FeedView(UserService userService, PostService postService, InteractionService interactionService) {
         this.postService = postService;
         this.userService = userService;
+        this.interactionService = interactionService;
+
         User authenticatedUser = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         executor.getAsyncExecutor().execute(() -> {
             userService.loadRecommendations(authenticatedUser);
@@ -46,9 +50,9 @@ public class FeedView extends HorizontalLayout {
         feedPanel.addClassName("feed-panel");
         feedPanel.addClassName(LumoUtility.AlignItems.CENTER);
 
-        feedPanel.add("Recommendations", new FeedScroller(FeedType.RECOMMENDATION, authenticatedUser, userService, postService, UI.getCurrent()));
-        feedPanel.add("Discovery", new FeedScroller(FeedType.DISCOVERY, authenticatedUser, userService, postService, UI.getCurrent()));
-        feedPanel.add("Following", new FeedScroller(FeedType.FOLLOWING, authenticatedUser, userService, postService, UI.getCurrent()));
+        feedPanel.add("Recommendations", new FeedScroller(FeedType.RECOMMENDATION, authenticatedUser, userService, postService, UI.getCurrent(), this.interactionService));
+        feedPanel.add("Discovery", new FeedScroller(FeedType.DISCOVERY, authenticatedUser, userService, postService, UI.getCurrent(), this.interactionService));
+        feedPanel.add("Following", new FeedScroller(FeedType.FOLLOWING, authenticatedUser, userService, postService, UI.getCurrent(), this.interactionService));
         feedPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
 
         feedPanel.setSelectedIndex(1);

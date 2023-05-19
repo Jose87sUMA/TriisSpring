@@ -2,6 +2,7 @@ package com.example.application.views.feed.postPanel;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.services.InteractionService;
 import com.example.application.services.PostService;
 import com.example.application.services.UserService;
 import com.vaadin.flow.component.UI;
@@ -24,26 +25,29 @@ import java.util.List;
 public class CommentSection extends VerticalLayout {
     private MessageInput input;
     private MessageList list;
+
     private final PostService postService;
     private final UserService userService;
     private final PostPanel postPanel;
-    public CommentSection(String width, Post post, PostService postService, UserService userService, PostPanel postPanel){
+    private final InteractionService interactionService;
+    public CommentSection(String width, Post post, PostService postService, UserService userService, PostPanel postPanel, InteractionService interactionService){
 
         this.postService = postService;
         this.userService = userService;
         this.postPanel = postPanel;
+        this.interactionService = interactionService;
         this.setWidth(width);
         //this.setHeight("190px");
 
         this.input = new MessageInput();
-        this.list = new MessageList(this.postService.commentItems(post));
+        this.list = new MessageList(this.interactionService.commentItems(post));
         list.setMaxHeight(Float.parseFloat(postPanel.content.getHeight().substring(0, postPanel.content.getHeight().length()-2))-50 + "px");
 
         this.input.addSubmitListener(submitEvent -> {
             User authenticatedUser = this.userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-            this.postService.newComment(post, authenticatedUser, submitEvent.getValue());
+            this.interactionService.newComment(post, authenticatedUser, submitEvent.getValue());
             Notification.show("Commented " + submitEvent.getValue(), 2000, Notification.Position.BOTTOM_STRETCH);
-            List<MessageListItem> commentItems = this.postService.commentItems(post);
+            List<MessageListItem> commentItems = this.interactionService.commentItems(post);
 
             UI ui = UI.getCurrent();
             ui.access(() -> {

@@ -2,6 +2,7 @@ package com.example.application.views.feed.postPanel;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.services.InteractionService;
 import com.example.application.services.PostService;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
@@ -14,10 +15,13 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 public class InteractionFooter extends HorizontalLayout {
 
     private final PostService postService;
+    private final InteractionService interactionService;
     private final User authenticatedUser;
     private final PostPanel postPanel;
-    public InteractionFooter(String width, Post post, PostService postService, User authenticatedUser, PostPanel postPanel) {
+
+    public InteractionFooter(String width, Post post, PostService postService, InteractionService interactionService, User authenticatedUser, PostPanel postPanel) {
         this.postService = postService;
+        this.interactionService = interactionService;
         this.authenticatedUser = authenticatedUser;
         this.postPanel = postPanel;
 
@@ -26,7 +30,7 @@ public class InteractionFooter extends HorizontalLayout {
         double v = Double.parseDouble(width.substring(0, width.length() - 2)) / (3.5);
 
         Icon likeIcon;
-        if (!this.postService.getAllUsersLiking(post).contains(this.authenticatedUser)) {
+        if (!interactionService.getAllUsersLiking(post).contains(this.authenticatedUser)) {
             likeIcon = new Icon(VaadinIcon.HEART_O);
         } else {
             likeIcon = new Icon(VaadinIcon.HEART);
@@ -49,7 +53,7 @@ public class InteractionFooter extends HorizontalLayout {
 
         Icon retweeted = new Icon(VaadinIcon.RETWEET);
         retweeted.setColor("springgreen");
-        if (this.postService.isReposted(post, this.authenticatedUser)) {
+        if (interactionService.isReposted(post, this.authenticatedUser)) {
             repostButton.setIcon(retweeted);
         } else {
             repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
@@ -103,13 +107,13 @@ public class InteractionFooter extends HorizontalLayout {
      * @param likeButton
      */
     public void likeClick(Post post, User authUser, Button likeButton) {
-        if (!postService.getAllUsersLiking(post).contains(authUser)) {
-            postService.newLike(authUser, post);
+        if (!interactionService.getAllUsersLiking(post).contains(authUser)) {
+            interactionService.newLike(authUser, post);
             Icon redHeart = new Icon(VaadinIcon.HEART);
             redHeart.setColor("red");
             likeButton.setIcon(redHeart);
         } else {
-            postService.dislike(authenticatedUser, post);
+            interactionService.dislike(authenticatedUser, post);
             likeButton.setIcon(new Icon(VaadinIcon.HEART_O));
         }
         postService.save(post);
@@ -122,13 +126,13 @@ public class InteractionFooter extends HorizontalLayout {
      * @param repostButton
      */
     public void repostClick(Post post, User authUser, Button repostButton) {
-        boolean reposted = postService.isReposted(post, authUser);
+        boolean reposted = interactionService.isReposted(post, authUser);
         repostButton.setEnabled(false);
         //Already reposted?
         if (!reposted) {
-            postService.repost(post, authenticatedUser, repostButton);
+            interactionService.repost(post, authenticatedUser, repostButton);
         } else {
-            postService.unrepost(post, authenticatedUser, repostButton);
+            interactionService.unrepost(post, authenticatedUser, repostButton);
         }
         System.out.println("main");
 
