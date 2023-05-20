@@ -27,6 +27,7 @@ import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class PostHeader extends HorizontalLayout {
@@ -36,6 +37,9 @@ public class PostHeader extends HorizontalLayout {
     private final User poster;
     private final User authenticatedUser;
     private final Post post;
+
+    private final Avatar profileAvatar;
+    private final Button profileName;
 
     public PostHeader(String width, PostService postService, UserService userService, User poster, User authenticatedUser,  Post post) {
 
@@ -48,10 +52,10 @@ public class PostHeader extends HorizontalLayout {
         this.setWidth(width);
         this.setHeight("35px");
 
-        Avatar profileAvatar = new Avatar(poster.getUsername());
+        profileAvatar = new Avatar(poster.getUsername());
         profileAvatar.setImageResource(userService.getProfilePicImageResource(poster));
 
-        Button profileName = new Button(poster.getUsername() + " - " + post.getPoints() + " - " + post.getPost_date());
+        profileName = new Button(poster.getUsername() + " - " + post.getPoints() + " - " + post.getPost_date());
         profileName.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         profileName.setWidth("270px");
         profileName.setHeight("30px");
@@ -209,6 +213,10 @@ public class PostHeader extends HorizontalLayout {
         dialog.add(directLayout, indirectLayout, directPointsInfoNot, indirectPointsInfoNot);
         return dialog;
 
+    }
+
+    public void refreshPoints(BigInteger points){
+        profileName.setText(poster.getUsername() + " - " + points + " - " + post.getPost_date());
     }
 
 

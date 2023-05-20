@@ -7,12 +7,14 @@ import com.example.application.services.PostService;
 import com.example.application.services.UserService;
 import com.example.application.services.threads.SpringAsyncConfig;
 import com.example.application.views.feed.postPanel.PostPanel;
+import com.example.application.views.feed.searchbar.SearchBar;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
@@ -27,23 +29,22 @@ import java.util.*;
  */
 public class FeedScroller extends VerticalLayout {
 
+    private final UserService userService;
+    private final PostService postService;
+    private final FeedService feedService;
+    private final InteractionService interactionService;
+
     SpringAsyncConfig executor = new SpringAsyncConfig();
 
-    SortType current = null;
-
     Button loadMore;
+
+    SortType current = null;
     MenuBar sorting;
     UI ui;
     final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.reverseOrder()),
                                                           SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
 
     PriorityQueue<Post> buffer;
-
-    private final UserService userService;
-    private final PostService postService;
-    private final FeedService feedService;
-    private final InteractionService interactionService;
-
     private VerticalLayout content = new VerticalLayout();
 
     /**
@@ -66,17 +67,15 @@ public class FeedScroller extends VerticalLayout {
         loadMore = new Button("Load More Posts", e -> loadMore());
 
         sorting = sortChooser();
-        this.add(sorting);
-
-        this.setSpacing(true);
-
-        this.addClassName(LumoUtility.AlignItems.CENTER);
-
         changeSorting(SortType.RECENT);
 
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);
 
+        this.addClassName(LumoUtility.AlignItems.CENTER);
+        this.setSpacing(true);
+
+        this.add(sorting);
         this.add(content);
         this.add(loadMore);
     }

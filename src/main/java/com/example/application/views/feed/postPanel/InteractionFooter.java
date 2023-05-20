@@ -2,11 +2,16 @@ package com.example.application.views.feed.postPanel;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
+import com.example.application.exceptions.PostException;
 import com.example.application.services.InteractionService;
 import com.example.application.services.PostService;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.button.Button;
@@ -18,12 +23,18 @@ public class InteractionFooter extends HorizontalLayout {
     private final InteractionService interactionService;
     private final User authenticatedUser;
     private final PostPanel postPanel;
+    private final Post post;
+
+    private final Button likeButton;
+    private final Button repostButton;
+    private final Button commentButton;
 
     public InteractionFooter(String width, Post post, PostService postService, InteractionService interactionService, User authenticatedUser, PostPanel postPanel) {
         this.postService = postService;
         this.interactionService = interactionService;
         this.authenticatedUser = authenticatedUser;
         this.postPanel = postPanel;
+        this.post = post;
 
         this.setWidth(width);
         this.setHeight("25px");
@@ -37,19 +48,19 @@ public class InteractionFooter extends HorizontalLayout {
             likeIcon.setColor("red");
         }
 
-        Button likeButton = new Button(likeIcon);
+        likeButton = new Button(post.getLikes()+"", likeIcon);
         likeButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
         likeButton.setHeight("25px");
         likeButton.setWidth(v + "px");
         likeButton.addClickListener(click -> {
 
             likeButton.setEnabled(false);
-            likeClick(post, this.authenticatedUser, likeButton);
+            likeClick();
             likeButton.setEnabled(true);
 
         });
 
-        Button repostButton = new Button();
+        repostButton = new Button(interactionService.getAllReposts(post)+"");
 
         Icon retweeted = new Icon(VaadinIcon.RETWEET);
         retweeted.setColor("springgreen");
@@ -64,10 +75,15 @@ public class InteractionFooter extends HorizontalLayout {
         repostButton.setWidth(v + "px");
 
         repostButton.addClickListener(click -> {
-            repostClick(post, this.authenticatedUser, repostButton);
+            repostClick();
         });
 
-        Button commentButton = new Button(new Icon(VaadinIcon.COMMENT_O));
+        if(post.getUserId() == authenticatedUser.getUserId()){
+            repostButton.setEnabled(false);
+        }
+
+
+        commentButton = new Button(interactionService.getAllComments(post)+"",new Icon(VaadinIcon.COMMENT_O));
         commentButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY_INLINE);
         commentButton.setHeight("25px");
         commentButton.setWidth(v + "px");
@@ -102,13 +118,11 @@ public class InteractionFooter extends HorizontalLayout {
 
     /**
      * Actioned when the like button has been pressed. This method adds or subtracts a like to the post.
-     * @param post
-     * @param authUser
-     * @param likeButton
      */
-    public void likeClick(Post post, User authUser, Button likeButton) {
-        if (!interactionService.getAllUsersLiking(post).contains(authUser)) {
-            interactionService.newLike(authUser, post);
+    public void likeClick() {
+
+        if (!interactionService.getAllUsersLiking(post).contains(authenticatedUser)) {
+            interactionService.newLike(authenticatedUser, post);
             Icon redHeart = new Icon(VaadinIcon.HEART);
             redHeart.setColor("red");
             likeButton.setIcon(redHeart);
@@ -116,25 +130,119 @@ public class InteractionFooter extends HorizontalLayout {
             interactionService.dislike(authenticatedUser, post);
             likeButton.setIcon(new Icon(VaadinIcon.HEART_O));
         }
+        likeButton.setText(post.getLikes()+"");
         postService.save(post);
     }
 
     /**
      * Actioned when the repost button has been pressed. This method adds or deletes a repost for the user.
-     * @param post
-     * @param authUser
-     * @param repostButton
      */
-    public void repostClick(Post post, User authUser, Button repostButton) {
-        boolean reposted = interactionService.isReposted(post, authUser);
+    public void repostClick() {
+        boolean reposted = interactionService.isReposted(post, authenticatedUser);
         repostButton.setEnabled(false);
         //Already reposted?
         if (!reposted) {
-            interactionService.repost(post, authenticatedUser, repostButton);
+            repost();
         } else {
-            interactionService.unrepost(post, authenticatedUser, repostButton);
+            unrepost();
         }
-        System.out.println("main");
+    }
+
+    public void repost() {
+
+        if(post.getPointed().equals("Y")){
+
+            Notification usePoints = new Notification();
+            usePoints.setDuration(-1);
+            usePoints.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+            Div statusText = new Div(new Text("Use points?"));
+
+            Button yes = new Button("Yes");
+            yes.addClickListener(event -> {
+                usePoints.close();
+                try{
+                    interactionService.pointedRepost(post, authenticatedUser);
+                    postPanel.postHeader.refreshPoints(postService.findById(post.getPostId()).getPoints()); //Post with new points
+                    repostSuccess();
+                } catch (PostException e) {
+                    Notification notEnough = new Notification(e.getMessage());
+                    notEnough.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notEnough.setDuration(5000);
+                    notEnough.open();
+                    return;
+                }finally {
+                    repostButton.setEnabled(true);
+                }
+            });
+            Button no = new Button("No");
+            no.addClickListener(event -> {
+                usePoints.close();
+                interactionService.notPointedRepost(post, authenticatedUser);
+                repostSuccess();
+                repostButton.setEnabled(true);
+            });
+
+            HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
+            buttons.setAlignItems(FlexComponent.Alignment.CENTER);
+            usePoints.add(buttons);
+
+            usePoints.open();
+
+        }else{
+            interactionService.notPointedRepost(post, authenticatedUser);
+            repostSuccess();
+            repostButton.setEnabled(true);
+        }
+
+    }
+
+    public void repostSuccess(){
+
+        Notification notification = new Notification("Successful repost!");
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        notification.setDuration(5000);
+        notification.open();
+
+        Icon icon = new Icon(VaadinIcon.RETWEET);
+        icon.setColor("springgreen");
+        repostButton.setIcon(icon);
+
+        refreshRepostCount();
+
+    }
+
+    private void refreshRepostCount() {
+        repostButton.setText(interactionService.getAllReposts(post)+"");
+    }
+
+    private void unrepost(){
+
+        Notification deletePostCheck = new Notification();
+        deletePostCheck.setDuration(-1);
+        deletePostCheck.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+        Div statusText = new Div(new Text("Are you sure you want to unrepost? You won't get any used points back :("));
+
+        Button yes = new Button("Yes");
+        yes.addClickListener(event -> {
+
+            interactionService.deleteRepost(authenticatedUser, post);
+            repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
+            refreshRepostCount();
+            deletePostCheck.close();
+            repostButton.setEnabled(true);
+
+            Notification.show("Unreposted");
+        });
+        Button no = new Button("No");
+        no.addClickListener(event -> {
+            deletePostCheck.close();
+            repostButton.setEnabled(true);
+        });
+        HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
+        buttons.setAlignItems(FlexComponent.Alignment.CENTER);
+        deletePostCheck.add(buttons);
+
+        deletePostCheck.open();
 
     }
 }

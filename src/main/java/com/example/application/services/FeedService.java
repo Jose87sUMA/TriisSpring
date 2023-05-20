@@ -2,10 +2,8 @@ package com.example.application.services;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.repositories.PostsRepository;
-import com.sun.jna.platform.win32.OaIdl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
+
 import java.math.BigInteger;
 import java.util.*;
 
@@ -74,7 +72,7 @@ public class FeedService {
         Pageable page = PageRequest.of(index, ELEMENTS, sorts.get(currentSort));
         switch (feedType){
             case FOLLOWING -> posts = postRep.findAllByUsersFollowedByUserId(page, userId);
-            case DISCOVERY -> posts = postRep.findAll(page);
+            case DISCOVERY -> posts = postRep.findAllExcept(page, userId);
             case PROFILE -> posts = postRep.findAllByUserId(page, userId);
             case RECOMMENDATION -> posts = postRep.findAllRecommendedToUserId(page, userId);
         }

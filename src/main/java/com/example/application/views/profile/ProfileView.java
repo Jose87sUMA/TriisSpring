@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
@@ -35,10 +36,19 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     private FeedScroller profilePanel;
     private User user, authenticatedUser;
+
     private final UserService userService;
     private final PostService postService;
     private final MakePostService makePostService;
     private final InteractionService interactionService;
+
+    private Button following;
+    private Button followers;
+    private Button type1;
+    private Button type2;
+    private Button follow;
+    private Button makePost;
+    private Button editProfile;
 
 
     public ProfileView(UserService userService, PostService postService, MakePostService makePostService, InteractionService interactionService) {
@@ -67,13 +77,12 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         profilePanel = new FeedScroller(FeedService.FeedType.PROFILE, user, userService, postService, UI.getCurrent(), interactionService);
 
         this.setJustifyContentMode(JustifyContentMode.CENTER);
-        this.setMargin(true);
         this.setHorizontalComponentAlignment(Alignment.CENTER, profilePanel);
 
-        HorizontalLayout buttons = createButtonsLayout();
+        VerticalLayout buttons = createButtonsLayout();
 
         this.setHorizontalComponentAlignment(Alignment.CENTER, buttons);
-        this.setAlignItems(Alignment.CENTER);
+        this.setAlignItems(FlexComponent.Alignment.CENTER);
 
         removeAll();
 
@@ -90,30 +99,34 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     }
 
-    Button followers, follow;
-
     /**
      * CUSTOMIZING  BUTTONS
      */
-    private HorizontalLayout createButtonsLayout() {
+    private VerticalLayout createButtonsLayout() {
         //buttons
-        Button following = new Button("Following: " + userService.getFollowing(user).size());
-        following.addClickListener(event -> UI.getCurrent().navigate("profile/?following/" + user.getUsername()));
+        following = new Button("Following: " + userService.getFollowing(user).size());
+        following.addClickListener(event -> {
+            FollowingDialog followingDialog = new FollowingDialog(userService, user);
+            followingDialog.open();
+        });
 
-        Button follow = new Button("Followers: " + userService.getFollowers(user).size());
-        follow.addClickListener(event -> UI.getCurrent().navigate("profile/?follower/" + user.getUsername()));
+        followers = new Button("Followers: " + userService.getFollowers(user).size());
+        followers.addClickListener(event -> {
+            FollowersDialog followersDialog = new FollowersDialog(userService, user);
+            followersDialog.open();
+        });
 
-        Button type1 = new Button("Type 1 points: " + user.getType1Points());
+        type1 = new Button("Type 1 points: " + user.getType1Points());
         type1.addClickListener(e -> createStatisticsLayout().open());
-        
-        Button type2 = new Button("Type 2 points: " + user.getType2Points());
+
+        type2 = new Button("Type 2 points: " + user.getType2Points());
 
         follow = new Button(!isFollowing(user) ? "Follow" : "Unfollow");
         follow.addClickListener(e -> follow());
 
-        Button makePost = new Button("Make a Post");
+        makePost = new Button("Make a Post");
 
-        Button editProfile = new Button("Edit Profile");
+        editProfile = new Button("Edit Profile");
         editProfile.addClickListener(event -> UI.getCurrent().navigate("profile/?edit/" + user.getUsername()));
 
         if(!user.equals(userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()))) {
@@ -123,7 +136,20 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
             follow.setVisible(false);
             makePost.addClickListener(e -> new MakePostBox(postService, userService, makePostService, profilePanel).open()) ;
         }
-        return new HorizontalLayout(followers, following, type1, type2, follow, makePost, editProfile);
+
+        HorizontalLayout foll =  new HorizontalLayout(following, followers);
+        foll.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+
+        HorizontalLayout points = new HorizontalLayout(type1, type2);
+        points.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+
+        HorizontalLayout extra = new HorizontalLayout(follow, makePost, editProfile);
+        extra.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+
+        VerticalLayout buttons = new VerticalLayout(foll, points, extra);
+        buttons.setAlignItems(Alignment.CENTER);
+
+        return buttons;
 
     }
 

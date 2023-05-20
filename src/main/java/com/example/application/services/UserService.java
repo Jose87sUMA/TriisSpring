@@ -159,26 +159,6 @@ public class UserService {
 
     List<User> findAllByMatchingUsername(String match){return userRep.findAllByUsernameContainsIgnoreCase(match);}
 
-    public boolean editUsername(User user, String username) {
-        if(!username.isEmpty() && username.matches("^[a-z0-9]+$") && findByUsername(username) == null) {
-            user.setUsername(username);
-            userRep.save(user);
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public boolean editEmail(User user, String email) {
-        if(!email.isEmpty() && findByEmail(email) == null) {
-            user.setEmail(email);
-            userRep.save(user);
-            return true;
-        }else{
-            return false;
-        }
-    }
-
     public void editPassword(User user, String password) {
         user.setPassword((new BCryptPasswordEncoder()).encode(password));
     }
@@ -215,4 +195,31 @@ public class UserService {
     public List<UserPointLog> findAllUserLogsByBeneficiary(User user){
         return userPointLogRep.findAllByBenfUserIdOrderByPointsDesc(user.getUserId());
     }
+
+    public List<User> findAllProfiles(String stringFilter) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return null;
+        } else {
+
+            return userRep.searchUsers(stringFilter);
+
+        }
+    }
+
+    public List<User> findAllFollowing(String stringFilter, User user) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return getFollowing(user);
+        } else {
+            return userRep.searchFollowing(stringFilter,getFollowing(user));
+        }
+    }
+    public List<User> findAllFollower(String stringFilter, User user) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return getFollowers(user);
+        } else {
+
+            return userRep.searchFollowers(stringFilter, getFollowers(user));
+        }
+    }
+
 }

@@ -2,6 +2,7 @@ package com.example.application.services;
 
 import com.example.application.data.entities.*;
 import com.example.application.data.repositories.*;
+import com.example.application.exceptions.PostException;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -16,8 +17,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,15 +44,6 @@ public class InteractionService {
         this.postPointLogRep = postPointLogRep;
         this.userPointLogRep = userPointLogRep;
         this.commentsRep = commentsRep;
-    }
-
-    /**
-     * Returns an integer with the ammount of likes of the given Post.
-     * @param p
-     * @return
-     */
-    public int getAllLikes(Post p){
-        return likeRep.findAllByPostId(p.getPostId()).size();
     }
 
     /**
@@ -96,6 +88,15 @@ public class InteractionService {
 
     //REPOST BUTTON
 
+    public int getAllReposts(Post p){
+        if(p.getOriginalPostId() != null)
+            return postRep.findAllByOriginalPostId(p.getOriginalPostId()).size();
+        else
+            return postRep.findAllByOriginalPostId(p.getPostId()).size();
+
+    }
+
+
     /**
      * Given a post and a user, this method checks whether the named post is reposted by the user.
      * @param post
@@ -103,134 +104,26 @@ public class InteractionService {
      * @return
      */
     public boolean isReposted(Post post, User user){
-        //User reposting a repost and has already reposted any post refering to the same original post as the repost he is reposting
+                //User reposting a repost and has already reposted any post refering to the same original post as the post he is reposting
         return (post.getOriginalPostId() != null && !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getOriginalPostId()).isEmpty())
                 //User reposting the original post and has already reposted any repost of the original post
-                || !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getPostId()).isEmpty(); //
+                || !postRep.findAllByUserIdAndOriginalPostId(user.getUserId(), post.getPostId()).isEmpty();
     }
 
-    public void repost(Post post, User authUser, Button repostButton) {
-
-        UI.setCurrent(repostButton.getUI().get());
-
-        var ref = new Object() {
-            boolean repostSuccess = true;
-        };
-        Notification repostSuccessNoti = new Notification("Reposted correctly.");
-        repostSuccessNoti.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        repostSuccessNoti.setDuration(5000);
-
-        //Post allows point investment?
-        if(post.getPointed().equals("Y")){
-
-            Notification usePoints = new Notification();
-            usePoints.setDuration(-1);
-            usePoints.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
-            Div statusText = new Div(new Text("Use points?"));
-
-            Button yes = new Button("Yes");
-            yes.addClickListener(event -> {
-
-                UI.getCurrent().access(() -> {
-                    usePoints.close();
-                });
-
-                //Enough Points?
-                if(authUser.getType2Points().compareTo(BigInteger.valueOf(5)) >= 0){
-                    Post newRepost = postRep.save(new Post(post, authUser, true));
-                    this.pointDistribution(newRepost, authUser);
-                    authUser.setType2Points(BigInteger.valueOf(authUser.getType2Points().intValue() - 5));
-                    userRep.save(authUser);
-                    UI.getCurrent().access(() -> {
-                        repostSuccessNoti.open();
-                    });
-                }else{
-                    Notification notEnough = new Notification("Not enough points for repost! Wait for next refill :)");
-                    notEnough.addThemeVariants(NotificationVariant.LUMO_ERROR);
-
-                    UI.getCurrent().access(() -> {
-                        notEnough.open();
-                        ref.repostSuccess = false;
-                    });
-                }
-                UI.getCurrent().access(() -> {
-                    repostButton.setEnabled(true);
-                });
-            });
-            Button no = new Button("No");
-            no.addClickListener(event -> {
-                postRep.save(new Post(post, authUser, false));
-
-                UI.getCurrent().access(() -> {
-                    usePoints.close();
-                    repostButton.setEnabled(true);
-                    repostSuccessNoti.open();
-                });
-            });
-
-            HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
-            buttons.setAlignItems(FlexComponent.Alignment.CENTER);
-            usePoints.add(buttons);
-
-            UI.getCurrent().access(() -> {
-                usePoints.open();
-            });
-
+    public void pointedRepost(Post post, User authenticatedUser) throws PostException {
+        //Enough Points?
+        if(authenticatedUser.getType2Points().compareTo(BigInteger.valueOf(5)) >= 0){
+            Post newRepost = postRep.save(new Post(post, authenticatedUser, true));
+            this.pointDistribution(newRepost, authenticatedUser);
+            authenticatedUser.setType2Points(BigInteger.valueOf(authenticatedUser.getType2Points().intValue() - 5));
+            userRep.save(authenticatedUser);
         }else{
-            postRep.save(new Post(post, authUser, false));
-            UI.getCurrent().access(() -> {
-                repostButton.setEnabled(true);
-            });
+            throw new PostException("Not enough points for repost! Wait for next refill :)");
         }
-
-        if(ref.repostSuccess){
-            Icon icon = new Icon(VaadinIcon.RETWEET);
-            icon.setColor("springgreen");
-            UI.getCurrent().access(() -> {
-                repostButton.setIcon(icon);
-            });
-        }
-
-        System.out.println("thread");
-
     }
 
-    public void unrepost(Post post, User authUser, Button repostButton){
-
-        UI.setCurrent(repostButton.getUI().get());
-
-        Notification deletePostCheck = new Notification();
-        deletePostCheck.setDuration(-1);
-        deletePostCheck.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
-        Div statusText = new Div(new Text("Are you sure you want to unrepost? You won't get any used points back :("));
-
-        Button yes = new Button("Yes");
-        yes.addClickListener(event -> {
-            this.deleteRepost(authUser, post);
-
-            UI.getCurrent().access(() -> {
-                deletePostCheck.close();
-                repostButton.setIcon(new Icon(VaadinIcon.RETWEET));
-                Notification.show("Unreposted");
-                repostButton.setEnabled(true);
-            });
-        });
-        Button no = new Button("No");
-        no.addClickListener(event -> {
-            UI.getCurrent().access(() -> {
-                deletePostCheck.close();
-                repostButton.setEnabled(true);
-            });
-        });
-        HorizontalLayout buttons = new HorizontalLayout(statusText, yes, no);
-        buttons.setAlignItems(FlexComponent.Alignment.CENTER);
-        deletePostCheck.add(buttons);
-
-        UI.getCurrent().access(() -> {
-            deletePostCheck.open();
-        });
-        System.out.println("thread");
-
+    public void notPointedRepost(Post post, User authenticatedUser) {
+        postRep.save(new Post(post, authenticatedUser, false));
     }
 
     public void pointDistribution(Post post, User authUser) {
@@ -334,5 +227,9 @@ public class InteractionService {
         comment.setUserComment(text);
 
         commentsRep.save(comment);
+    }
+
+    public int getAllComments(Post post) {
+        return commentsRep.findAllByPostId(post.getPostId()).size();
     }
 }

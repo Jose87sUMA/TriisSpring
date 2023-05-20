@@ -48,22 +48,25 @@ public class PostPanel extends VerticalLayout {
         this.content = postService.getContent(post, ui);
 
         Float height = Float.parseFloat(content.getHeight().substring(0,content.getHeight().length()-2))+60;
-        this.setHeight(height + "px");
-        this.setWidth(content.getWidth());
+        ui.access(() -> {
+            this.setHeight(height + "px");
+            this.setWidth(content.getWidth());
+            this.addClassName(LumoUtility.Border.ALL);
+            this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
+            this.addClassName(LumoUtility.BorderRadius.LARGE);
+            this.addClassName(LumoUtility.BoxSizing.CONTENT);
+            this.addClassName(LumoUtility.Padding.Left.NONE);
+            this.addClassName(LumoUtility.Padding.Right.NONE);
+
+            this.setSpacing(false);
+            this.setAlignItems(FlexComponent.Alignment.CENTER);
+        });
+
+
 
         this.postHeader = new PostHeader(content.getWidth(), postService, userService, poster, authenticatedUser, post);
         this.interactionFooter = new InteractionFooter(content.getWidth(),post, postService, interactionService, authenticatedUser, this);
         this.commentSection = new CommentSection(content.getWidth(),post, postService, userService, this, interactionService);
-
-        this.addClassName(LumoUtility.Border.ALL);
-        this.addClassName(LumoUtility.BorderColor.CONTRAST_90);
-        this.addClassName(LumoUtility.BorderRadius.LARGE);
-        this.addClassName(LumoUtility.BoxSizing.CONTENT);
-        this.addClassName(LumoUtility.Padding.Left.NONE);
-        this.addClassName(LumoUtility.Padding.Right.NONE);
-
-        this.setSpacing(false);
-        this.setAlignItems(FlexComponent.Alignment.CENTER);
 
         this.add(postHeader, content, interactionFooter, commentSection);
         System.out.println("Finished load: " + post.getPostId());

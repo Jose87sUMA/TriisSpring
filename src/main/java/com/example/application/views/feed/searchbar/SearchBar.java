@@ -1,8 +1,8 @@
 package com.example.application.views.feed.searchbar;
 
 import com.example.application.data.entities.User;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -18,22 +18,19 @@ import java.util.List;
 public class SearchBar extends Dialog {
 
     private final UserService userService;
-    private final PostService postService;
 
     private TextField textFilter;
     private Grid<User> grid;
 
-    public SearchBar(UserService userService, PostService postService){
+    public SearchBar(UserService userService){
 
         this.userService = userService;
-        this.postService = postService;
 
         textFilter = new TextField();
         grid = new Grid<>(User.class, false);
 
         grid.addComponentColumn(us -> createButtonToProfile(us.getUsername())).setHeader("Profiles");
         grid.setWidth("300px");  // esto no hace nada
-        grid.setHeight("300px");
 
         this.add(getSearchBar(), grid);
         this.setWidth("50x");  // esto no hace nada

@@ -7,6 +7,7 @@ import com.example.application.services.UserService;
 import com.example.application.services.FeedService.FeedType;
 import com.example.application.services.threads.SpringAsyncConfig;
 import com.example.application.views.MainLayout;
+import com.example.application.views.feed.searchbar.SearchBar;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -42,25 +43,21 @@ import java.util.List;
 @Route(value = "feed", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @PermitAll
-
-public class FeedView extends HorizontalLayout  {
-
-    private final UserService userService;
-    private final PostService postService;
-    private User authenticatedUser;
-
-    FeedPanel feedPanel ;
-
-    SpringAsyncConfig executor = new SpringAsyncConfig();
-
-    private TabSheet feedPanel;
-    private User authenticatedUser;
+public class FeedView extends VerticalLayout  {
 
     private final UserService userService;
     private final PostService postService;
     private final InteractionService interactionService;
 
+    private User authenticatedUser;
+
+    private FeedPanel feedPanel;
+
+    SpringAsyncConfig executor = new SpringAsyncConfig();
+
+
     public FeedView(UserService userService, PostService postService, InteractionService interactionService) {
+
         this.postService = postService;
         this.userService = userService;
         this.interactionService = interactionService;
@@ -70,25 +67,19 @@ public class FeedView extends HorizontalLayout  {
             userService.loadRecommendations(authenticatedUser);
         });
 
-        feedPanel = new TabSheet();
+        feedPanel = new FeedPanel(authenticatedUser, userService, postService, interactionService);
 
-        feedPanel.addClassName("feed-panel");
-        feedPanel.addClassName(LumoUtility.AlignItems.CENTER);
+        this.setMargin(false);
+        this.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        feedPanel.add("Recommendations", new FeedScroller(FeedType.RECOMMENDATION, authenticatedUser, userService, postService, UI.getCurrent(), this.interactionService));
-        feedPanel.add("Discovery", new FeedScroller(FeedType.DISCOVERY, authenticatedUser, userService, postService, UI.getCurrent(), this.interactionService));
-        feedPanel.add("Following", new FeedScroller(FeedType.FOLLOWING, authenticatedUser, userService, postService, UI.getCurrent(), this.interactionService));
-        feedPanel.addThemeVariants(TabSheetVariant.LUMO_TABS_EQUAL_WIDTH_TABS);
+        Button searchButton = new Button("Search Users");
+        searchButton.addClickListener(e -> {
+            SearchBar searchBar = new SearchBar(userService);
+            searchBar.open();
+        });
 
-        feedPanel.setSelectedIndex(1);
-        feedPanel.getElement().getChild(0).setAttribute("style", "width: 450px;");
-
-        this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        this.setMargin(true);
-        this.setVerticalComponentAlignment(Alignment.CENTER, feedPanel);
-
-        add(feedPanel);
-
+        this.add(searchButton);
+        this.add(feedPanel);
 
     }
 
