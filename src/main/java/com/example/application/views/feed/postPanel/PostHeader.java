@@ -221,7 +221,9 @@ public class PostHeader extends HorizontalLayout {
     }
 
     public void refreshPoints(BigInteger points){
-        profileName.setText(poster.getUsername() + " - " + points + " - " + post.getPost_date().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_ORDINAL_DATE));
+        profileName.setText(poster.getUsername() + " - "
+                            + post.getPoints() + " - "
+                            + post.getPost_date().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
 
 
