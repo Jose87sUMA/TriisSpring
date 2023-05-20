@@ -122,7 +122,7 @@ public class UserService {
         }
     }
 
-    public List<User> findAllProfiles(String stringFilter, User user) {
+    public List<User> findAllProfiles(String stringFilter) {
         if (stringFilter == null || stringFilter.isEmpty()) {
             return null;
         } else {
