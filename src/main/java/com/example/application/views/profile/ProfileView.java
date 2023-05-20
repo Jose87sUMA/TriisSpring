@@ -100,9 +100,12 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         Button following = new Button("Following: " + userService.getFollowing(user).size());
         following.addClickListener(event -> UI.getCurrent().navigate("profile/?following/" + user.getUsername()));
 
-        followers = new Button("Followers: " + userService.getFollowers(user).size());
+        Button follow = new Button("Followers: " + userService.getFollowers(user).size());
+        follow.addClickListener(event -> UI.getCurrent().navigate("profile/?follower/" + user.getUsername()));
+
         Button type1 = new Button("Type 1 points: " + user.getType1Points());
         type1.addClickListener(e -> createStatisticsLayout().open());
+        
         Button type2 = new Button("Type 2 points: " + user.getType2Points());
 
         follow = new Button(!isFollowing(user) ? "Follow" : "Unfollow");

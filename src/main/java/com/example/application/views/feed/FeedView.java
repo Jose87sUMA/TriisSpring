@@ -20,11 +20,36 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * View manager for the feed.
  */
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
+import jakarta.annotation.security.PermitAll;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
+import java.util.List;
+
 @PageTitle("Triis - Feed")
 @Route(value = "feed", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @PermitAll
-public class FeedView extends HorizontalLayout {
+
+public class FeedView extends HorizontalLayout  {
+
+    private final UserService userService;
+    private final PostService postService;
+    private User authenticatedUser;
+
+    FeedPanel feedPanel ;
 
     SpringAsyncConfig executor = new SpringAsyncConfig();
 
@@ -63,6 +88,8 @@ public class FeedView extends HorizontalLayout {
         this.setVerticalComponentAlignment(Alignment.CENTER, feedPanel);
 
         add(feedPanel);
+
+
     }
 
 //    public void loadMore(){

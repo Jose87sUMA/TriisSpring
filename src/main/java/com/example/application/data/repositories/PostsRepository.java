@@ -79,4 +79,14 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
      */
     @Query(value = "select * FROM POSTS P WHERE P.USER_ID IN (SELECT R.RECOMMENDATION_USER_ID FROM RECOMMENDATION R WHERE R.RECOMMENDED_USER_ID = :userId ORDER BY R.SCORE DESC FETCH FIRST 10 ROWS ONLY)", nativeQuery = true)
     List<Post> findAllRecommendedToUserId(Pageable pageable, BigInteger userId);
+    List<Post> findAllByUserIdOrderByPostDateDesc(BigInteger userId);
+
+
+    @Query("select p from Post p JOIN  User c ON(c.userId = p.userId )"+
+            "where lower(c.username) like lower(concat(:filterSearch, '%'))"  )
+    List<Post> searchPosts(@Param("filterSearch")String filterSearch);
+// poner todos los posts de ese usuario
+
+
+
 }
