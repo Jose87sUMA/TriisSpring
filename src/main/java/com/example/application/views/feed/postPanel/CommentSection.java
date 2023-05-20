@@ -44,6 +44,7 @@ public class CommentSection extends VerticalLayout {
         list.setMaxHeight(Float.parseFloat(postPanel.content.getHeight().substring(0, postPanel.content.getHeight().length()-2))-50 + "px");
 
         this.input.addSubmitListener(submitEvent -> {
+
             User authenticatedUser = this.userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
             this.interactionService.newComment(post, authenticatedUser, submitEvent.getValue());
             Notification.show("Commented " + submitEvent.getValue(), 2000, Notification.Position.BOTTOM_STRETCH);
@@ -54,6 +55,7 @@ public class CommentSection extends VerticalLayout {
                 list.setItems(commentItems);
                 ui.push();
             });
+
         });
         input.setMaxHeight("70px");
 

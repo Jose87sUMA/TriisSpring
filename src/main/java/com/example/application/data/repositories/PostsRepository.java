@@ -1,6 +1,7 @@
 package com.example.application.data.repositories;
 
 import com.example.application.data.entities.Post;
+import org.atmosphere.config.service.Get;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -90,6 +91,8 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
             "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL " +
             "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
     List<Post> findTenByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
+
+    /**
      * Get all posts by a certain user.
      * @param pageable Page request.
      * @param userId User ID.

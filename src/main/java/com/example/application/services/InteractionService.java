@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,10 +199,9 @@ public class InteractionService {
         List<MessageListItem> itemList =new ArrayList<>();
         for(Comment c : commentList){
 
-            Timestamp timestamp = new Timestamp((c.getCommentDate()).getTime());
-            Instant i = timestamp.toInstant();
+            Instant zonedTime = c.getCommentDate().atZone(ZoneId.systemDefault()).toInstant();
 
-            MessageListItem item = new MessageListItem(c.getUserComment(), i,(userRep.findFirstByUserId(c.getUserId()).getUsername()));
+            MessageListItem item = new MessageListItem(c.getUserComment(), zonedTime, (userRep.findFirstByUserId(c.getUserId()).getUsername()));
             itemList.add(item);
         }
         return itemList;
@@ -222,7 +222,7 @@ public class InteractionService {
         Comment comment = new Comment();
 
         comment.setPostId(post.getPostId());
-        comment.setCommentDate(new java.sql.Date(Instant.now().toEpochMilli()));
+        comment.setCommentDate(Instant.now());
         comment.setUserId(user.getUserId());
         comment.setUserComment(text);
 

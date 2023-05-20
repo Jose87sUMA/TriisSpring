@@ -2,26 +2,34 @@ package com.example.application.views.leaderboards;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.LeaderboardService;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
-import com.example.application.views.feed.PostPanel;
+import com.example.application.services.InteractionService;
+import com.example.application.services.LeaderboardService;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
+import com.example.application.services.threads.SpringAsyncConfig;
+import com.example.application.views.feed.postPanel.PostPanel;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class LeaderboardScroller extends VerticalLayout {
 
     private final UserService userService;
     private final PostService postService;
+    private final InteractionService interactionService;
     private final LeaderboardService leaderboardService;
     private final LeaderboardService.LeaderboardType leaderboardType;
+
+    SpringAsyncConfig executor = new SpringAsyncConfig();
+    UI ui;
+
     /**
      * the list of posts that appear on the top 10
      */
@@ -34,15 +42,19 @@ public class LeaderboardScroller extends VerticalLayout {
 
     /**
      * calls  a method which initializes the vertical layout CONTENT with necessary components
-     * @param leaderboardType the selected top 10: posts (select by time span) or users
+     *
+     * @param leaderboardType    the selected top 10: posts (select by time span) or users
      * @param userService
+     * @param interactionService
      * @param leaderboardService
      */
-    LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, UserService userService, PostService postService, LeaderboardService leaderboardService) {
+    LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, UserService userService, PostService postService, InteractionService interactionService, LeaderboardService leaderboardService, UI ui) {
         this.userService = userService;
         this.postService =postService;
+        this.interactionService = interactionService;
         this.leaderboardService = leaderboardService;
         this.leaderboardType = leaderboardType;
+        this.ui = ui;
 
         this.addClassName(LumoUtility.AlignItems.CENTER);
         content.setSpacing(true);
@@ -65,16 +77,54 @@ public class LeaderboardScroller extends VerticalLayout {
         }
 
         if(posts != null && posts.size() != 0){
+            Map<Integer, PostPanel> newPostPanels = new HashMap<>();
+            Map<Integer, Boolean> postIsReady = new HashMap<>();
+
             for(int i = 0; i < Math.min(10, posts.size()); i++){
-                content.add(new H4 ((i+1) + " Position"), new PostPanel(posts.get(i), userService, postService));
+                PostPanel postPanel = new PostPanel(posts.get(i), userService, postService, interactionService);
+                newPostPanels.put(i, postPanel);
+                postIsReady.put(i, false);
+
+                int finalI = i;
+                executor.getAsyncExecutor().execute(() -> {
+                    postPanel.loadPostPanel(ui);
+                    postIsReady.put(finalI, true);
+                });
             }
+            for(Map.Entry<Integer, PostPanel> entry :  newPostPanels.entrySet()){
+                while(!postIsReady.get(entry.getKey())){
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                H4 position = new H4 ((entry.getKey()+1) + " Position");
+                if(entry.getKey() == 0){
+                    position.getStyle().set("color", "#FFD700");
+                }else if (entry.getKey() == 1){
+                    position.getStyle().set("color", "#C0C0C0");
+                } else if (entry.getKey() == 2) {
+                    position.getStyle().set("color", "#CD7F32");
+                }
+                content.add(position, entry.getValue());
+            }
+
         }else if(users != null && users.size() != 0){
             Button buttonUser[] = new Button[users.size()];
             for(int i = 0; i < Math.min(10, users.size()); i++){
                 buttonUser[i] = new Button(users.get(i).getUsername() + ":   " + users.get(i).getType1Points() + " points");
                 buttonUser[i].setWidth("100%");
                 //button[i].addClickListener(UI.getCurrent().navigate(ProfileView.class, username));
-                content.add(new H4 ((i+1) + " Position"), buttonUser[i]);
+                H4 position = new H4 ((i+1) + " Position");
+                if(i == 0){
+                    position.getStyle().set("color", "#FFD700");
+                }else if (i == 1){
+                    position.getStyle().set("color", "#C0C0C0");
+                } else if (i == 2) {
+                    position.getStyle().set("color", "#CD7F32");
+                }
+                content.add(position, buttonUser[i]);
             }
         }else{
             content.add(new H4("Competition is tight isn't it? D;"));

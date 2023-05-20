@@ -27,6 +27,7 @@ import com.example.application.services.FeedService;
 
 
 import java.util.*;
+import java.util.concurrent.locks.Condition;
 
 /**
  * Class that manages a feed.
@@ -45,6 +46,7 @@ public class FeedScroller extends VerticalLayout {
     SortType current = null;
     MenuBar sorting;
     UI ui;
+
     final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.reverseOrder()),
                                                           SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
 
@@ -122,6 +124,7 @@ public class FeedScroller extends VerticalLayout {
      * Adds posts into the feed.
      */
     private void addPosts(){
+
         Map<Post, Boolean> newPostPanelsBool = new TreeMap<>(sorter.get(current));
         Map<Post, PostPanel> newPostPanels = new TreeMap<>(sorter.get(current));
         boolean empty = false;
@@ -141,7 +144,13 @@ public class FeedScroller extends VerticalLayout {
             });
         }
         for(Map.Entry<Post, PostPanel> entry :  newPostPanels.entrySet()){
-            while(!newPostPanelsBool.get(entry.getKey())){}
+            while(!newPostPanelsBool.get(entry.getKey())){
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             content.add(entry.getValue());
         }
 

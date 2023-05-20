@@ -43,6 +43,6 @@ public class FeedPanel extends TabSheet {
         this.setSelectedIndex(1);
         this.getElement().getChild(0).setAttribute("style", "width: 450px;");
 
-        }
-
     }
+
+}

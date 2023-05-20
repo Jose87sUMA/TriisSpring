@@ -28,7 +28,7 @@ public class Comment {
     private Instant commentDate;
 
     private Instant getZonedDate() {
-        ZoneId zoneId =  ZoneId.of("Europe/Madrid"); // Use your desired time zone
+        ZoneId zoneId =  ZoneId.of("Europe/Madrid");
         LocalDate date = LocalDate.now();
         LocalTime time = LocalTime.now();
         LocalDateTime localDateTime = LocalDateTime.of(date, time);

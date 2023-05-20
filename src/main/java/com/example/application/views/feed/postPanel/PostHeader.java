@@ -28,6 +28,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class PostHeader extends HorizontalLayout {
@@ -55,7 +58,9 @@ public class PostHeader extends HorizontalLayout {
         profileAvatar = new Avatar(poster.getUsername());
         profileAvatar.setImageResource(userService.getProfilePicImageResource(poster));
 
-        profileName = new Button(poster.getUsername() + " - " + post.getPoints() + " - " + post.getPost_date());
+        profileName = new Button(poster.getUsername() + " - "
+                                    + post.getPoints() + " - "
+                                    + post.getPost_date().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         profileName.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         profileName.setWidth("270px");
         profileName.setHeight("30px");
@@ -216,7 +221,7 @@ public class PostHeader extends HorizontalLayout {
     }
 
     public void refreshPoints(BigInteger points){
-        profileName.setText(poster.getUsername() + " - " + points + " - " + post.getPost_date());
+        profileName.setText(poster.getUsername() + " - " + points + " - " + post.getPost_date().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_ORDINAL_DATE));
     }
 
 
