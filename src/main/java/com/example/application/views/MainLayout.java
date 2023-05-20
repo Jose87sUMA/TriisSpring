@@ -1,10 +1,12 @@
 package com.example.application.views;
 
 import com.example.application.data.entities.User;
+import com.example.application.services.UserService;
 import com.example.application.security.AuthenticatedUser;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.feed.FeedView;
 import com.example.application.views.leaderboards.LeaderboardView;
+import com.example.application.views.profile.ProfileView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -19,11 +21,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.page.*;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import com.vaadin.flow.shared.communication.*;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.BoxSizing;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -82,10 +82,12 @@ public class MainLayout extends AppLayout {
 
     private AuthenticatedUser authenticatedUser;
     private AccessAnnotationChecker accessChecker;
+    private final UserService userService;
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
+    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker, UserService userService) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
+        this.userService = userService;
 
         addToNavbar(createHeaderContent());
     }
@@ -107,7 +109,7 @@ public class MainLayout extends AppLayout {
 
             Avatar avatar = new Avatar(user.getUsername());
             StreamResource resource = new StreamResource("profile-pic",
-                    () -> new ByteArrayInputStream(user.getProfilePicture()));
+                    () -> new ByteArrayInputStream(userService.getProfilePicBytes(user)));
             avatar.setImageResource(resource);
             avatar.setThemeName("xsmall");
             avatar.getElement().setAttribute("tabindex", "-1");
@@ -156,9 +158,9 @@ public class MainLayout extends AppLayout {
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo("Triis", LineAwesomeIcon.INSTAGRAM.create(), FeedView.class), //
+                new MenuItemInfo("Profile", LineAwesomeIcon.USER.create(), ProfileView.class), //
                 new MenuItemInfo("Leaderboard", LineAwesomeIcon.CHESS_KING_SOLID.create(), LeaderboardView.class), //
                 new MenuItemInfo("About", LineAwesomeIcon.FILE.create(), AboutView.class), //
-
         };
     }
 

@@ -21,6 +21,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     List<Post> findAllByUserId(BigInteger userId);
     Post findFirstByPostId(BigInteger postId);
 
+
     Post save(Post p);
 
     Post findByPostIdAndUserId(BigInteger postId, BigInteger userId);
@@ -30,7 +31,8 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     @Query(value = "select * from POSTS P WHERE P.USER_ID = :userId AND P.POST_ID = :postId ORDER BY POST_DATE DESC", nativeQuery = true)
     List<Post> findAllByPostIdAndUserId(@Param("postId") BigInteger postId,@Param("userId") BigInteger userId);
 
-    //by two parameters
+    List<Post> findAllByOriginalPostId(BigInteger originalPostId);
+
     List<Post> findAllByUserIdAndOriginalPostId(BigInteger userId, BigInteger postId);
 
     /*DELETE QUERIES*/
@@ -44,13 +46,15 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
     @Query(value = "SELECT * FROM POSTS WHERE POST_ID IN (WITH PARENT_POST (P) AS (SELECT REPOST_ID AS P FROM POSTS WHERE POST_ID = :postId UNION ALL SELECT REPOST_ID FROM PARENT_POST, POSTS WHERE PARENT_POST.P = POSTS.POST_ID) SELECT * FROM PARENT_POST)", nativeQuery = true)
     List<Post> findPostBranch(@Param("postId") BigInteger postId);
 
+    //List<Post> findAllByUserIdOrderByPostDateDesc(BigInteger userId);
     /**
-     * Get all posts.
+     * Get all posts except those by the specified user.
      * @param pageable Page request.
      * @return List of posts determined by page.
      */
-    @Query(value = "select * from POSTS", nativeQuery = true)
-    List<Post> findAll(Pageable pageable);
+    @Query(value = "select * from POSTS where USER_ID != :userId", nativeQuery = true)
+    List<Post> findAllExcept(Pageable pageable, @Param("userId") BigInteger userId);
+
 
     /**
      * Get posts of users that a certain user follows.
@@ -67,6 +71,7 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
      * @param userId User ID.
      * @return List of posts determined by page.
      */
+    @Query(value = "select * from POSTS P WHERE P.USER_ID = :userId", nativeQuery = true)
     List<Post> findAllByUserId(Pageable pageable, BigInteger userId);
 
     /**
@@ -85,5 +90,20 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
             "WHERE POINTED = 'Y' AND ORIGINAL_POST_ID IS NULL " +
             "ORDER BY POINTS DESC  FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
     List<Post> findTenByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
+     * Get all posts by a certain user.
+     * @param pageable Page request.
+     * @param userId User ID.
+     * @return List of posts determined by page.
+     */
+    @Query(value = "select * FROM POSTS P WHERE P.USER_ID IN (SELECT R.RECOMMENDATION_USER_ID FROM RECOMMENDATION R WHERE R.RECOMMENDED_USER_ID = :userId ORDER BY R.SCORE DESC FETCH FIRST 10 ROWS ONLY)", nativeQuery = true)
+    List<Post> findAllRecommendedToUserId(Pageable pageable, BigInteger userId);
+
+    @Query("select p from Post p JOIN  User c ON(c.userId = p.userId )"+
+            "where lower(c.username) like lower(concat(:filterSearch, '%'))"  )
+    List<Post> searchPosts(@Param("filterSearch")String filterSearch);
+
+// poner todos los posts de ese usuario
+
+
 
 }

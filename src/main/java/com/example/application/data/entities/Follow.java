@@ -20,6 +20,15 @@ public class Follow implements Serializable {
     @jakarta.persistence.Column(name = "USER_ID_FOLLOWING")
     private BigInteger userIdFollowing;
 
+    @EmbeddedId
+    FollowCompositePK id = new FollowCompositePK();
+
+    public Follow(BigInteger userIdFollower, BigInteger userIdFollowing) {
+        this.userIdFollower = userIdFollower;
+        this.userIdFollowing = userIdFollowing;
+    }
+    public Follow() {}
+
     public FollowCompositePK getId() {
         return new FollowCompositePK(userIdFollower, userIdFollowing);
     }

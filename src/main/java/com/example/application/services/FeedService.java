@@ -1,11 +1,9 @@
-package com.example.application.data.services;
+package com.example.application.services;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.repositories.PostsRepository;
-import com.sun.jna.platform.win32.OaIdl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
+
 import java.math.BigInteger;
 import java.util.*;
 
@@ -13,7 +11,7 @@ import java.util.*;
  * Service to handle Feed requests. It works by sending data page by page.
  */
 public class FeedService {
-    public enum FeedType {DISCOVERY, FOLLOWING, PROFILE}
+    public enum FeedType {DISCOVERY, FOLLOWING, PROFILE, RECOMMENDATION}
     public enum SortType {RECENT, POPULAR}
 
     public static final int ELEMENTS = 10;
@@ -74,8 +72,9 @@ public class FeedService {
         Pageable page = PageRequest.of(index, ELEMENTS, sorts.get(currentSort));
         switch (feedType){
             case FOLLOWING -> posts = postRep.findAllByUsersFollowedByUserId(page, userId);
-            case DISCOVERY -> posts = postRep.findAll(page);
+            case DISCOVERY -> posts = postRep.findAllExcept(page, userId);
             case PROFILE -> posts = postRep.findAllByUserId(page, userId);
+            case RECOMMENDATION -> posts = postRep.findAllRecommendedToUserId(page, userId);
         }
         nextPage();
         return posts;

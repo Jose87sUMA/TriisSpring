@@ -86,11 +86,11 @@ public class Comment {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Comment that = (Comment) o;
-        return Objects.equals(postId, that.postId) && Objects.equals(userId, that.userId) && Objects.equals(userComment, that.userComment) && Objects.equals(commentDate, that.commentDate) && Objects.equals(commentId, that.commentId);
+        return Objects.equals(commentId, that.commentId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(postId, userId, userComment, commentDate, commentId);
+        return Objects.hash(commentId);
     }
 }

@@ -37,7 +37,7 @@ public class User implements Serializable {
     private String verified;
     @Basic
     @Column(name = "PROFILE_PICTURE")
-    private byte[] profilePicture;
+    private String profilePicture;
     @Basic
     @Column(name = "TREE_ID")
     private BigInteger treeId;
@@ -104,11 +104,11 @@ public class User implements Serializable {
         this.verified = verified;
     }
 
-    public byte[] getProfilePicture() {
+    public String getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(byte[] profilePicture) {
+    public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
     }
 

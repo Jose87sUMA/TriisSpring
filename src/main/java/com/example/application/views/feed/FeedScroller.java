@@ -2,14 +2,19 @@ package com.example.application.views.feed;
 
 import com.example.application.data.entities.Post;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.PostService;
-import com.example.application.data.services.UserService;
+import com.example.application.services.InteractionService;
+import com.example.application.services.PostService;
+import com.example.application.services.UserService;
+import com.example.application.services.threads.SpringAsyncConfig;
+import com.example.application.views.feed.postPanel.PostPanel;
+import com.example.application.views.feed.searchbar.SearchBar;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import java.io.Serializable;
@@ -17,8 +22,8 @@ import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
 
-import com.example.application.data.services.FeedService.*;
-import com.example.application.data.services.FeedService;
+import com.example.application.services.FeedService.*;
+import com.example.application.services.FeedService;
 
 
 import java.util.*;
@@ -27,48 +32,54 @@ import java.util.*;
  * Class that manages a feed.
  */
 public class FeedScroller extends VerticalLayout {
-    SortType current = null;
-
-    Button loadMore;
-    MenuBar sorting;
-
-    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.naturalOrder()),
-                                                          SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
-
-    PriorityQueue<Post> buffer;
 
     private final UserService userService;
     private final PostService postService;
     private final FeedService feedService;
+    private final InteractionService interactionService;
 
+    SpringAsyncConfig executor = new SpringAsyncConfig();
+
+    Button loadMore;
+
+    SortType current = null;
+    MenuBar sorting;
+    UI ui;
+    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.reverseOrder()),
+                                                          SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
+
+    PriorityQueue<Post> buffer;
     private VerticalLayout content = new VerticalLayout();
 
     /**
      * Constructs the feed.
-     * @param feedType Type of feed.
-     * @param authenticatedUser
+     *
+     * @param feedType           Type of feed.
+     * @param user               If SortType PROFILE user must be the profile. Otherwise, user is authenticated user.
      * @param userService
      * @param postService
+     * @param interactionService
      */
-    FeedScroller(FeedType feedType, User authenticatedUser, UserService userService, PostService postService) {
+    public FeedScroller(FeedType feedType, User user, UserService userService, PostService postService, UI ui, InteractionService interactionService) {
+
+        this.ui = ui;
         this.userService = userService;
         this.postService = postService;
-        this.feedService = new FeedService(this.postService.getPostRepository(), feedType, authenticatedUser.getUserId());
+        this.interactionService = interactionService;
+        this.feedService = new FeedService(this.postService.getPostRepository(), feedType, user.getUserId());
 
         loadMore = new Button("Load More Posts", e -> loadMore());
 
         sorting = sortChooser();
-        this.add(sorting);
-
-        this.setSpacing(true);
-
-        this.addClassName(LumoUtility.AlignItems.CENTER);
-
         changeSorting(SortType.RECENT);
 
         content.setSpacing(true);
         content.addClassName(LumoUtility.AlignItems.CENTER);
 
+        this.addClassName(LumoUtility.AlignItems.CENTER);
+        this.setSpacing(true);
+
+        this.add(sorting);
         this.add(content);
         this.add(loadMore);
     }
@@ -111,14 +122,33 @@ public class FeedScroller extends VerticalLayout {
      * Adds posts into the feed.
      */
     private void addPosts(){
+        Map<Post, Boolean> newPostPanelsBool = new TreeMap<>(sorter.get(current));
+        Map<Post, PostPanel> newPostPanels = new TreeMap<>(sorter.get(current));
+        boolean empty = false;
         for(int i = 0; i < FeedService.ELEMENTS; i++){
             if (buffer.isEmpty()) {
-                content.add(new Text("No more posts available."));
+                empty = true;
                 loadMore.setEnabled(false);
                 break;
             }
-            content.add(new PostPanel(buffer.poll(), userService, postService));
+            PostPanel postPanel = new PostPanel(buffer.poll(), userService, postService, interactionService);
+            newPostPanelsBool.put(postPanel.getPost(), false);
+            newPostPanels.put(postPanel.getPost(), postPanel);
+
+            executor.getAsyncExecutor().execute(() -> {
+                postPanel.loadPostPanel(ui);
+                newPostPanelsBool.put(postPanel.getPost(), true);
+            });
         }
+        for(Map.Entry<Post, PostPanel> entry :  newPostPanels.entrySet()){
+            while(!newPostPanelsBool.get(entry.getKey())){}
+            content.add(entry.getValue());
+        }
+
+        if(empty)
+            content.add(new Text("No more posts available."));
+        
+        System.out.println("Outside addPosts");
     }
 
     /**

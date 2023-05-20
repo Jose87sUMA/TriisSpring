@@ -1,27 +1,16 @@
 package com.example.application.views.register;
 
-import ch.qos.logback.core.Layout;
 import com.example.application.data.entities.User;
-import com.example.application.data.services.UserService;
-import com.example.application.security.AuthenticatedUser;
-import com.example.application.views.MainLayout;
+import com.example.application.services.UserService;
 import com.example.application.views.login.LoginView;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.login.LoginI18n;
-import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -29,11 +18,6 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.router.*;
-import com.vaadin.flow.router.internal.RouteUtil;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -117,7 +101,7 @@ public class RegisterForm extends VerticalLayout {
      * VERIFY FIELDS AND SAVE USER
      */
     private void register(){
-        String userName = username.getValue();
+        String username = this.username.getValue();
         String password1 = password.getValue();
         String password2 = confirmPassword.getValue();
         String emailValue = email.getValue();
@@ -126,8 +110,11 @@ public class RegisterForm extends VerticalLayout {
 
         notification.setDuration(2000);
 
-        if(userName.trim().isEmpty()){
+        if(username.trim().isEmpty()){
             notification.setText("Enter a username");
+            notification.open();
+        }else if(!username.matches("^[a-z0-9]+$")){
+            notification.setText("Username can only contain numbers and lowercase letters");
             notification.open();
         }else if(emailValue.trim().isEmpty()){
             notification.setText("Enter an email");
@@ -147,7 +134,7 @@ public class RegisterForm extends VerticalLayout {
         }else if(!password1.equals(password2)){
             notification.setText("Passwords don't match");
             notification.open();
-        }else if(userService.findByUsername(userName) != null){
+        }else if(userService.findByUsername(username) != null){
             notification.setText("User already exists");
             notification.open();
         }else if(userService.findByEmail(emailValue) != null){
@@ -158,7 +145,7 @@ public class RegisterForm extends VerticalLayout {
             PasswordEncoder pass = new BCryptPasswordEncoder();
             CharSequence passwordToEncrypt = password1;
 
-            userService.save(new User(userName, pass.encode(passwordToEncrypt), emailValue));
+            userService.save(new User(username, pass.encode(passwordToEncrypt), emailValue));
             notification.removeThemeVariants(NotificationVariant.LUMO_ERROR);
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);    
             notification.setText("User saved");

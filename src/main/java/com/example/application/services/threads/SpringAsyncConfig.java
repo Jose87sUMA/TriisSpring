@@ -1,4 +1,4 @@
-package com.example.application.data.services.threads;
+package com.example.application.services.threads;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class SpringAsyncConfig implements AsyncConfigurer {
    @Override
-    public Executor getAsyncExecutor() {
+    public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.initialize();
         return threadPoolTaskExecutor;
