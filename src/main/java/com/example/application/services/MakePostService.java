@@ -113,7 +113,7 @@ public class MakePostService {
     public InputStream manageImageURL(String link) throws MakePostException, IOException {
         InputStream fileData = null;
         if(link.isEmpty()){
-            throw new MakePostException("No link ");
+            throw new MakePostException("No link");
         }
         try{
             URL imageUrl = new URL(link);
@@ -139,5 +139,13 @@ public class MakePostService {
      */
     public BigInteger getPostCost(User user){
         return new BigInteger(String.valueOf(Math.min(userService.getNumberOfFollowers(user)*3, 30000)));
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public void setPostService(PostService postService) {
+        this.postService = postService;
     }
 }

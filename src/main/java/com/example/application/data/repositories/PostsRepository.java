@@ -105,6 +105,9 @@ public interface PostsRepository extends CrudRepository<Post, BigInteger> {
             "where lower(c.username) like lower(concat(:filterSearch, '%'))"  )
     List<Post> searchPosts(@Param("filterSearch")String filterSearch);
 
+
+    Post findFirstByUserIdOrderByPostIdDesc(BigInteger userId);
+
 // poner todos los posts de ese usuario
 
 
