@@ -16,9 +16,19 @@ import com.vaadin.flow.data.binder.Binder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+/**
+ * Layout where a user is able to change their password
+ * and profile picture.
+ */
 public class EditProfilePanel extends VerticalLayout {
 
     private final UserService userService;
+
+    /**
+     * @param user
+     * @param userService
+     * @param postService
+     */
     public EditProfilePanel(User user, UserService userService, PostService postService) {
 
         this.userService = userService;
@@ -77,7 +87,7 @@ public class EditProfilePanel extends VerticalLayout {
 
         /*
         * does not update the photo
-        * */
+        */
         if(!user.equals(userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()))) {
             changeProfPic.setVisible(false);
         }else{

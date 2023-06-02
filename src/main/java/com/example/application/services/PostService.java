@@ -28,36 +28,38 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Service that manages posts.
+ */
 @Service
 public class PostService {
 
     private final PostsRepository postRep;
-    private final UsersRepository userRep;
     private final ReportRepository reportRep;
-    private final CommentsRepository commentsRep;
-    private final LikesRepository likeRep;
     private final PostPointLogRepository postPointLogRep;
-    private final UserPointLogRepository userPointLogRep;
 
     @Autowired
     DropboxService dropboxService;
 
 
-    public PostService(LikesRepository likeRep, PostsRepository postRep, UsersRepository userRep, ReportRepository reportRep, CommentsRepository commentsRep, PostPointLogRepository postPointLogRep, UserPointLogRepository userPointLogRep) {
-        this.likeRep = likeRep;
+    /**
+     * @param likeRep
+     * @param postRep
+     * @param reportRep
+     * @param postPointLogRep
+     */
+    public PostService(LikesRepository likeRep, PostsRepository postRep, ReportRepository reportRep, PostPointLogRepository postPointLogRep) {
         this.postRep = postRep;
-        this.userRep = userRep;
         this.reportRep = reportRep;
-        this.commentsRep = commentsRep;
         this.postPointLogRep = postPointLogRep;
-        this.userPointLogRep = userPointLogRep;
     }
 
     /**
      * This method updates information about a post or saves a new Post.
-     * @param post
-     * @return
+     *
+     * @param post to be updated or saved
+     * @return Updated post
+     * @author Daniel de los Ríos García
      */
     public Post save(Post post){
         postRep.save(post);
@@ -66,32 +68,28 @@ public class PostService {
 
     /**
      * This method removes a Post given as parameter.
-     * @param post
+     *
+     * @param post Post to be removed
+     * @author Daniel de los Ríos García
      */
     public void deletePost(Post post){postRep.delete(post);}
 
     /**
-     * Finds a post that has the given ID
-     * @param postId
-     * @return
+     * Finds a post that has the given ID.
+     *
+     * @param postId ID of post to find
+     * @return Post with the given ID
      */
     public Post findById(BigInteger postId){ return postRep.findFirstByPostId(postId); }
-
-    /**
-     * Returns a list of the posts of the given user.
-     * @param user
-     * @return
-     */
-    public List<Post> findAllByUser(User user){ return postRep.findAllByUserId(user.getUserId()); }
-    //public List<Post> findAllByUserAndDate(User user){ return postRep.findAllByUserIdOrderByPostDateDesc(user.getUserId()); }
 
     /**
      * Gets the content to be displayed from a post. Gets from dropbox the image to be displayed which can be from another
      * post in case the parameter is a repost.
      *
-     * @param post
+     * @param post Post for which the
      * @param ui
      * @return Vaadin.Image object of the content ot be displayed
+     * @author José Alejandro Sarmiento
      */
     public Image getContent(Post post, UI ui){
 
@@ -116,6 +114,13 @@ public class PostService {
         return image;
     }
 
+    /**
+     * Scales a given image.
+     *
+     * @param image Image to be scaled.
+     * @param bufferedImage Same image but as a BufferedImage. Needed to get the dimensions.
+     * @author José Alejandro Sarmiento & Ziri Raha
+     */
     private static void scaleImage(Image image, BufferedImage bufferedImage){
         int imgHeight = bufferedImage.getHeight();
         int imgWidth = bufferedImage.getWidth();
@@ -130,58 +135,36 @@ public class PostService {
 //        }
     }
 
-
-    public static byte[] getBlobFromFile(File file){
-        BufferedImage img = null;
-        try {
-            img = ImageIO.read(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = bi.createGraphics();
-        g2d.drawImage(img, 0, 0, null);
-        g2d.dispose();
-        ByteArrayOutputStream baos = null;
-
-        try {
-            baos = new ByteArrayOutputStream();
-            ImageIO.write(bi, "png", baos);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                baos.close();
-            } catch (Exception e) {
-            }
-        }
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-
-        return bais.readAllBytes();
-
-    }
-
-    /**
-     * Returns a list of Post from users followed by the given user.
-     * @param user
-     * @return
-     */
-    public List<Post> getAllByPeopleFollowed(User user){return postRep.findAllByUsersFollowedByUserIdOrderByPostDateDesc(user.getUserId());}
-
     /**
      * Returns Post Repository.
      * @return
+     * @author Ziri Raha
      */
     public PostsRepository getPostRepository(){
         return postRep;
     }
 
-    public void newReport(User authenticatedUser, Post post, String reason) {
-        reportRep.save(new Report(authenticatedUser, post, reason));
+    /**
+     * Creates a new report with the given parameters.
+     *
+     * @param user
+     * @param post
+     * @param reason
+     * @author José Alejandro Sarmiento
+     */
+    public void newReport(User user, Post post, String reason) {
+        reportRep.save(new Report(user, post, reason));
     }
 
     //POINTS LOGS
 
+    /**
+     * Finds all the post point logs of a given post.
+     *
+     * @param post Post for which we need the point logs.
+     * @return List of post point logs of the given post.
+     * @author José Alejandro Sarmiento
+     */
     public List<PostsPointLog> findAllLogsByPost (Post post){
         return postPointLogRep.findAllByPostIdOrderByLogDateDesc(post.getPostId());
     }
@@ -189,13 +172,14 @@ public class PostService {
 
     /**
      * Creates a new post object and stores fileData in dropbox server with name postId.jpg
+     *
      * @param authenticatedUser
      * @param b
      * @param fileData
      * @return The newly created post
+     * @author José Alejandro Sarmiento
      */
     public Post createPost(User authenticatedUser, boolean b, InputStream fileData) {
-
         Post post = postRep.save(new Post(authenticatedUser, b));
         dropboxService.uploadPost(post, fileData);
         return post;

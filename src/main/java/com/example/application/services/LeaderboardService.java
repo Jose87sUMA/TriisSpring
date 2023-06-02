@@ -11,7 +11,9 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
-
+/**
+ * Service that manages the leaderboards.
+ */
 @Service
 public class LeaderboardService{
     private final UsersRepository userRep;
@@ -19,6 +21,10 @@ public class LeaderboardService{
 
     public enum LeaderboardType {TODAY, THIS_WEEK,THIS_MONTH, THIS_YEAR, ALL_TIME, USERS}
 
+    /**
+     * @param postRep
+     * @param userRep
+     */
     public LeaderboardService(PostsRepository postRep, UsersRepository userRep) {
         this.userRep = userRep;
         this.postRep = postRep;
@@ -26,24 +32,28 @@ public class LeaderboardService{
 
     /**
      * @return 10 original pointed posts with the highest number of points posted today
+     * @author Ksenia Myakisheva
      */
     public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedToday(){
         return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now()));
     }
     /**
      * @return 10 original pointed posts with the highest number of points posted this week
+     * @author Ksenia Myakisheva
      */
     public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisWeek(){
         return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusWeeks(1)));
     }
     /**
      * @return 10 original pointed posts with the highest number of points posted this month
+     * @author Ksenia Myakisheva
      */
     public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisMonth(){
         return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusMonths(1)));
     }
     /**
      * @return 10 original pointed posts with the highest number of points posted this year
+     * @author Ksenia Myakisheva
      */
     public List<Post> findTenByPointedOriginalPostIdOrderByPointsDescCreatedThisYear(){
         return postRep.findTenByPointedAndOriginalPostIdIsNullCreatedAtAfterOrderByPointsDesc(Date.valueOf(LocalDate.now().minusYears(1)));
@@ -51,6 +61,7 @@ public class LeaderboardService{
 
     /**
      * @return 10 original pointed posts with the highest number of points
+     * @author Ksenia Myakisheva
      */
     public List<Post> findTenByPointedOriginalPostIdOrderByPointsDesc(){
         return postRep.findTenByPointedAndOriginalPostIdIsNullOrderByPointsDesc();
@@ -58,6 +69,7 @@ public class LeaderboardService{
 
     /**
      * @return 10 users with the highest number of points
+     * @author Ksenia Myakisheva
      */
     public List<User>  findUsersHighestType1Points(){
         return userRep.findTenOrderByType1PointsDesc();

@@ -1,5 +1,6 @@
 package com.example.application.views.feed.postPanel;
 import com.example.application.services.InteractionService;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.*;
 
@@ -15,22 +16,32 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.concurrent.CompletableFuture;
 
-
+/**
+ * Represents the post panel that is displayed on the feed.
+ * Contains a header with information, a footer for actions and the post's content.
+ */
 public class PostPanel extends VerticalLayout {
 
     private final User authenticatedUser;
-    private Post post;
-    private User poster;
+    private final Post post;
+    private final User poster;
 
     private final UserService userService;
     private final PostService postService;
     private final InteractionService interactionService;
 
-    protected PostHeader postHeader;
-    protected Image content;
-    protected InteractionFooter interactionFooter;
-    protected CommentSection commentSection;
+    private PostHeader postHeader;
+    private Image content;
+    private InteractionFooter interactionFooter;
+    private CommentSection commentSection;
 
+    /**
+     *
+     * @param post
+     * @param userService
+     * @param postService
+     * @param interactionService
+     */
     public PostPanel(Post post, UserService userService, PostService postService, InteractionService interactionService){
 
         this.post = post;
@@ -43,6 +54,14 @@ public class PostPanel extends VerticalLayout {
 
     }
 
+    /**
+     * It downloads the post's content from dropbox and sets it as whe post panel content to be displayed.
+     * This is done separately from the constructor, so several downloads can be performed at the same time.
+     *
+     * @param ui needed to work with Vaadin's Images
+     * @return
+     * @author José Alejandro Sarmiento
+     */
     @Async
     public CompletableFuture<Void> loadPostPanel(UI ui){
         this.content = postService.getContent(post, ui);
@@ -74,8 +93,43 @@ public class PostPanel extends VerticalLayout {
         return CompletableFuture.completedFuture(null);
     }
 
+    /**
+     * @return The post associated with the post panel
+     * @author José Alejandro Sarmiento
+     */
     public Post getPost() {
         return post;
     }
 
+    /**
+     * @return The comment section associated with the post panel
+     * @author José Alejandro Sarmiento
+     */
+    public CommentSection getCommentSection() {
+        return commentSection;
+    }
+
+    /**
+     * @return The Image associated with the post panel
+     * @author José Alejandro Sarmiento
+     */
+    public Image getContent() {
+        return content;
+    }
+
+    /**
+     * @return The Post Header associated with the post panel
+     * @author José Alejandro Sarmiento
+     */
+    public PostHeader getPostHeader() {
+        return postHeader;
+    }
+
+    /**
+     * @return The interaction footer associated with the post panel
+     * @author José Alejandro Sarmiento
+     */
+    public InteractionFooter getInteractionFooter() {
+        return interactionFooter;
+    }
 }

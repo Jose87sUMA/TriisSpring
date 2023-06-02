@@ -15,6 +15,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Component to look for user's and see the results of the search
+ */
 public class SearchBar extends Dialog {
 
     private final UserService userService;
@@ -22,6 +25,9 @@ public class SearchBar extends Dialog {
     private TextField textFilter;
     private Grid<User> grid;
 
+    /**
+     * @param userService
+     */
     public SearchBar(UserService userService){
 
         this.userService = userService;
@@ -39,6 +45,10 @@ public class SearchBar extends Dialog {
 
     }
 
+    /**
+     * Updates the list of user's displayed
+     * @author Laura de Haro García
+     */
     private void updateList() {
 
         List<User> us = userService.findAllProfiles(textFilter.getValue());
@@ -51,6 +61,11 @@ public class SearchBar extends Dialog {
         }
     }
 
+    /**
+     * Creates and returns the search bar used to look for users
+     * @return The search bar component
+     * @author Laura de Haro García
+     */
     private Component getSearchBar() {
 
         textFilter.setPlaceholder("Search Profile...");
@@ -64,6 +79,12 @@ public class SearchBar extends Dialog {
 
     }
 
+    /**
+     * Creates a button with a given username that whenever it is clicked
+     * it makes a redirection to the username's profile
+     * @param Username
+     * @return The aforementioned button
+     */
     private Button createButtonToProfile(String Username) {
         Button but = new Button(Username);
         but.addThemeVariants(ButtonVariant.LUMO_TERTIARY);

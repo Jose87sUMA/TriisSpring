@@ -11,14 +11,22 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 
+/**
+ * Dialog containing the followers of a certain user and
+ * a search bar to look for some of them.
+ */
 public class FollowersDialog extends Dialog {
 
     private final UserService userService;
     private User user;
-    TextField filterText = new TextField();
+    private TextField filterText = new TextField();
     //to filter
-    Grid<User> grid = new Grid<>(User.class, false);
+    private Grid<User> grid = new Grid<>(User.class, false);
 
+    /**
+     * @param userService
+     * @param user
+     */
     public FollowersDialog(UserService userService, User user) {
         this.userService = userService;
         this.user = user;
@@ -44,12 +52,21 @@ public class FollowersDialog extends Dialog {
 
     }
 
+    /**
+     * Updates the users that appear on the dialog depending on the search bar.
+     * @author Ksenia Myakisheva
+     */
     private void updateList() {
         //List<User> users = userService.getFollowing(user);
         //grid.setItems(users);
         grid.setItems(userService.findAllFollower(filterText.getValue(), user));
     }
 
+    /**
+     * Creates the search bar to look for users.
+     * @return the search bar
+     * @author Ksenia Myakisheva
+     */
     private Component getSearchBar() {
 
         filterText.setPlaceholder("Search User...");
@@ -86,8 +103,11 @@ public class FollowersDialog extends Dialog {
     }
 
     /**
+     * Creates an icon that shows if a user is verified or not
+     *
      * @param status
      * @return Icon   green if verified, red if not
+     * @author Ksenia Myakisheva
      */
     private Icon createStatusIcon(String status) {
         boolean isAvailable = "Y".equals(status);

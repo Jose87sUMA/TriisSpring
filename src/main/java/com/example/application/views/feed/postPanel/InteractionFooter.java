@@ -89,17 +89,17 @@ public class InteractionFooter extends HorizontalLayout {
         commentButton.setWidth(v + "px");
         commentButton.addClickListener(click -> {
 
-            if (postPanel.commentSection.isVisible()) {
-                postPanel.content.setVisible(true);
-                postPanel.postHeader.setVisible(true);
-                postPanel.postHeader.addClassName(LumoUtility.Border.BOTTOM);
-                postPanel.commentSection.setVisible(false);
+            if (postPanel.getCommentSection().isVisible()) {
+                postPanel.getContent().setVisible(true);
+                postPanel.getPostHeader().setVisible(true);
+                postPanel.getPostHeader().addClassName(LumoUtility.Border.BOTTOM);
+                postPanel.getCommentSection().setVisible(false);
                 commentButton.setIcon(new Icon(VaadinIcon.COMMENT_O));
             } else {
-                postPanel.content.setVisible(false);
-                postPanel.postHeader.setVisible(false);
-                postPanel.postHeader.addClassName(LumoUtility.Border.NONE);
-                postPanel.commentSection.setVisible(true);
+                postPanel.getContent().setVisible(false);
+                postPanel.getPostHeader().setVisible(false);
+                postPanel.getPostHeader().addClassName(LumoUtility.Border.NONE);
+                postPanel.getCommentSection().setVisible(true);
                 commentButton.setIcon(new Icon(VaadinIcon.COMMENT));
             }
 
@@ -162,7 +162,7 @@ public class InteractionFooter extends HorizontalLayout {
                 usePoints.close();
                 try{
                     interactionService.pointedRepost(post, authenticatedUser);
-                    postPanel.postHeader.refreshPoints(postService.findById(post.getPostId()).getPoints()); //Post with new points
+                    postPanel.getPostHeader().refreshPoints(postService.findById(post.getPostId()).getPoints()); //Post with new points
                     repostSuccess();
                 } catch (PostException e) {
                     Notification notEnough = new Notification(e.getMessage());

@@ -22,6 +22,10 @@ public class EditProfileView extends VerticalLayout implements HasUrlParameter<S
     private final PostService postService;
 
 
+    /**
+     * @param userService
+     * @param postService
+     */
     public EditProfileView(UserService userService, PostService postService) {
 
         this.postService = postService;
@@ -29,6 +33,15 @@ public class EditProfileView extends VerticalLayout implements HasUrlParameter<S
 
     }
 
+    /**
+     * Method used to construct the view depending on the URL parameter.
+     *
+     * @param event
+     *            the navigation event that caused the call to this method
+     * @param parameter
+     *            the resolved url parameter
+     * @author José Alejandro Sarmiento
+     */
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
 

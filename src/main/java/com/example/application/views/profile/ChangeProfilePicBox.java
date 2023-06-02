@@ -16,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import static java.lang.Math.min;
 
+/**
+ * Dialog to change profile picture. Functions as MakePosBox.
+ */
 public class ChangeProfilePicBox extends MakePostBox {
 
 
@@ -27,7 +30,7 @@ public class ChangeProfilePicBox extends MakePostBox {
 
 
     /**
-     * constructor initializes a window for changing the user's profile picture
+     * Constructor initializes a window for changing the user's profile picture
      * @param postService
      * @param userService
      * @param profilePanel
@@ -41,6 +44,10 @@ public class ChangeProfilePicBox extends MakePostBox {
         this.profilePanel = profilePanel;
     }
 
+    /**
+     * Creates the dialog with that makes it possible to change the profile picture.
+     * @author José Alejandro Sarmiento
+     */
     @Override
     public void createUploadPictureLayout(){
         this.setDraggable(true);
@@ -62,6 +69,7 @@ public class ChangeProfilePicBox extends MakePostBox {
     /**
      * Uploads the fileData of this instance to the dropbox server as the user's new profile picture.
      * Notifies the user in case of success or failure.
+     * @author José Alejandro Sarmiento
      */
     private void uploadPicture() {
         boolean success = false;

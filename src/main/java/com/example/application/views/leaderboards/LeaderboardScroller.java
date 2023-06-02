@@ -17,8 +17,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
+/**
+ * Class that manages a particular leaderboard (distinguished by leaderboardType).
+ * Functions as FeedScroller.
+ */
 public class LeaderboardScroller extends VerticalLayout {
 
     private final UserService userService;
@@ -27,8 +30,8 @@ public class LeaderboardScroller extends VerticalLayout {
     private final LeaderboardService leaderboardService;
     private final LeaderboardService.LeaderboardType leaderboardType;
 
-    SpringAsyncConfig executor = new SpringAsyncConfig();
-    UI ui;
+    private SpringAsyncConfig executor = new SpringAsyncConfig();
+    private UI ui;
 
     /**
      * the list of posts that appear on the top 10
@@ -41,12 +44,13 @@ public class LeaderboardScroller extends VerticalLayout {
     private VerticalLayout content = new VerticalLayout();
 
     /**
-     * calls  a method which initializes the vertical layout CONTENT with necessary components
+     * Calls  a method which initializes the vertical layout CONTENT with necessary components
      *
      * @param leaderboardType    the selected top 10: posts (select by time span) or users
      * @param userService
      * @param interactionService
      * @param leaderboardService
+     * @author Ksenia Myakisheva
      */
     LeaderboardScroller(LeaderboardService.LeaderboardType leaderboardType, UserService userService, PostService postService, InteractionService interactionService, LeaderboardService leaderboardService, UI ui) {
         this.userService = userService;
@@ -64,7 +68,8 @@ public class LeaderboardScroller extends VerticalLayout {
     }
 
     /**
-     * according to leaderboardType, perform a query to select the top ten and add them to CONTENT
+     * According to leaderboardType, perform a query to select the top ten and add them to CONTENT
+     * @author Ksenia Myakisheva
      */
     private void addResult(){
         switch (leaderboardType){

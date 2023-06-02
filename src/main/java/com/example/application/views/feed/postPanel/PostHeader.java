@@ -33,6 +33,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Represents the header of the post panel. It contains the user's name, their profile picture,
+ * the number of points the post has generated, the date the post was created and the options button.
+ */
 public class PostHeader extends HorizontalLayout {
 
     private final PostService postService;
@@ -44,6 +48,15 @@ public class PostHeader extends HorizontalLayout {
     private final Avatar profileAvatar;
     private final Button profileName;
 
+    /**
+     *
+     * @param width
+     * @param postService
+     * @param userService
+     * @param poster
+     * @param authenticatedUser
+     * @param post
+     */
     public PostHeader(String width, PostService postService, UserService userService, User poster, User authenticatedUser,  Post post) {
 
         this.postService = postService;
@@ -82,6 +95,14 @@ public class PostHeader extends HorizontalLayout {
 
     }
 
+    /**
+     * Creates the MenuBar that contains:
+     * - Delete Post and View Statistics Buttons if the User is either the owner of the post or an administrator
+     * - Report Button if not
+     *
+     * @return the MenuBar containing all the buttons
+     * @author Ksenia Myakisheva
+     */
     private MenuBar createPostMenuLayout(){
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
@@ -110,6 +131,14 @@ public class PostHeader extends HorizontalLayout {
 
         return menuBar;
     }
+
+    /**
+     * Creates the ConfirmDialog that allows the user to report the post.
+     * Calls postService.newReport if the user confirms the report.
+     *
+     * @return The ConfirmDialog for the report action
+     * @author Ksenia Myakisheva & José Alejandro Sarmiento
+     */
     private ConfirmDialog createReportLayout(){
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setWidth("475px");
@@ -140,6 +169,13 @@ public class PostHeader extends HorizontalLayout {
 
     }
 
+    /**
+     * Creates the ConfirmDialog that allows the user to delete the post.
+     * Calls postService.delete if the user confirms the report.
+     *
+     * @return the ConfirmDialog for the delete action
+     * @author Ksenia Myakisheva
+     */
     private ConfirmDialog createConfirmDelete(){
 
         ConfirmDialog dialog = new ConfirmDialog();
@@ -157,6 +193,15 @@ public class PostHeader extends HorizontalLayout {
         return dialog;
     }
 
+    /**
+     * Creates the Dialog that allows the user to see the statistics of the generated points by the post.
+     * It is divided by:
+     * - Direct points (generated when the post is reposted directly). Here you can see the users that reposted.
+     * - Indirect points (generated when the post's reposts are reposted)
+     *
+     * @return the Dialog to see the statistics
+     * @author José Alejandro Sarmiento
+     */
     private ConfirmDialog createStatisticsLayout(){
 
         ConfirmDialog dialog = new ConfirmDialog();
@@ -220,9 +265,15 @@ public class PostHeader extends HorizontalLayout {
 
     }
 
+    /**
+     * Refreshes the number of points the post has generated. Useful when the post is reposted.
+     *
+     * @param points New amount of points to be displayed.
+     * @author José Alejandro Sarmiento
+     */
     public void refreshPoints(BigInteger points){
         profileName.setText(poster.getUsername() + " - "
-                            + post.getPoints() + " - "
+                            + points + " - "
                             + post.getPost_date().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
 

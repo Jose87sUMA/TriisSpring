@@ -56,6 +56,12 @@ public class FeedView extends VerticalLayout  {
     SpringAsyncConfig executor = new SpringAsyncConfig();
 
 
+    /**
+     *
+     * @param userService
+     * @param postService
+     * @param interactionService
+     */
     public FeedView(UserService userService, PostService postService, InteractionService interactionService) {
 
         this.postService = postService;

@@ -39,18 +39,18 @@ public class FeedScroller extends VerticalLayout {
     private final FeedService feedService;
     private final InteractionService interactionService;
 
-    SpringAsyncConfig executor = new SpringAsyncConfig();
+    private SpringAsyncConfig executor = new SpringAsyncConfig();
 
-    Button loadMore;
+    private Button loadMore;
 
-    SortType current = null;
-    MenuBar sorting;
-    UI ui;
+    private SortType current = null;
+    private MenuBar sorting;
+    private UI ui;
 
-    final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.reverseOrder()),
+    private final Map<SortType, Comparator<Post>> sorter = Map.of(SortType.RECENT, Comparator.comparing(Post::getPost_date, Comparator.reverseOrder()),
                                                           SortType.POPULAR, Comparator.comparing(Post::getPoints, Comparator.reverseOrder()));
 
-    PriorityQueue<Post> buffer;
+    private PriorityQueue<Post> buffer;
     private VerticalLayout content = new VerticalLayout();
 
     /**
@@ -61,6 +61,7 @@ public class FeedScroller extends VerticalLayout {
      * @param userService
      * @param postService
      * @param interactionService
+     * @author Ziri Raha
      */
     public FeedScroller(FeedType feedType, User user, UserService userService, PostService postService, UI ui, InteractionService interactionService) {
 
@@ -88,6 +89,7 @@ public class FeedScroller extends VerticalLayout {
 
     /**
      * Adds posts into the feed and loads more posts from database.
+     * @author Ziri Raha
      */
     @ClientCallable
     public void loadMore(){
@@ -100,6 +102,7 @@ public class FeedScroller extends VerticalLayout {
     /**
      * Menu Item to choose which type of sorting for the feed.
      * @return Component in charge of this action.
+     * @author Ziri Raha
      */
     MenuBar sortChooser(){
         MenuBar menu = new MenuBar();
@@ -121,7 +124,11 @@ public class FeedScroller extends VerticalLayout {
     }
 
     /**
-     * Adds posts into the feed.
+     * Adds posts into the feed. It first creates a post panel for each of the post
+     * and then starts downloading the image of that post panel concurrently.
+     * They are then added to the content layout depending on the current sort.
+     *
+     * @author Ziri Raha & José Alejandro Sarmiento
      */
     private void addPosts(){
 
@@ -162,6 +169,7 @@ public class FeedScroller extends VerticalLayout {
 
     /**
      * Loads posts from database.
+     * @author Ziri Raha
      */
     private void loadPosts(){
         buffer.addAll(feedService.findNextNPosts());
@@ -171,6 +179,7 @@ public class FeedScroller extends VerticalLayout {
     /**
      * Changes sorting of the feed. Also clears it.
      * @param st Sorting mode.
+     * @author Ziri Raha
      */
     public void changeSorting(SortType st){
         if (current != st) {
@@ -182,6 +191,7 @@ public class FeedScroller extends VerticalLayout {
 
     /**
      * Refreshes the feed. Clears buffer, resets and adds posts.
+     * @author Ziri Raha
      */
     public void refresh(){
         buffer = new PriorityQueue<>(sorter.get(current));

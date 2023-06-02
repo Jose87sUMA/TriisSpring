@@ -16,6 +16,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.util.List;
 
+/**
+ * Class that represents the different feed divided by scopes (Recommendations, Discovery and Following)
+ */
 public class FeedPanel extends TabSheet {
 
     private User authenticatedUser;
@@ -26,6 +29,13 @@ public class FeedPanel extends TabSheet {
 
     private VerticalLayout content = new VerticalLayout();
 
+    /**
+     *
+     * @param authenticatedUser
+     * @param userService
+     * @param postService
+     * @param interactionService
+     */
     public FeedPanel(User authenticatedUser, UserService userService, PostService postService, InteractionService interactionService){
 
         this.postService = postService;

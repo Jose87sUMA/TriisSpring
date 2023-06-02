@@ -8,10 +8,20 @@ import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.TabSheetVariant;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
+/**
+ * Class that contains all the different leaderboards. Functions as FeedPanel
+ */
 public class LeaderboardPanel extends TabSheet {
 
     private VerticalLayout content = new VerticalLayout();
 
+    /**
+     *
+     * @param userService
+     * @param postService
+     * @param leaderboardService
+     * @param interactionService
+     */
     public LeaderboardPanel(UserService userService, PostService postService, LeaderboardService leaderboardService, InteractionService interactionService){
 
         this.addClassName("feed-panel");

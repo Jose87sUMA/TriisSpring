@@ -22,7 +22,7 @@ public class LeaderboardView extends HorizontalLayout {
     private TabSheet leaderboardPanel;
 
     /**
-     * contains a Tab to select a leaderboard
+     * Contains a Tab to select a leaderboard
      * each leaderboard initializes its own type of scroller (predefined types)
      * leaderboard types are divided into:
      * - 10 top posts with the highest number of points from a given type span

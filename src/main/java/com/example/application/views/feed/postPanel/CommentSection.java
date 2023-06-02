@@ -21,6 +21,8 @@ import java.util.List;
  * The comment section is conformed by MessageList and a MessageInput, both are added to a Vertical layout.
  * The MessageInput includes the text field and a send button. The MessageList needs a list of MessageListItems to be filled,
  * which is retrieved using the commentItems method from the postService.
+ *
+ * @author Daniel de los Ríos García
  */
 public class CommentSection extends VerticalLayout {
     private MessageInput input;
@@ -30,6 +32,16 @@ public class CommentSection extends VerticalLayout {
     private final UserService userService;
     private final PostPanel postPanel;
     private final InteractionService interactionService;
+
+    /**
+     *
+     * @param width
+     * @param post
+     * @param postService
+     * @param userService
+     * @param postPanel
+     * @param interactionService
+     */
     public CommentSection(String width, Post post, PostService postService, UserService userService, PostPanel postPanel, InteractionService interactionService){
 
         this.postService = postService;
@@ -41,7 +53,7 @@ public class CommentSection extends VerticalLayout {
 
         this.input = new MessageInput();
         this.list = new MessageList(this.interactionService.commentItems(post));
-        list.setMaxHeight(Float.parseFloat(postPanel.content.getHeight().substring(0, postPanel.content.getHeight().length()-2))-50 + "px");
+        list.setMaxHeight(Float.parseFloat(postPanel.getContent().getHeight().substring(0, postPanel.getContent().getHeight().length()-2))-50 + "px");
 
         this.input.addSubmitListener(submitEvent -> {
 

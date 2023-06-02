@@ -13,6 +13,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 @RouteAlias(value = "register")
 public class RegisterView extends VerticalLayout {
 
+    /**
+     * @param userService
+     */
     public RegisterView(UserService userService) {
 
         this.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);

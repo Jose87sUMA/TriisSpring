@@ -51,6 +51,13 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     private Button editProfile;
 
 
+    /**
+     *
+     * @param userService
+     * @param postService
+     * @param makePostService
+     * @param interactionService
+     */
     public ProfileView(UserService userService, PostService postService, MakePostService makePostService, InteractionService interactionService) {
 
         this.postService = postService;
@@ -62,6 +69,15 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     }
 
+    /**
+     * Method used to construct the view depending on the URL parameter.
+     *
+     * @param event
+     *            the navigation event that caused the call to this method
+     * @param parameter
+     *            the resolved url parameter
+     * @author  Ksenia Myakisheva, Ziri Raha, Andrei Cojocariu & José Alejandro Sarmiento
+     */
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
 
@@ -100,7 +116,9 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     }
 
     /**
-     * CUSTOMIZING  BUTTONS
+     * Customizes all the buttons on the profile view
+     *
+     * @author Ksenia Myakisheva, Ziri Raha & José Alejandro Sarmiento
      */
     private VerticalLayout createButtonsLayout() {
         //buttons
@@ -153,6 +171,15 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     }
 
+    /**
+     * Creates the Dialog that allows the user to see the statistics of the generated points by the post.
+     * It is divided by:
+     * - Direct points (generated when the user's posts are reposted directly). Here you can see the users that reposted.
+     * - Indirect points (generated when the user's posts' reposts are reposted)
+     *
+     * @return the Dialog to see the statistics
+     * @author José Alejandro Sarmiento
+     */
     private ConfirmDialog createStatisticsLayout(){
 
         ConfirmDialog dialog = new ConfirmDialog();
@@ -226,7 +253,9 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
     }
 
     /**
-     * Following or unfollowing a user and refresing the buttons.
+     * Following or unfollowing a user and refreshing the buttons.
+     *
+     * @author Ziri Raha
      */
     void follow(){
         if (!isFollowing(user)) userService.follow(authenticatedUser, user);
@@ -237,8 +266,10 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
 
     /**
      * Is the current user following user.
+     *
      * @param user The user followed?
      * @return true if followed. false otherwise.
+     * @author Ziri Raha
      */
     boolean isFollowing(User user){
         return userService.getFollowing(authenticatedUser).contains(user);
@@ -251,7 +282,4 @@ public class ProfileView extends VerticalLayout implements HasUrlParameter<Strin
         this.setHeight(height + "px");
         this.setWidth(content.getWidth());
     }*/
-
-
-
 }

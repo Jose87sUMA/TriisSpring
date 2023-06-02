@@ -29,6 +29,9 @@ import java.net.URLConnection;
 
 import static java.lang.Math.min;
 
+/**
+ * Dialog used to make new posts.
+ */
 public class MakePostBox extends Dialog {
 
 
@@ -69,10 +72,13 @@ public class MakePostBox extends Dialog {
 
     }
 
-    /**adds and styles the component of make post window,
-     * adds closing functionality
-     * calls auxiliar functions to create components and model behaviour
-     * */
+    /**
+     * Adds and styles the component of make post window,
+     * adds closing functionality,
+     * calls auxiliar functions to create components and model behaviour.
+     *
+     * @author Ksenia Myakisheva
+     */
     public void createUploadPictureLayout(){
         this.setDraggable(true);
 
@@ -106,9 +112,11 @@ public class MakePostBox extends Dialog {
     }
 
     /**
-     * auxiliar function
+     * Auxiliary function
      * models behaviour of link button
      * user can see a link field on the screen now
+     *
+     * @author Ksenia Myakisheva
      */
     private void linkButtonEvent(){
         uploadComponent.setVisible(false);
@@ -119,9 +127,11 @@ public class MakePostBox extends Dialog {
     }
 
     /**
-     * auxiliar function
-     * models behaviour of filebutton
-     * user can see an upload picture componentn ow
+     * Auxiliary function
+     * models behaviour of fileButton
+     * user can see an upload picture component now
+     *
+     * @author Ksenia Myakisheva
      */
     private void fileButtonEvent(){
         uploadComponent.setVisible(true);
@@ -134,8 +144,9 @@ public class MakePostBox extends Dialog {
     /**
      * SAVES PICTURE UPLOADED BY USER IN DATABASE
      * calls the appropriate methods depending on the type of post (pointed or not) and if it is done by link or file
+     *
+     * @author Ksenia Myakisheva
      */
-
     private void post(){
         Notification notification = new Notification();
         notification.setDuration(4000);
@@ -177,8 +188,10 @@ public class MakePostBox extends Dialog {
     }
 
     /**
-     * create buttons to manage whether a post is pointed or not
+     * Create buttons to manage whether a post is pointed or not
+     *
      * @return Horizontal Layout with two buttons
+     * @author Ksenia Myakisheva
      */
     private HorizontalLayout createPointedButtons(){
         Button pointed = new Button("Pointed");
@@ -207,8 +220,10 @@ public class MakePostBox extends Dialog {
     }
 
     /**
-     * upload component which notifies in case of an error or saves image as an attribute of the class (fileData)
+     * Upload component which notifies in case of an error or saves image as an attribute of the class (fileData)
+     *
      * @return upload component for images
+     * @author Ksenia Myakisheva
      */
     public Upload createUploadComponent(){
         MemoryBuffer uploadBuffer= new MemoryBuffer();

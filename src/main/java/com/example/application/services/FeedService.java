@@ -28,6 +28,7 @@ public class FeedService {
 
     /**
      * Constructs the service. And initializes a page.
+     *
      * @param postRep
      * @param feedType
      * @param userId
@@ -49,7 +50,9 @@ public class FeedService {
 
     /**
      * Set the sort parameter to st.
+     *
      * @param st Sorting mode.
+     * @author Ziri Raha
      */
     public void setSort(SortType st){
         reset();
@@ -58,6 +61,8 @@ public class FeedService {
 
     /**
      * Resets the page.
+     *
+     * @author Ziri Raha
      */
     public void reset(){
         index = 0;
@@ -65,7 +70,9 @@ public class FeedService {
 
     /**
      * Find the next N posts. N is set by the ELEMENTS variable of the class.
+     *
      * @return Returns a list of N posts found.
+     * @author Ziri Raha
      */
     public List<Post> findNextNPosts(){
         List<Post> posts = null;
@@ -82,6 +89,8 @@ public class FeedService {
 
     /**
      * Go to the next page.
+     *
+     * @author Ziri Raha
      */
     void nextPage(){
         index++;

@@ -18,6 +18,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Class that manages the connections to the dropbox repository containing all the images.
+ */
 @Service
 public class DropboxService {
 
@@ -30,11 +33,22 @@ public class DropboxService {
     private final UsersRepository userRep;
 
 
+    /**
+     * @param postRep
+     * @param userRep
+     */
     public DropboxService(PostsRepository postRep, UsersRepository userRep) {
         this.postRep = postRep;
         this.userRep = userRep;
     }
 
+    /**
+     * Downloads the image that corresponds to a certain post.
+     *
+     * @param post Post for which the content will be downloaded
+     * @return the byte array of the image
+     * @author José Alejandro Sarmiento
+     */
     public byte[] downloadPostContent(Post post){
 
         DbxClientV2 client = getDbxClientV2();
@@ -61,6 +75,14 @@ public class DropboxService {
         return imageBytes;
     }
 
+    /**
+     * Uploads a certain image, contained in the InputStream, as the content of a certain post.
+     *
+     * @param post Post that will contain the uploaded image
+     * @param fileData InputStream containing the image.
+     * @return The updated post
+     * @author José Alejandro Sarmiento
+     */
     public Post uploadPost(Post post, InputStream fileData){
 
         DbxClientV2 client = getDbxClientV2();
@@ -84,6 +106,13 @@ public class DropboxService {
         return post;
     }
 
+    /**
+     * Downloads the profile picture of a given user.
+     *
+     * @param user User for which the profile picture will be downloaded
+     * @return the byte array of the image
+     * @author José Alejandro Sarmiento
+     */
     public byte[] downloadProfilePicture(User user) {
 
         String pathFile = (user.getProfilePicture() != null ? user.getProfilePicture() : "default.jpg");
@@ -105,7 +134,16 @@ public class DropboxService {
         return imageBytes;
     }
 
-    public User uploadProfilePicture(User user, InputStream fileData){
+    /**
+     * Uploads a certain image, contained in the InputStream, as the profile picture of a certain user.
+     *
+     * @param user User that will contain the uploaded image
+     * @param fileData InputStream containing the image.
+     * @return The updated User
+     * @throws UserException If there is an error uploading the image.
+     * @author José Alejandro Sarmiento
+     */
+    public User uploadProfilePicture(User user, InputStream fileData) throws UserException{
 
         DbxClientV2 client = getDbxClientV2();
         boolean success = false;
@@ -129,6 +167,12 @@ public class DropboxService {
         return user;
     }
 
+    /**
+     * Gets the Dropbox Client used to upload or download files.
+     *
+     * @return the Dropbox client
+     * @author José Alejandro Sarmiento
+     */
     protected DbxClientV2 getDbxClientV2() {
         DbxCredential cred = new DbxCredential(ACCESS_TOKEN, 14400L, REFRESH_TOKEN, APP_KEY, APP_SECRET);
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
@@ -136,6 +180,12 @@ public class DropboxService {
         return client;
     }
 
+    /**
+     * Refreshes the access token in case it has expired
+     *
+     * @param client Dropbox Client that we are trying to access
+     * @author José Alejandro Sarmiento
+     */
     protected void refreshToken(DbxClientV2 client) {
         try {
             ACCESS_TOKEN = client.refreshAccessToken().getAccessToken();

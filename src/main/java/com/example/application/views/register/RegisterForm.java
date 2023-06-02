@@ -22,21 +22,27 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Layout that manages registration.
+ */
 public class RegisterForm extends VerticalLayout {
 
-    UserService userService;
-    Binder<User> binder = new BeanValidationBinder<>(User.class);
+    private final UserService userService;
+    private Binder<User> binder = new BeanValidationBinder<>(User.class);
     //field creation
-    TextField username = new TextField("Username");
-    EmailField email = new EmailField("Email");
+    private TextField username = new TextField("Username");
+    private EmailField email = new EmailField("Email");
 
-    PasswordField password = new PasswordField("Password");
-    PasswordField confirmPassword = new PasswordField("Confirm password");
+    private PasswordField password = new PasswordField("Password");
+    private PasswordField confirmPassword = new PasswordField("Confirm password");
     //buttons
-    Button save = new Button("Save");
-    Button close = new Button("Log in");
+    private Button save = new Button("Save");
+    private Button close = new Button("Log in");
     private User user;
 
+    /**
+     * @param userService
+     */
     public RegisterForm(UserService userService) {
 
         this.setSizeUndefined();
@@ -53,13 +59,22 @@ public class RegisterForm extends VerticalLayout {
         add(wholeForm);
     }
 
+    /**
+     * Sets the current user to the one given as parameter..
+     *
+     * @param user
+     * @author José Alejandro Sarmiento
+     */
     public void setUser(User user){
         this.user = user;
         binder.readBean(user);
     }
 
     /**
-     * CUSTOMIZING  FORM
+     * Sets up the FormLayout with the different text fields
+     *
+     * @return The created FormLayout
+     * @author José Alejandro Sarmiento
      */
     private FormLayout createFormLayout(){
         FormLayout formLayout = new FormLayout();
@@ -80,7 +95,10 @@ public class RegisterForm extends VerticalLayout {
     }
 
     /**
-     * CUSTOMIZING  BUTTONS
+     * Creates a layout with all the button and adds themes and listeners to all the buttons.
+     *
+     * @return The created layout with the buttons.
+     * @author José Alejandro Sarmiento
      */
     private HorizontalLayout createButtonsLayout() {
         //creating themes for the buttons
@@ -98,7 +116,10 @@ public class RegisterForm extends VerticalLayout {
     }
 
     /**
-     * VERIFY FIELDS AND SAVE USER
+     * Attempts to register a new user.
+     * Notifies the user if anything went wrong.
+     *
+     * @author Ksenia Myakisheva & José Alejandro Sarmiento
      */
     private void register(){
         String username = this.username.getValue();
