@@ -13,6 +13,9 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service to manage all post interactions.
+ */
 @Service
 public class InteractionService {
 

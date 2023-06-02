@@ -1,0 +1,17 @@
+com.example.application
+com.example.application.data.entities
+com.example.application.data.repositories
+com.example.application.data.tests
+com.example.application.exceptions
+com.example.application.security
+com.example.application.services
+com.example.application.services.threads
+com.example.application.views
+com.example.application.views.about
+com.example.application.views.feed
+com.example.application.views.feed.postPanel
+com.example.application.views.feed.searchbar
+com.example.application.views.leaderboards
+com.example.application.views.login
+com.example.application.views.profile
+com.example.application.views.register
