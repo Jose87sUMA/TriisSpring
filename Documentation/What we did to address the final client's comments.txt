@@ -1,0 +1,33 @@
+Client Requests for final submission
+
+- Main request is to revise the coherence between the documentation and the system
+
+	José Alejandro Sarmiento updated the implementation model to include everything the project has right now. 
+	
+	The implementation model with absolutely all the classes divided by layers and the class diagram with only the entities 
+	can be found on the Triis Spring Models Model as well as different sequence diagrams. 
+
+	Our first design diagram and the first sequence diagrams we made can be found on the 02 Design.
+
+	The different iterations of our first project (old attempt) can be found on 03.1 Implementation Model.
+	
+	Our Deployment Diagram can be found on 03.2 Deployment Model.
+
+	The requirements, use cases and domain diagrams are all in their respective models inside 01 Analysis.
+
+
+- Second request is to complete the code documentation with Javadoc comments including authorship. Please note that you can add multiple @author tags in a class 
+
+	José Alejandro Sarmiento included the @author tag in all the javadoc comments the rest of the group had already written. Then we generated the javadoc. 
+	However, it was impossible to generate it with the @author tag. Apparently it is discontinued. Ziri investigated if it was possible to do it in any way but
+	he didn't find a way to do it.
+
+- Now for documents we needed for the final submission:
+	
+	Ksenia redacted the List of Requirements.
+	José Alejandro Sarmiento redacted the Test Cases Developed and Functionalities Developed.
+
+- Some extra things we did:
+	
+	Ziri investigated different alternatives for deployment.
+	Jose tried deploying but was unsuccessful doing so.

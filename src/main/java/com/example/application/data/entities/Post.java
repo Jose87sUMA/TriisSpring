@@ -92,6 +92,10 @@ public class Post implements Serializable {
         return postId;
     }
 
+    public void setPostId(BigInteger postId) {
+        this.postId = postId;
+    }
+
     public BigInteger getUserId() {
         return userId;
     }
@@ -136,8 +140,16 @@ public class Post implements Serializable {
         return repostId;
     }
 
+    public void setRepostId(BigInteger repostId) {
+        this.repostId = repostId;
+    }
+
     public BigInteger getOriginalPostId() {
         return originalPostId;
+    }
+
+    public void setOriginalPostId(BigInteger originalPostId) {
+        this.originalPostId = originalPostId;
     }
 
     /*public List<Report> getReports() {
