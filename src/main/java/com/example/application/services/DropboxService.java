@@ -25,9 +25,9 @@ import java.io.InputStream;
 public class DropboxService {
 
     private String ACCESS_TOKEN_STR = System.getenv().get(ACCESS_TOKEN);
-    private String REFRESH_TOKEN = "6d8EnIVISdoAAAAAAAAAAVPNMHcp1U2Ys9hTuDPhTreq1YrZCHG6hYZyipFG9x8-";
-    private String APP_KEY = "t6v4qds3tflheb3";
-    private String APP_SECRET = "26k0xiwwznt3r25";
+    private String REFRESH_TOKEN_STR = System.getenv().get(REFRESH_TOKEN);
+    private String APP_KEY_STR = System.getenv().get(APP_KEY);
+    private String APP_SECRET_STR = System.getenv().get(APP_SECRET);
     private final PostsRepository postRep;
     private final UsersRepository userRep;
 
@@ -173,7 +173,7 @@ public class DropboxService {
      * @author José Alejandro Sarmiento
      */
     protected DbxClientV2 getDbxClientV2() {
-        DbxCredential cred = new DbxCredential(ACCESS_TOKEN_STR, 14400L, REFRESH_TOKEN, APP_KEY, APP_SECRET);
+        DbxCredential cred = new DbxCredential(ACCESS_TOKEN_STR, 14400L, REFRESH_TOKEN_STR, APP_KEY_STR, APP_SECRET_STR);
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
         DbxClientV2 client = new DbxClientV2(config, cred);
         return client;
