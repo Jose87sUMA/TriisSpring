@@ -24,10 +24,10 @@ import java.io.InputStream;
 @Service
 public class DropboxService {
 
-    private String ACCESS_TOKEN_STR = System.getenv().get(ACCESS_TOKEN);
-    private String REFRESH_TOKEN_STR = System.getenv().get(REFRESH_TOKEN);
-    private String APP_KEY_STR = System.getenv().get(APP_KEY);
-    private String APP_SECRET_STR = System.getenv().get(APP_SECRET);
+    private String ACCESS_TOKEN = System.getenv("ACCESS_TOKEN");
+    private String REFRESH_TOKEN = System.getenv("REFRESH_TOKEN");
+    private String APP_KEY = System.getenv("APP_KEY");
+    private String APP_SECRET = System.getenv("APP_SECRET");
     private final PostsRepository postRep;
     private final UsersRepository userRep;
 
@@ -173,7 +173,7 @@ public class DropboxService {
      * @author José Alejandro Sarmiento
      */
     protected DbxClientV2 getDbxClientV2() {
-        DbxCredential cred = new DbxCredential(ACCESS_TOKEN_STR, 14400L, REFRESH_TOKEN_STR, APP_KEY_STR, APP_SECRET_STR);
+        DbxCredential cred = new DbxCredential(ACCESS_TOKEN, 14400L, REFRESH_TOKEN, APP_KEY, APP_SECRET);
         DbxRequestConfig config = DbxRequestConfig.newBuilder("Triis").build();
         DbxClientV2 client = new DbxClientV2(config, cred);
         return client;
@@ -187,8 +187,8 @@ public class DropboxService {
      */
     protected void refreshToken(DbxClientV2 client) {
         try {
-            ACCESS_TOKEN_STR = client.refreshAccessToken().getAccessToken();
-            System.out.println("New access token: " + ACCESS_TOKEN_STR);
+            ACCESS_TOKEN = client.refreshAccessToken().getAccessToken();
+            System.out.println("New access token: " + ACCESS_TOKEN);
         } catch (Exception refreshException) {
             System.out.println("Failed to refresh token: " + refreshException.getMessage());
         }
