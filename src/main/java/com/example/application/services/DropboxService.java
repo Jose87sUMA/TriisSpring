@@ -24,10 +24,10 @@ import java.io.InputStream;
 @Service
 public class DropboxService {
 
-    private String ACCESS_TOKEN = System.getenv().get("ACCESS_TOKEN");
-    private String REFRESH_TOKEN = System.getenv().get("REFRESH_TOKEN");
-    private String APP_KEY = System.getenv().get("APP_KEY");
-    private String APP_SECRET = System.getenv().get("APP_SECRET");
+    private String ACCESS_TOKEN = System.getenv("DROPBOX_ACCESS_TOKEN");
+    private String REFRESH_TOKEN = System.getenv("DROPBOX_REFRESH_TOKEN");
+    private String APP_KEY = System.getenv("DROPBOX_APP_KEY");
+    private String APP_SECRET = System.getenv("DROPBOX_APP_SECRET");
     private final PostsRepository postRep;
     private final UsersRepository userRep;
 
